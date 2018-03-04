@@ -23,12 +23,12 @@ namespace ClassifyBot
         }
         #endregion
 
-        #region Properties
+        #region Propertiesemblies 
         public static List<Assembly> LoadedAssemblies { get; }
         #endregion
 
         #region Methods
-        public static Type[] GetLoadedAssembliesTypes<T>()
+        public static Type[] GetTypes<T>()
         {
             return LoadedAssemblies
                  .Select(a => a.GetTypes())
@@ -38,32 +38,36 @@ namespace ClassifyBot
 
         public static T MarshalOptions<T>(string[] args, out string optionsHelp) where T : CommandLineOptions
         {
+            ParserResult<object> result = null;
+            Parser p = new Parser();
             optionsHelp = string.Empty;
-            Type[] ClassifierOptionsTypes = GetLoadedAssembliesTypes<T>();
+            Type[] ClassifierOptionsTypes = GetTypes<T>();
             MethodInfo parseArgumentsMethod = typeof(ParserExtensions).GetMethods()
                  .Where(m => m.IsGenericMethod && m.Name == "ParseArguments" && m.GetGenericArguments().Count() == ClassifierOptionsTypes.Count())?.FirstOrDefault();
 
             if (parseArgumentsMethod == null)
             {
-                return default(T);
+                result = Parser.Default.ParseArguments(args, typeof(T));
+            }
+            else
+            {
+                result = (ParserResult<object>)parseArgumentsMethod.MakeGenericMethod(ClassifierOptionsTypes).Invoke(p, new object[] { p, args });
             }
 
-            Parser p = new Parser();
-            ParserResult<object> result = (ParserResult<object>)parseArgumentsMethod.MakeGenericMethod(ClassifierOptionsTypes).Invoke(p, new object[] { p, args });
-            result.MapResult((o) =>
-            {
-                return (T)o;
-            },
-            (errors) =>
-            {
-                return default(T);
-            });
-            return null;
+            string helpText = string.Empty;
+            T options = default(T);
+            result
+                .WithNotParsed((errors) => helpText = GetHelpForInvalidOptions(result, errors))
+                .WithParsed((o) => options = (T) o);
+            optionsHelp = helpText;
+            return options;
+         
         }
+
 
         public static string GetHelpForInvalidOptions(ParserResult<object> result, IEnumerable<Error> errors)
         {
-            Type[] ClassifierOptionsTypes = GetLoadedAssembliesTypes<CommandLineOptions>();
+            Type[] ClassifierOptionsTypes = GetTypes<CommandLineOptions>();
             HelpText help = HelpText.AutoBuild(result, h =>
             {
                 h.AddOptions(result);

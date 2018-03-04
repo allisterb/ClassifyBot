@@ -31,7 +31,7 @@ namespace ClassifyBot.Cli
                 .WriteTo.RollingFile(Path.Combine("logs", "ClassifyBot") + "-{Date}.log")
                 .CreateLogger();
             L = Log.ForContext<Program>();
-            CommandLineOptions.MarshalExtractorOptions(args);
+           ExtractorOptions eo = CommandLineOptions.MarshalOptions<ExtractorOptions>(args, out string optionsHelp);
         }
     }
 }
