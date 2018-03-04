@@ -4,6 +4,7 @@ using System.Diagnostics.Contracts;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -16,22 +17,22 @@ namespace ClassifyBot
     public abstract class Extractor<TRecord, TFeature> : IExtractor<TRecord, TFeature> where TFeature : ICloneable, IComparable, IComparable<TFeature>, IConvertible, IEquatable<TFeature> where TRecord : Record<TFeature>
     {
         #region Constructors
-        public Extractor(FileInfo outputFile, bool overwrite, bool append, Dictionary<string, object> options = null)
+        public Extractor(FileInfo outputFile, bool overwrite, bool append, Dictionary<string, object> options)
         {
             Contract.Requires(outputFile != null);
+            Contract.Requires(options != null);
             L = Log.ForContext<Extractor<TRecord, TFeature>>();
             Options = options;
+            foreach (PropertyInfo prop in this.GetType().GetProperties())
+            {
+                if (Options.ContainsKey(prop.Name) && prop.CanWrite)
+                {
+                    prop.SetValue(this, Options[prop.Name]);
+                }
+            }
             JsonOutputFile = outputFile;
             Overwrite = overwrite;
             Append = append;
-            if (options.ContainsKey("CompressOutputFile"))
-            {
-                CompressOutputFile = true;
-            }
-            if (options.ContainsKey("Authentication"))
-            {
-                Authentication = (string) options["Authentication"];
-            }
             if (!CompressOutputFile)
             {
                 if (Append && JsonOutputFile.Exists)
@@ -58,15 +59,12 @@ namespace ClassifyBot
                         L.Information("{file} exists with {r} records and will be appended to.", JsonOutputFile, ExtractedRecords.Count);
                     }
                 }
-
             }
-            
-
         }
         #endregion
 
         #region Abstract methods
-        public abstract int Extract(Dictionary<string, string> options, int? recordBatchSize = null, int? recordLimit = null);
+        public abstract int Extract(int? recordBatchSize = null, int? recordLimit = null, Dictionary<string, string> options = null);
         #endregion
 
         #region Properties

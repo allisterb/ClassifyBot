@@ -23,7 +23,11 @@ namespace ClassifyBot
         }
         #endregion
 
-        #region Propertiesemblies 
+        #region Abstract members
+        public abstract Type StageType { get; }
+        #endregion
+
+        #region Properties
         public static List<Assembly> LoadedAssemblies { get; }
         #endregion
 
@@ -38,22 +42,8 @@ namespace ClassifyBot
 
         public static T MarshalOptions<T>(string[] args, out string optionsHelp) where T : CommandLineOptions
         {
-            ParserResult<object> result = null;
-            Parser p = new Parser();
             optionsHelp = string.Empty;
-            Type[] ClassifierOptionsTypes = GetTypes<T>();
-            MethodInfo parseArgumentsMethod = typeof(ParserExtensions).GetMethods()
-                 .Where(m => m.IsGenericMethod && m.Name == "ParseArguments" && m.GetGenericArguments().Count() == ClassifierOptionsTypes.Count())?.FirstOrDefault();
-
-            if (parseArgumentsMethod == null)
-            {
-                result = Parser.Default.ParseArguments(args, typeof(T));
-            }
-            else
-            {
-                result = (ParserResult<object>)parseArgumentsMethod.MakeGenericMethod(ClassifierOptionsTypes).Invoke(p, new object[] { p, args });
-            }
-
+            ParserResult<object> result = Parser.Default.ParseArguments(args, GetTypes<T>());
             string helpText = string.Empty;
             T options = default(T);
             result

@@ -7,10 +7,25 @@ using System.Threading.Tasks;
 
 namespace ClassifyBot
 {
-    public class Record<T> : IRecord<T> where T : ICloneable, IComparable, IComparable<T>, IConvertible, IEquatable<T>
+    public class Record<TFeature> : IRecord<TFeature> where TFeature : ICloneable, IComparable, IComparable<TFeature>, IConvertible, IEquatable<TFeature>
     {
+        #region Constructors
+        public Record(int id, string label, params TFeature[] features) : this(label, features)
+        {
+            this.Id = id;
+        }
+        public Record(string label, params TFeature[] features)
+        {
+            this.Label = label;
+            this.Features = features;
+        }
+
+        #endregion
+        
+        #region Properties
         public int? Id { get; }
         public string Label { get; }
-        public T[] Features { get; }
+        public TFeature[] Features { get; }
+        #endregion
     }
 }

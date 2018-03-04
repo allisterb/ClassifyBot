@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ClassifyBot.Base\ClassifyBot.Base.csproj" />
+    <ProjectReference Include="..\ClassifyBot.Classifier.StanfordNLP\ClassifyBot.Classifier.StanfordNLP.csproj" />
+    <ProjectReference Include="..\ClassifyBot.Core\ClassifyBot.Core.csproj" />
+  </ItemGroup>
+
+</Project>
