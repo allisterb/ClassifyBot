@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ClassifyBot.Cli": {
+      "commandName": "Project",
+      "commandLineArgs": "web-extract"
+    }
+  }
+}

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ClassifyBot.Base
+namespace ClassifyBot
 {
     public class Class1
     {

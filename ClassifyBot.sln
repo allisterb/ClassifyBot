@@ -3,7 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27130.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClassifyBot.Base", "ClassifyBot.Base\ClassifyBot.Base.csproj", "{1766BFC4-19B8-456B-BB34-A587981B1C10}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClassifyBot.Base", "ClassifyBot.Base\ClassifyBot.Base.csproj", "{1766BFC4-19B8-456B-BB34-A587981B1C10}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClassifyBot.Cli", "ClassifyBot.Cli\ClassifyBot.Cli.csproj", "{C45B108F-22E3-42A0-812F-2A65C0FBDF66}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClassifyBot.Core", "ClassifyBot.Core\ClassifyBot.Core.csproj", "{3D26782E-329D-4F9B-B9BC-C2E63A27CC12}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClassifyBot.Classifier.StanfordNLP", "ClassifyBot.Classifier.StanfordNLP\ClassifyBot.Classifier.StanfordNLP.csproj", "{909511D0-6396-43A9-8BDD-5751DF93E46E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +21,18 @@ Global
 		{1766BFC4-19B8-456B-BB34-A587981B1C10}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1766BFC4-19B8-456B-BB34-A587981B1C10}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1766BFC4-19B8-456B-BB34-A587981B1C10}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C45B108F-22E3-42A0-812F-2A65C0FBDF66}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C45B108F-22E3-42A0-812F-2A65C0FBDF66}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C45B108F-22E3-42A0-812F-2A65C0FBDF66}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C45B108F-22E3-42A0-812F-2A65C0FBDF66}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3D26782E-329D-4F9B-B9BC-C2E63A27CC12}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3D26782E-329D-4F9B-B9BC-C2E63A27CC12}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3D26782E-329D-4F9B-B9BC-C2E63A27CC12}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3D26782E-329D-4F9B-B9BC-C2E63A27CC12}.Release|Any CPU.Build.0 = Release|Any CPU
+		{909511D0-6396-43A9-8BDD-5751DF93E46E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{909511D0-6396-43A9-8BDD-5751DF93E46E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{909511D0-6396-43A9-8BDD-5751DF93E46E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{909511D0-6396-43A9-8BDD-5751DF93E46E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
