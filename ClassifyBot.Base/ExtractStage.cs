@@ -9,33 +9,24 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
+using CommandLine;
 using Newtonsoft.Json;
 using Serilog;
 
 namespace ClassifyBot
 {
-    public abstract class Extractor<TRecord, TFeature> : IExtractor<TRecord, TFeature> where TFeature : ICloneable, IComparable, IComparable<TFeature>, IConvertible, IEquatable<TFeature> where TRecord : Record<TFeature>
+    [Verb("extract", HelpText = "Extract records from a data source into a common JSON format.")]
+    public abstract class ExtractStage<TRecord, TFeature> : Stage, IExtractor<TRecord, TFeature> 
+        where TFeature : ICloneable, IComparable, IComparable<TFeature>, IConvertible, IEquatable<TFeature> where TRecord : Record<TFeature>
     {
         #region Constructors
-        public Extractor(FileInfo outputFile, bool overwrite, bool append, Dictionary<string, object> options)
+        public ExtractStage()
         {
-            Contract.Requires(outputFile != null);
-            Contract.Requires(options != null);
-            L = Log.ForContext<Extractor<TRecord, TFeature>>();
-            Options = options;
-            foreach (PropertyInfo prop in this.GetType().GetProperties())
-            {
-                if (Options.ContainsKey(prop.Name) && prop.CanWrite)
-                {
-                    prop.SetValue(this, Options[prop.Name]);
-                }
-            }
-            JsonOutputFile = outputFile;
-            Overwrite = overwrite;
-            Append = append;
+            Contract.Requires(!OutputFileName.Empty());
+            L = Log.ForContext<ExtractStage<TRecord, TFeature>>();
             if (!CompressOutputFile)
             {
-                if (Append && JsonOutputFile.Exists)
+                if (AppendToOutputFile && JsonOutputFile.Exists)
                 {
                     using (StreamReader f = new StreamReader(JsonOutputFile.OpenRead()))
                     using (JsonTextReader reader = new JsonTextReader(f))
@@ -48,7 +39,7 @@ namespace ClassifyBot
             }
             else
             {
-                if (Append && JsonOutputFile.Exists)
+                if (AppendToOutputFile && JsonOutputFile.Exists)
                 {
                     using (GZipStream gzs = new GZipStream(JsonOutputFile.OpenRead(), CompressionMode.Decompress))
                     using (StreamReader f = new StreamReader(gzs))
@@ -68,14 +59,30 @@ namespace ClassifyBot
         #endregion
 
         #region Properties
-        public Dictionary<string, object> Options { get; protected set; }
-        public FileInfo JsonOutputFile { get; protected set; }
+        public FileInfo JsonOutputFile => OutputFileName.Empty() ? null : new FileInfo(OutputFileName);
+
         public List<TRecord> ExtractedRecords { get; protected set; } = new List<TRecord>();
-        public bool Overwrite { get; protected set; } = false;
-        public bool Append { get; protected set; } = false;
-        public bool CompressOutputFile { get; protected set; } = false;
-        public string Authentication { get; protected set; } = string.Empty;
-        protected virtual ILogger L { get; } = Log.ForContext<Extractor<TRecord, TFeature>>();
+
+        public int RecordLimit { get; set; }
+
+        [Option('f', "output-file", Required = true, HelpText = "Output data file name for dataset. A file with .json or .json.gz extension will be created with this name.")]
+        public string OutputFileName { get; set; }
+
+        [Option('o', "overwrite", Required = false, Default = false, HelpText = "Ovewrite existing output data file if it exists.")]
+        public bool OverwriteOutputFile { get; set; }
+
+        [Option('a', "append", Required = false, Default = false, HelpText = "Append extracted data to existing output file if it exists.")]
+        public bool AppendToOutputFile { get; set; }
+
+        [Option('c', "compress", Required = false, Default = false, HelpText = "Output file will be compressed with GZIP.")]
+        public bool CompressOutputFile { get; set; }
+
+        [Option('b', "batch", Required = false, HelpText = "Batch the number of records extracted.", Default = 0)]
+        public int RecordBatchSize { get; set; }
+
+        [Option('l', "records", Required = false, HelpText = "Limit the number of records extracted.", Default = 0)]
+        
+        protected virtual ILogger L { get; } = Log.ForContext<ExtractStage<TRecord, TFeature>>();
         #endregion
 
         #region Methods

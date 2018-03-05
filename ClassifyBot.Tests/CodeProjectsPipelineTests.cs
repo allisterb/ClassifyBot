@@ -1,23 +1,19 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Xunit;
 
+using Xunit;
 using ClassifyBot.Pipeline.CodeProject.LanguageDetector;
 
 namespace ClassifyBot.Tests
 {
     public class CodeProjectPipelineTests
     {
-        public const string CPUrl = "https://www.codeproject.com/script/Contests/Uploads/1024/LanguageSamples.zip";
-
-
-        [Fact(DisplayName = "WebFileExtractor test")]
+        [Fact(DisplayName = "LanguageDataExtractor functions properly")]
         public void ExtractorTests()
         {
             FileInfo file = new FileInfo("ExtractorTest.json");
-            Dictionary<string, object> ExtractorOptions = new Dictionary<string, object>() { { "InputFileUrl", new Uri(CPUrl) } };
-            LanguageDataExtractor e = new LanguageDataExtractor(file, true, false, ExtractorOptions);
+            LanguageDataExtractor e =  Stage.MarshalOptionsForStage<LanguageDataExtractor>(new string[] { "extract", "-f", "foo.json"}, out string optionsHelp);
             int n = e.Extract();
         }
     }

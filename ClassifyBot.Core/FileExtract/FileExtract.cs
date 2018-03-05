@@ -3,20 +3,26 @@ using System.Collections.Generic;
 using System.IO.Compression;
 using System.Diagnostics.Contracts;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 using Serilog;
+using CommandLine;
 
 namespace ClassifyBot
 {
 
-    public abstract class FileExtractor<TRecord, TFeature> : Extractor<TRecord, TFeature> where TFeature : ICloneable, IComparable, IComparable<TFeature>, IConvertible, IEquatable<TFeature> where TRecord : Record<TFeature>
+    public abstract class FileExtract<TRecord, TFeature> : ExtractStage<TRecord, TFeature> where TFeature : ICloneable, IComparable, IComparable<TFeature>, IConvertible, IEquatable<TFeature> where TRecord : Record<TFeature>
     {
         #region Constructors
-        public FileExtractor(FileInfo outputFile, bool overwrite, bool append, Dictionary<string, object> options) : base(outputFile, overwrite, append, options)
+        public FileExtract() : base()
         {
-            Contract.Requires(Options.ContainsKey("InputFile"));
             Contract.Requires(InputFile != null && InputFile.Exists);
+        }
+
+        public FileExtract(string inputFileName) : base()
+        {
+            InputFileName = inputFileName;
         }
         #endregion
 
@@ -25,12 +31,13 @@ namespace ClassifyBot
         #endregion
 
         #region Properties
-        public FileInfo InputFile { get; protected set; }
+        [Option('i', "input-file", Required = true, HelpText = "Input data file name for dataset. A file with a .zip or .gz or .tar.gz extension will be automatically decompressed.")]
+        public virtual string InputFileName { get; set; }
 
+        public FileInfo InputFile => InputFileName.Empty() ? null : new FileInfo(InputFileName);
         #endregion
 
-        #region Methods
-        #endregion
+
 
         #region Implemented members
         public override int Extract(int? recordBatchSize = null, int? recordLimit = null, Dictionary<string, string> options = null)

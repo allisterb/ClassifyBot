@@ -14,15 +14,8 @@ namespace ClassifyBot.Cli
     class Program
     {
         static Dictionary<string, string> AppConfig { get; set; }
-        static Dictionary<string, object> PipelineOptions { get; set; }
         static ILogger L;
        
-        static FileInfo InputFile { get; set; }
-        static FileInfo ExtractOutputFile { get; set; }
-        static FileInfo TrainingOutputFile { get; set; }
-        static FileInfo TestOutputFile { get; set; }
-        static FileInfo TargetOutputFile { get; set; }
-
         static void Main(string[] args)
         {
             Log.Logger = new LoggerConfiguration()
@@ -31,7 +24,8 @@ namespace ClassifyBot.Cli
                 .WriteTo.RollingFile(Path.Combine("logs", "ClassifyBot") + "-{Date}.log")
                 .CreateLogger();
             L = Log.ForContext<Program>();
-           ExtractorOptions eo = CommandLineOptions.MarshalOptions<ExtractorOptions>(args, out string optionsHelp);
+
+            Stage s = Stage.MarshalOptionsForStage(args, out string optionsHelp);
         }
     }
 }

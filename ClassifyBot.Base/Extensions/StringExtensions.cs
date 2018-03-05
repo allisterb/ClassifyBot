@@ -13,6 +13,11 @@ namespace ClassifyBot
             return string.Format(formatString, o);
         }
 
+        public static bool Empty(this string s)
+        {
+            return string.IsNullOrEmpty(s);
+        }
+
         public static string ToOneCharString(this char c)
         {
             return new string(c, 1);

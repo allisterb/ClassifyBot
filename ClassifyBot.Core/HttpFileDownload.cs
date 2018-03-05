@@ -85,6 +85,10 @@ namespace ClassifyBot
                 {
                     client.DownloadProgressChanged += this.progress_changed_event_handler;
                 }
+                else
+                {
+                    client.DownloadProgressChanged += Client_DownloadProgressChanged;
+                }
                 client.DownloadFileCompleted += Client_DownloadFileCompleted;
                 return client.DownloadFileTaskAsync(this.url, this.local_file.FullName); 
             }
@@ -120,6 +124,7 @@ namespace ClassifyBot
             this.TotalBytesToReceive = e.TotalBytesToReceive;
             this.TotalBytesReceived = e.TotalBytesToReceive;
             this.ProgressPercentage = e.ProgressPercentage;
+            L.Information("Downloaded {0} bytes of {1} total. {2}% done", TotalBytesReceived, TotalBytesReceived + TotalBytesToReceive, ProgressPercentage);
         }
 
         private void Client_DownloadFileCompleted(object sender, AsyncCompletedEventArgs e)
@@ -128,10 +133,12 @@ namespace ClassifyBot
             {
                 this.CompletedSuccessfully = false;
                 this.Error = e.Error;
+                L.Error(this.Error, "Failed to download file from Url {0} to {1}.", url, local_file);
             }
             else
             {
                 this.CompletedSuccessfully = true;
+                L.Information("Successfully downloaded file from Url {0} to {1}.", url, local_file);
             }
         }
         #endregion

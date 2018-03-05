@@ -10,10 +10,10 @@ using CommandLine.Text;
 
 namespace ClassifyBot
 {
-    public abstract class CommandLineOptions
+    public abstract class Stage
     {
         #region Constructors
-        static CommandLineOptions()
+        static Stage()
         {
             LoadedAssemblies = Assembly.GetExecutingAssembly().LoadAllFrom("ClassifyBot.*.dll", "ClassifyBot.Base.dll", "ClassifyBot.Cli.dll");
             if (LoadedAssemblies == null)
@@ -21,43 +21,65 @@ namespace ClassifyBot
                 throw new Exception("Did not load assembly ClassifyBot.Core.dll");
             }
         }
-        #endregion
 
-        #region Abstract members
-        public abstract Type StageType { get; }
+        public Stage()
+        {
+            foreach (PropertyInfo prop in this.GetType().GetProperties())
+            {
+                if (!StageOptions.ContainsKey(prop.Name))
+                {
+                    StageOptions.Add(prop.Name, prop.GetValue(this));
+                }
+            }
+        }
         #endregion
 
         #region Properties
         public static List<Assembly> LoadedAssemblies { get; }
+        public static Dictionary<string, object> StageOptions { get; } = new Dictionary<string, object>();
         #endregion
 
         #region Methods
-        public static Type[] GetTypes<T>()
+        public static Type[] GetSubTypes<T>()
         {
             return LoadedAssemblies
                  .Select(a => a.GetTypes())
                  .SelectMany(t => t)
-                 .Where(t => t.IsSubclassOf(typeof(T)))?.ToArray();
+                 .Where(t => t.IsSubclassOf(typeof(T)) && ! t.IsAbstract)?.ToArray();
         }
 
-        public static T MarshalOptions<T>(string[] args, out string optionsHelp) where T : CommandLineOptions
+        public static Stage MarshalOptionsForStage(string[] args, out string optionsHelp)
         {
             optionsHelp = string.Empty;
-            ParserResult<object> result = Parser.Default.ParseArguments(args, GetTypes<T>());
+            Parser p = new Parser();
+            ParserResult<object> result = p.ParseArguments(args, GetSubTypes<Stage>());
             string helpText = string.Empty;
-            T options = default(T);
+            Stage stage = null;
             result
                 .WithNotParsed((errors) => helpText = GetHelpForInvalidOptions(result, errors))
-                .WithParsed((o) => options = (T) o);
+                .WithParsed((o) => stage = (Stage) o);
             optionsHelp = helpText;
-            return options;
-         
+            return stage;
+        }
+
+        public static T MarshalOptionsForStage<T>(string[] args, out string optionsHelp)
+        {
+            optionsHelp = string.Empty;
+            Parser p = new Parser();
+            ParserResult<object> result = p.ParseArguments(args, typeof(T));
+            string helpText = string.Empty;
+            T stage = default(T);
+            result
+                .WithNotParsed((errors) => helpText = GetHelpForInvalidOptions(result, errors))
+                .WithParsed((o) => stage = (T) o);
+            optionsHelp = helpText;
+            return stage;
         }
 
 
         public static string GetHelpForInvalidOptions(ParserResult<object> result, IEnumerable<Error> errors)
         {
-            Type[] ClassifierOptionsTypes = GetTypes<CommandLineOptions>();
+            Type[] ClassifierOptionsTypes = GetSubTypes<Stage>();
             HelpText help = HelpText.AutoBuild(result, h =>
             {
                 h.AddOptions(result);

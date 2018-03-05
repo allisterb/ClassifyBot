@@ -2,11 +2,29 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using Serilog;
+
+using CommandLine;
 
 namespace ClassifyBot.Pipeline.CodeProject.LanguageDetector
 {
-    public class LanguageDataExtractor : WebFileExtractor<LanguageItem, string>
+    public class LanguageDataExtractor : WebFileExtract<LanguageItem, string>
     {
-        public LanguageDataExtractor(FileInfo outputFile, bool overwrite, bool append, Dictionary<string, object> options) : base(outputFile, overwrite, append, options) { }
+        #region Constructors
+        public LanguageDataExtractor() : base("https://www.codeproject.com/script/Contests/Uploads/1024/LanguageSamples.zip")
+        {
+            
+        }
+        #endregion
+
+        #region Overriden members
+        [Option('u', "url", Required = false, Hidden = true)]
+        public override string _InputFileUrl => string.Empty;
+
+        protected override Func<ILogger, StreamReader, IEnumerable<LanguageItem>> ReadFileStream { get; } = (logger, r) =>
+        {
+            return null;
+        };
+        #endregion
     }
 }
