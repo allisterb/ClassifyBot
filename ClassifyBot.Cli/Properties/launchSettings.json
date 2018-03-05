@@ -2,7 +2,7 @@
   "profiles": {
     "ClassifyBot.Cli": {
       "commandName": "Project",
-      "commandLineArgs": "--help"
+      "commandLineArgs": "extract --help"
     }
   }
 }

@@ -47,7 +47,7 @@ namespace ClassifyBot
             }
             Log.Logger = LoggerConfiguration.CreateLogger();
             L = Log.ForContext<Stage>();
-            Stage s = Stage.MarshalOptionsForStage(args, out string optionsHelp);
+            Stage s = Driver.MarshalOptionsForStage(args, out string optionsHelp);
             if (s == null && !optionsHelp.Empty())
             {
                 L.Information(optionsHelp);

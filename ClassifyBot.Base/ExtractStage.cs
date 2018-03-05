@@ -15,7 +15,7 @@ using Serilog;
 
 namespace ClassifyBot
 {
-    [Verb("extract", HelpText = "Extract records from a data source into a common JSON format.")]
+    
     public abstract class ExtractStage<TRecord, TFeature> : Stage, IExtractor<TRecord, TFeature> 
         where TFeature : ICloneable, IComparable, IComparable<TFeature>, IConvertible, IEquatable<TFeature> where TRecord : Record<TFeature>
     {

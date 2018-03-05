@@ -13,7 +13,7 @@ namespace ClassifyBot.Tests
         public void ExtractorTests()
         {
             FileInfo file = new FileInfo("ExtractorTest.json");
-            LanguageDataExtractor e =  Stage.MarshalOptionsForStage<LanguageDataExtractor>(new string[] { "extract", "-f", "foo.json"}, out string optionsHelp);
+            LanguageDataExtractor e =  Driver.MarshalOptionsForStage<LanguageDataExtractor>(new string[] { "extract", "-f", "foo.json"}, out string optionsHelp);
             int n = e.Extract();
         }
     }
