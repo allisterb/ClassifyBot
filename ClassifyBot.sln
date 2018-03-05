@@ -9,11 +9,16 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClassifyBot.Cli", "Classify
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClassifyBot.Core", "ClassifyBot.Core\ClassifyBot.Core.csproj", "{3D26782E-329D-4F9B-B9BC-C2E63A27CC12}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClassifyBot.Classifier.StanfordNLP", "ClassifyBot.Classifier.StanfordNLP\ClassifyBot.Classifier.StanfordNLP.csproj", "{909511D0-6396-43A9-8BDD-5751DF93E46E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClassifyBot.Classifier.StanfordNLP", "ClassifyBot.Classifier.StanfordNLP\ClassifyBot.Classifier.StanfordNLP.csproj", "{909511D0-6396-43A9-8BDD-5751DF93E46E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClassifyBot.Pipeline.CodeProject", "ClassifyBot.Pipeline.CodeProject\ClassifyBot.Pipeline.CodeProject.csproj", "{D27AD8D8-42FB-410F-A7F8-10E1719AE50E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClassifyBot.Pipeline.CodeProject", "ClassifyBot.Pipeline.CodeProject\ClassifyBot.Pipeline.CodeProject.csproj", "{D27AD8D8-42FB-410F-A7F8-10E1719AE50E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClassifyBot.Tests", "ClassifyBot.Tests\ClassifyBot.Tests.csproj", "{ACAA556E-1477-450F-B610-89BB8AB04FC3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClassifyBot.Tests", "ClassifyBot.Tests\ClassifyBot.Tests.csproj", "{ACAA556E-1477-450F-B610-89BB8AB04FC3}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{BB197DB6-C648-44F6-8C4C-A529BE7EF91B}"
+	ProjectSection(SolutionItems) = preProject
+		clb.cmd = clb.cmd
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -9,7 +9,7 @@ namespace ClassifyBot.Tests
 {
     public class CodeProjectPipelineTests
     {
-        [Fact(DisplayName = "LanguageDataExtractor functions properly")]
+        [Fact(DisplayName = "Can instantiate LanguageDataExtractor.")]
         public void ExtractorTests()
         {
             FileInfo file = new FileInfo("ExtractorTest.json");

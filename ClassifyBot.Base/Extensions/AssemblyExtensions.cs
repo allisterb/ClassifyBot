@@ -63,7 +63,7 @@ namespace ClassifyBot
             string[] assemblyFiles = null;
             try
             {
-                assemblyFiles = Directory.GetFiles(Directory.GetCurrentDirectory(), "ClassifyBot.*.dll").ToArray();
+                assemblyFiles = Directory.GetFiles(GetExecutingDirectoryName(), "ClassifyBot.*.dll").ToArray();
             }
             catch (Exception e)
             {
@@ -79,6 +79,12 @@ namespace ClassifyBot
             {
                 return LoadAllFrom(assembly, assemblyFiles, excludedFileNames);
             }
+        }
+
+        public static string GetExecutingDirectoryName()
+        {
+            var location = new Uri(Assembly.GetEntryAssembly().GetName().CodeBase);
+            return new FileInfo(location.AbsolutePath).Directory.FullName;
         }
     }
 }
