@@ -19,7 +19,7 @@ namespace ClassifyBot.Pipeline.CodeProject.LanguageDetector
 
         #region Overriden members
         [Option('u', "url", Required = false, Hidden = true)]
-        public override string _InputFileUrl => string.Empty;
+        public override string InputFileUrl => string.Empty;
 
         protected override Func<ILogger, StreamReader, IEnumerable<LanguageItem>> ReadFileStream { get; } = (logger, r) =>
         {

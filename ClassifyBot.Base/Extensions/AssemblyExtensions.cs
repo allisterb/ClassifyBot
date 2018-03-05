@@ -47,12 +47,12 @@ namespace ClassifyBot
             }
             if (assemblies.Count == 0)
             {
-                L.Debug("No external assemblies matching search pattern loaded.");
+                L.Debug("No assemblies matching search pattern loaded.");
                 return null;
             }
             else
             {
-                L.Information("Loaded {0} external assemblies: {1}.", assemblies.Count, assemblies);
+                L.Information("Loaded {0} ClassifyBot assemblies: {1}.", assemblies.Count, assemblies);
                 return assemblies;
 
             }
