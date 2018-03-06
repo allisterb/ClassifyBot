@@ -47,10 +47,18 @@ namespace ClassifyBot
             }
             Log.Logger = LoggerConfiguration.CreateLogger();
             L = Log.ForContext<Stage>();
-            Stage s = Driver.MarshalOptionsForStage(args, out string optionsHelp);
-            if (s == null && !optionsHelp.Empty())
+            Stage s = Driver.MarshalOptionsForStage(args, out StageResult result, out string optionsHelp);
+            if (result == StageResult.INIT && s != null)
+            {
+                s.Run();
+            }
+            else if (result == StageResult.INVALID_OPTIONS && s == null && !optionsHelp.Empty())
             {
                 L.Information(optionsHelp);
+            }
+            else
+            {
+                throw new Exception("Unknown stage state {0} {1}.".F( result, s));
             }
         }
 
