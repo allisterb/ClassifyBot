@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using Serilog;
 
 using CommandLine;
+using HtmlAgilityPack;
 
 namespace ClassifyBot.Pipeline.CodeProject.LanguageDetector
 {
@@ -19,18 +21,15 @@ namespace ClassifyBot.Pipeline.CodeProject.LanguageDetector
         #endregion
 
         #region Overriden members
-        public override StageResult Run()
-        {
-            Extract();
-            return StageResult.SUCCESS;
-        }
-
         [Option('u', "url", Required = false, Hidden = true)]
         public override string InputFileUrl { get; set; }
 
         protected override Func<ILogger, StreamReader, IEnumerable<LanguageItem>> ReadFileStream { get; } = (logger, r) =>
         {
-            return null;
+            HtmlDocument doc = new HtmlDocument();
+            doc.Load(r);
+            HtmlNodeCollection nodes = doc.DocumentNode.SelectNodes("//pre");
+            return nodes.Select(n => new LanguageItem(n.Line, n.Attributes["lang"].Value, n.InnerText));
         };
         #endregion
     }

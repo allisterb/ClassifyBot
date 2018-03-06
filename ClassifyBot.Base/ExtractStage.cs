@@ -54,6 +54,14 @@ namespace ClassifyBot
         }
         #endregion
 
+        #region Overriden members
+        public override StageResult Run()
+        {
+            Extract();
+            return StageResult.SUCCESS;
+        }
+        #endregion
+
         #region Abstract methods
         public abstract int Extract(int? recordBatchSize = null, int? recordLimit = null, Dictionary<string, string> options = null);
         #endregion

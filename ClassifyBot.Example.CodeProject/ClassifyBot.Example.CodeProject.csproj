@@ -5,6 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="HtmlAgilityPack" Version="1.7.1" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\ClassifyBot.Base\ClassifyBot.Base.csproj" />
     <ProjectReference Include="..\ClassifyBot.Classifier.StanfordNLP\ClassifyBot.Classifier.StanfordNLP.csproj" />
     <ProjectReference Include="..\ClassifyBot.Core\ClassifyBot.Core.csproj" />
