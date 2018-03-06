@@ -77,7 +77,6 @@ namespace ClassifyBot
         #endregion
 
         #region Properties
-
         [Option('u', "url", Required = true, HelpText = "Input data file Url. A file with a .zip or .gz or .tar.gz extension will be automatically decompressed.")]
         public virtual string InputFileUrl { get; set; }
 

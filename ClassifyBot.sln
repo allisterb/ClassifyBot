@@ -11,7 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClassifyBot.Core", "Classif
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClassifyBot.Classifier.StanfordNLP", "ClassifyBot.Classifier.StanfordNLP\ClassifyBot.Classifier.StanfordNLP.csproj", "{909511D0-6396-43A9-8BDD-5751DF93E46E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClassifyBot.Pipeline.CodeProject", "ClassifyBot.Pipeline.CodeProject\ClassifyBot.Pipeline.CodeProject.csproj", "{D27AD8D8-42FB-410F-A7F8-10E1719AE50E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClassifyBot.Example.CodeProject", "ClassifyBot.Example.CodeProject\ClassifyBot.Example.CodeProject.csproj", "{D27AD8D8-42FB-410F-A7F8-10E1719AE50E}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClassifyBot.Tests", "ClassifyBot.Tests\ClassifyBot.Tests.csproj", "{ACAA556E-1477-450F-B610-89BB8AB04FC3}"
 EndProject

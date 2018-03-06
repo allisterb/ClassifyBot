@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ClassifyBot.Pipeline.CodeProject\ClassifyBot.Pipeline.CodeProject.csproj" />
+    <ProjectReference Include="..\ClassifyBot.Example.CodeProject\ClassifyBot.Example.CodeProject.csproj" />
   </ItemGroup>
 
 </Project>
