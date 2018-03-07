@@ -9,12 +9,11 @@ namespace ClassifyBot.Tests
 {
     public class CodeProjectPipelineTests
     {
-        [Fact(DisplayName = "Can instantiate LanguageDataExtractor.")]
+        [Fact(DisplayName = "Can create and use LanguageDataExtractor.")]
         public void ExtractorTests()
         {
-            FileInfo file = new FileInfo("ExtractorTest.json");
-            LanguageDataExtractor e =  Driver.MarshalOptionsForStage<LanguageDataExtractor>(new string[] { "extract-langdata", "-f", "foo.json"}, out StageResult result, out string optionsHelp);
-            int n = e.Extract();
+            StageResult r =  Driver.MarshalOptionsForStage<LanguageDataExtractor>(new string[] { "extract-langdata", "-f", "foo.json"}, out LanguageDataExtractor extractor, out string optionsHelp);
+            Assert.Equal(StageResult.CREATED, r);
         }
     }
 }

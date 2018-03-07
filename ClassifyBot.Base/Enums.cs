@@ -6,11 +6,13 @@ namespace ClassifyBot
 {
     public enum StageResult
     {
-        INIT = 100,
         SUCCESS = 0,
         INVALID_OPTIONS = 1,
         INPUT_ERROR = 2,
-        OUTPUT_FILE_EXISTS = 3,
+        OUTPUT_ERROR = 3,
+        FAILED = 4,
+        CREATED = -100,
+        INITIALIZED = -101
     }
 
     public enum ExtractResult
@@ -19,7 +21,6 @@ namespace ClassifyBot
         INVALID_OPTIONS = 1,
         INPUT_ERROR = 2,
         OUTPUT_FILE_EXISTS = 3,
-        ERROR_TRANSFORMING_DATA = 4
     }
 
     public enum ExitResult
@@ -28,7 +29,6 @@ namespace ClassifyBot
         INVALID_OPTIONS = 1,
         INPUT_FILE_ERROR = 2,
         OUTPUT_FILE_EXISTS = 3,
-        ERROR_TRANSFORMING_DATA = 4,
         STAGE_FAILED = 90,
         UNHANDLED_RUNTIME_EXCEPTION = 99
     }

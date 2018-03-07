@@ -19,11 +19,7 @@ namespace ClassifyBot
         public WebFileExtract() : base("{0}-clbot-web-extract-dl.tmp".F(DateTime.Now.Ticks))
         {
             Contract.Requires(!InputFileUrl.Empty());
-            if (Uri.TryCreate(InputFileUrl, UriKind.RelativeOrAbsolute, out Uri result))
-            {
-                InputFileUri = result;
-            }
-            else throw new ArgumentException("The input file Url {0} is not a valid Uri.".F(InputFileUrl));
+            
         }
 
         public WebFileExtract(string _inputFileUrl) : base("{0}-clbot-web-extract-dl.tmp".F(DateTime.Now.Ticks))
@@ -38,8 +34,9 @@ namespace ClassifyBot
         #endregion
 
         #region Overriden members
-        public override int Extract(int? recordBatchSize = null, int? recordLimit = null, Dictionary<string, string> options = null)
+        public override StageResult Extract(int? recordBatchSize = null, int? recordLimit = null, Dictionary<string, string> options = null)
         {
+            Contract.Requires(InputFileUri != null);
             if (InputFileUri.Segments.Any(s => s.EndsWith(".zip")))
             {
                 InputFileName += ".zip";
@@ -60,19 +57,37 @@ namespace ClassifyBot
             }
             catch (Exception e)
             {
-                L.Error(e, "Exception throw attempting to download file from Url {0} to {1}.", InputFileUri.ToString(), TempFile);
-                return -1;
+                Error(e, "Exception throw attempting to download file from Url {0} to {1}.", InputFileUri.ToString(), TempFile);
+                return StageResult.INPUT_ERROR;
             }
 
             if (!FileDownload.CompletedSuccessfully)
             {
-                L.Error("Failed to download file from Url {0} to {1}.", InputFileUri.ToString(), TempFile);
-                return -1;
+                Error("Failed to download file from Url {0} to {1}.", InputFileUri.ToString(), TempFile);
+                return StageResult.INPUT_ERROR;
+            }
+            return base.Extract();  
+        }
+
+        protected override StageResult Init()
+        {
+            if (Uri.TryCreate(InputFileUrl, UriKind.RelativeOrAbsolute, out Uri result))
+            {
+                InputFileUri = result;
+                return StageResult.SUCCESS;
             }
             else
             {
-                return base.Extract();
+                Error("The input file Url {0} is not a valid Uri.".F(InputFileUrl));
+                return StageResult.INPUT_ERROR;
             }
+        }
+
+        protected override StageResult Cleanup()
+        {
+            InputFile.Delete();
+            L.Debug("Deleted temporary input file {0}.", InputFileName);
+            return StageResult.SUCCESS;
         }
         #endregion
 

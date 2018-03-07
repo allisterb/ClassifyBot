@@ -47,19 +47,34 @@ namespace ClassifyBot
             }
             Log.Logger = LoggerConfiguration.CreateLogger();
             L = Log.ForContext<Stage>();
-            Stage s = Driver.MarshalOptionsForStage(args, out StageResult result, out string optionsHelp);
-            if (result == StageResult.INIT && s != null)
-            {
-                s.Run();
-            }
-            else if (result == StageResult.INVALID_OPTIONS && s == null && !optionsHelp.Empty())
+            StageResult result= Driver.MarshalOptionsForStage(args, out Stage stage, out string optionsHelp);
+            if (result == StageResult.INVALID_OPTIONS && stage == null && !optionsHelp.Empty())
             {
                 L.Information(optionsHelp);
             }
+            else if (result == StageResult.CREATED && stage != null && optionsHelp.Empty())
+            {
+                Exit(stage.Run());
+            }
             else
             {
-                throw new Exception("Unknown stage state {0} {1}.".F( result, s));
+                throw new Exception("Unknown stage state {0} {1}.".F( result, stage));
             }
+        }
+
+        static void Exit(StageResult result)
+        {
+            Log.CloseAndFlush();
+            ExitResult er = ExitResult.STAGE_FAILED;
+            if (result == StageResult.SUCCESS)
+            {
+                er = ExitResult.SUCCESS;
+            }
+            else
+            {
+                er = ExitResult.STAGE_FAILED;
+            }
+            Environment.Exit((int) er);
         }
 
         static void Exit(ExitResult result)

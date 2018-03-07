@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27130.0
+VisualStudioVersion = 15.0.27130.2036
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClassifyBot.Base", "ClassifyBot.Base\ClassifyBot.Base.csproj", "{1766BFC4-19B8-456B-BB34-A587981B1C10}"
 EndProject
@@ -17,6 +17,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClassifyBot.Tests", "Classi
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{BB197DB6-C648-44F6-8C4C-A529BE7EF91B}"
 	ProjectSection(SolutionItems) = preProject
+		clb = clb
 		clb.cmd = clb.cmd
 	EndProjectSection
 EndProject

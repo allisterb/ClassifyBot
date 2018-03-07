@@ -29,6 +29,7 @@ namespace ClassifyBot.Pipeline.CodeProject.LanguageDetector
             HtmlDocument doc = new HtmlDocument();
             doc.Load(r);
             HtmlNodeCollection nodes = doc.DocumentNode.SelectNodes("//pre");
+            logger.Information("Got {0} language data items from file.", nodes.Count);
             return nodes.Select(n => new LanguageItem(n.Line, n.Attributes["lang"].Value, n.InnerText));
         };
         #endregion

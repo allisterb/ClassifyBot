@@ -8,7 +8,6 @@ namespace ClassifyBot
 {
     public interface IExtractor<TRecord, TFeature> where TFeature : ICloneable, IComparable, IComparable<TFeature>, IConvertible, IEquatable<TFeature> where TRecord : Record<TFeature> 
     {
-        int Extract(int? recordBatchSize = null, int? recordLimit = null, Dictionary<string, string> options = null);
-        bool Save();
+        StageResult Extract(int? recordBatchSize = null, int? recordLimit = null, Dictionary<string, string> options = null);
     }
 }

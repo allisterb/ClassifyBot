@@ -80,7 +80,6 @@ namespace ClassifyBot
             {
                 client.BaseAddress = this.url.GetLeftPart(UriPartial.Authority);
                 client.Headers.Add(HttpRequestHeader.UserAgent, this.user_agent);
-                client.DownloadProgressChanged += Client_DownloadProgressChanged;
                 if (this.progress_changed_event_handler != null)
                 {
                     client.DownloadProgressChanged += this.progress_changed_event_handler;
@@ -121,10 +120,21 @@ namespace ClassifyBot
         private void Client_DownloadProgressChanged(object sender, DownloadProgressChangedEventArgs e)
         {
             WebClient client = (WebClient)sender;
-            this.TotalBytesToReceive = e.TotalBytesToReceive;
-            this.TotalBytesReceived = e.TotalBytesToReceive;
+            this.BytesToReceive = e.TotalBytesToReceive;
+            this.BytesReceived = e.BytesReceived;
             this.ProgressPercentage = e.ProgressPercentage;
-            L.Information("Downloaded {0} bytes of {1} total. {2}% done", TotalBytesReceived, TotalBytesReceived + TotalBytesToReceive, ProgressPercentage);
+            /*
+            if (e.TotalBytesToReceive != -1)
+            {
+                L.Information("Downloaded {0} bytes of {1} total. {2} % done", BytesReceived, BytesReceived + BytesToReceive, ProgressPercentage);
+            }
+            
+            else
+            {
+                L.Information("Downloaded {0} bytes.", BytesReceived);
+            }
+            */
+            L.Information("Downloaded {0} bytes.", e.BytesReceived);
         }
 
         private void Client_DownloadFileCompleted(object sender, AsyncCompletedEventArgs e)
@@ -133,12 +143,12 @@ namespace ClassifyBot
             {
                 this.CompletedSuccessfully = false;
                 this.Error = e.Error;
-                L.Error(this.Error, "Failed to download file from Url {0} to {1}.", url, local_file);
+                L.Error(this.Error, "Failed to download file from url {0} to {1}.", url, local_file.FullName);
             }
             else
             {
                 this.CompletedSuccessfully = true;
-                L.Information("Successfully downloaded file from Url {0} to {1}.", url, local_file);
+                L.Information("Successfully downloaded file from url {0} to {1}.", url, local_file.FullName);
             }
         }
         #endregion
@@ -151,8 +161,8 @@ namespace ClassifyBot
         public DownloadDataCompletedEventHandler completed_event_handler;
         public long? Size = null;
         public DateTime? LastModified = null;
-        public long TotalBytesToReceive = 0;
-        public long TotalBytesReceived = 0;
+        public long BytesToReceive = 0;
+        public long BytesReceived = 0;
         public int ProgressPercentage = 0;
         public bool CompletedSuccessfully = false;
         public Exception Error = null;

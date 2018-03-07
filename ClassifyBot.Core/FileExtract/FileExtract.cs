@@ -14,12 +14,12 @@ using SharpCompress.IO;
 
 namespace ClassifyBot
 {
-    public abstract class FileExtract<TRecord, TFeature> : ExtractStage<TRecord, TFeature> where TFeature : ICloneable, IComparable, IComparable<TFeature>, IConvertible, IEquatable<TFeature> where TRecord : Record<TFeature>
+    public abstract class FileExtract<TRecord, TFeature> : Extractor<TRecord, TFeature> where TFeature : ICloneable, IComparable, IComparable<TFeature>, IConvertible, IEquatable<TFeature> where TRecord : Record<TFeature>
     {
         #region Constructors
         public FileExtract() : base()
         {
-            Contract.Requires(InputFile != null && InputFile.Exists);
+            Contract.Requires(InputFile != null);
         }
 
         public FileExtract(string inputFileName) : base()
@@ -36,11 +36,11 @@ namespace ClassifyBot
         [Option('i', "input-file", Required = true, HelpText = "Input data file name for dataset. A file with a .zip or .gz or .tar.gz extension will be automatically decompressed.")]
         public virtual string InputFileName { get; set; }
 
-        public FileInfo InputFile => InputFileName.Empty() ? null : new FileInfo(InputFileName);
+        public override FileInfo InputFile => InputFileName.Empty() ? null : new FileInfo(InputFileName);
         #endregion
 
         #region Implemented members
-        public override int Extract(int? recordBatchSize = null, int? recordLimit = null, Dictionary<string, string> options = null)
+        public override StageResult Extract(int? recordBatchSize = null, int? recordLimit = null, Dictionary<string, string> options = null)
         {
             string[] compressedFileExtensions = new string[3] { ".zip", ".tar.gz", ".tar.bz" };
             if (compressedFileExtensions.Contains(InputFile.Extension))
@@ -59,11 +59,12 @@ namespace ClassifyBot
                     }
                     if (!fileFound)
                     {
-                        throw new Exception("{0} has no file entries in zip archive.".F(InputFile.FullName));
+                        Error("{0} has no file entries in zip archive.".F(InputFile.FullName));
+                        return StageResult.INPUT_ERROR;
                     }
                     else
                     {
-                        L.Information("Unzipping file {0} with size {1}.", reader.Entry.Key, reader.Entry.Size);
+                        Info("Unzipping file {0} with size {1} bytes.", reader.Entry.Key, reader.Entry.Size);
                     }
                     using (Stream rs = reader.OpenEntryStream())
                     using (StreamReader r = new StreamReader(rs))
@@ -72,16 +73,17 @@ namespace ClassifyBot
                     }
                 }
             }
-            else if (InputFile.Extension == ".gz")
+            else
             {
-                using (GZipStream gzs = new GZipStream(InputFile.OpenRead(), CompressionMode.Decompress))
-                using (StreamReader r = new StreamReader(gzs))
+                Info("Reading file {0} with size {1} bytes.", InputFile.Name, InputFile.Length);
+                using (FileStream f = InputFile.OpenRead())
+                using (StreamReader r = new StreamReader(f))
                 {
                     ExtractedRecords.AddRange(ReadFileStream(L, r));
                 }
 
             }
-            return ExtractedRecords.Count;
+            return StageResult.SUCCESS;
         }
         #endregion
     }

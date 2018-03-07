@@ -35,46 +35,44 @@ namespace ClassifyBot
                  .Where(t => t.IsSubclassOf(typeof(T)) && !t.IsAbstract)?.ToArray();
         }
 
-        public static Stage MarshalOptionsForStage(string[] args, out StageResult result, out string optionsHelp)
+        public static StageResult MarshalOptionsForStage(string[] args, out Stage stage, out string optionsHelp)
         {
             optionsHelp = string.Empty;
-            result = StageResult.INVALID_OPTIONS;
+            Stage s = null;
             Parser p = new Parser();
             ParserResult<object> options = p.ParseArguments(args, GetSubTypes<Stage>());
             string oh = string.Empty;
             StageResult sr = StageResult.INVALID_OPTIONS;
-            Stage stage = null;
             options
                 .WithNotParsed((errors) =>
                 {
                     oh = GetHelpForInvalidOptions(options, errors);
                     sr = StageResult.INVALID_OPTIONS;
                 })
-                .WithParsed((o) => { stage = (Stage)o; sr = StageResult.INIT; });
+                .WithParsed((o) => { s = (Stage) o; sr = StageResult.CREATED; });
             optionsHelp = oh;
-            result = sr;
-            return stage;
+            stage = s;
+            return sr;
         }
 
-        public static T MarshalOptionsForStage<T>(string[] args, out StageResult result, out string optionsHelp)
+        public static StageResult MarshalOptionsForStage<T>(string[] args, out T stage, out string optionsHelp)
         {
             optionsHelp = string.Empty;
-            result = StageResult.INVALID_OPTIONS;
+            T s = default(T);
             Parser p = new Parser();
             ParserResult<object> options = p.ParseArguments(args, typeof(T));
             string oh = string.Empty;
             StageResult sr = StageResult.INVALID_OPTIONS;
-            T stage = default(T);
             options
                 .WithNotParsed((errors) =>
                 {
                     oh = GetHelpForInvalidOptions(options, errors);
                     sr = StageResult.INVALID_OPTIONS;
                 })
-                .WithParsed((o) => { stage = (T) o; sr = StageResult.INIT; });
+                .WithParsed((o) => { s = (T) o; sr = StageResult.CREATED; });
             optionsHelp = oh;
-            result = sr;
-            return stage;
+            stage = s;
+            return sr;
         }
 
 
