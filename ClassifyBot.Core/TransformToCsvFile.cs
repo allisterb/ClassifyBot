@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 
@@ -32,7 +33,8 @@ namespace ClassifyBot
             using (CsvWriter csv = new CsvWriter(sw))
             {
                 SetPropFromDict(csv.Configuration.GetType(), csv.Configuration, options);
-                csv.WriteRecords(records);
+                csv.WriteRecords(records.Select(r => new { label = r.Label, text = r.Features[0] }));
+                csv.Flush();
                 return StageResult.SUCCESS;
             }
             

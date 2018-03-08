@@ -23,9 +23,9 @@ namespace ClassifyBot
         #endregion
         
         #region Properties
-        public int? Id { get; }
-        public string Label { get; }
-        public TFeature[] Features { get; }
+        public int? Id { get; set; }
+        public string Label { get; set; }
+        public TFeature[] Features { get; set; }
         #endregion
     }
 }
