@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace ClassifyBot.Pipeline.CodeProject.LanguageDetector
+namespace ClassifyBot.Example.CodeProject.LanguageDetector
 {
     public class LanguageItem : Record<string>
     {

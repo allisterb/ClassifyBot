@@ -2,7 +2,7 @@
   "profiles": {
     "ClassifyBot.Cli": {
       "commandName": "Project",
-      "commandLineArgs": "extract-langdata -f output.foo"
+      "commandLineArgs": "langdata-to-tsv -i C:\\Projects\\ClassifyBot\\data\\output.json.gz -f C:\\Projects\\ClassifyBot\\data\\output.tsv -o"
     }
   }
 }

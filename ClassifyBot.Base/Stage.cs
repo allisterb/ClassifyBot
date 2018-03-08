@@ -40,6 +40,8 @@ namespace ClassifyBot
 
         //[Option("explicit", HelpText = "Enable explicit loading of assemblies.", Required = false)]
         public string ExplicitAssemblies { get; set; }
+
+        public string[] CompressedFileExtensions = new string[3] { ".zip", ".tar.gz", ".tar.bz" };
         #endregion
 
         #region Abstract members
@@ -58,6 +60,17 @@ namespace ClassifyBot
         public virtual void Error(Exception e, string messageTemplate, params object[] propertyValues) => L.Error(e, messageTemplate, propertyValues);
         public virtual void Verbose(string messageTemplate, params object[] propertyValues) => L.Verbose(messageTemplate, propertyValues);
         public virtual void Warn(string messageTemplate, params object[] propertyValues) => L.Warning(messageTemplate, propertyValues);
+
+        public static void SetPropFromDict(Type t, object o, Dictionary<string, object> p)
+        {
+            foreach (PropertyInfo prop in t.GetProperties())
+            {
+                if (p.ContainsKey(prop.Name) && prop.PropertyType == p[prop.Name].GetType())
+                {
+                    prop.SetValue(o, p[prop.Name]);
+                }
+            }
+        }
         #endregion
 
     }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 
 using Xunit;
-using ClassifyBot.Pipeline.CodeProject.LanguageDetector;
+using ClassifyBot.Example.CodeProject.LanguageDetector;
 
 namespace ClassifyBot.Tests
 {

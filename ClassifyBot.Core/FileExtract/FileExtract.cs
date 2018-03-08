@@ -42,8 +42,8 @@ namespace ClassifyBot
         #region Implemented members
         public override StageResult Extract(int? recordBatchSize = null, int? recordLimit = null, Dictionary<string, string> options = null)
         {
-            string[] compressedFileExtensions = new string[3] { ".zip", ".tar.gz", ".tar.bz" };
-            if (compressedFileExtensions.Contains(InputFile.Extension))
+            
+            if (CompressedFileExtensions.Contains(InputFile.Extension))
             {
                 using (FileStream stream = InputFile.OpenRead())
                 using (IReader reader = ReaderFactory.Open(stream))

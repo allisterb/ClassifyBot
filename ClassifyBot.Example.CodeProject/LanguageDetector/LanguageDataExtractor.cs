@@ -8,16 +8,13 @@ using Serilog;
 using CommandLine;
 using HtmlAgilityPack;
 
-namespace ClassifyBot.Pipeline.CodeProject.LanguageDetector
+namespace ClassifyBot.Example.CodeProject.LanguageDetector
 {
     [Verb("extract-langdata", HelpText = "Download and extract language data from https://www.codeproject.com/script/Contests/Uploads/1024/LanguageSamples.zip into common JSON format.")]
     public class LanguageDataExtractor : WebFileExtract<LanguageItem, string>
     {
         #region Constructors
-        public LanguageDataExtractor() : base("https://www.codeproject.com/script/Contests/Uploads/1024/LanguageSamples.zip")
-        {
-            
-        }
+        public LanguageDataExtractor() : base("https://www.codeproject.com/script/Contests/Uploads/1024/LanguageSamples.zip") {}
         #endregion
 
         #region Overriden members
