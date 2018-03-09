@@ -16,7 +16,7 @@ namespace ClassifyBot
         #region Constructors
         public TransformToCsvFile(string delimiter = ",") : base()
         {
-            this.WriterOptions.Add("Delimiter", delimiter);
+            
         }
         #endregion
 
@@ -28,6 +28,7 @@ namespace ClassifyBot
             return StageResult.SUCCESS;
         }
 
+
         protected override Func<ILogger, StreamWriter, IEnumerable<TRecord>, Dictionary<string, object>, StageResult> WriteFileStream { get; } = (logger, sw, records, options) =>
         {
             using (CsvWriter csv = new CsvWriter(sw))
@@ -37,12 +38,32 @@ namespace ClassifyBot
                 csv.Flush();
                 return StageResult.SUCCESS;
             }
-            
+
         };
+
+        protected override StageResult Init()
+        {
+            StageResult r;
+            if ((r = base.Init()) != StageResult.SUCCESS)
+            {
+                return r;
+            }
+            else
+            {
+                if (AdditionalOptions.Count > 0)
+                {
+                    foreach (KeyValuePair<string, string> kv in AdditionalOptions)
+                    {
+                        WriterOptions.Add(kv.Key, kv.Value);
+                    }
+                }
+                return StageResult.SUCCESS;
+            }
+        }
         #endregion
 
         #region Properties
-       
+
         #endregion
     }
 }

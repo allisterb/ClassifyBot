@@ -10,9 +10,9 @@ namespace ClassifyBot.Example.CodeProject.LanguageDetector
     public class LanguageDataTransformToTsv : TransformToCsvFile<LanguageItem, string>
     {
         #region Constructor
-        public LanguageDataTransformToTsv() : base("\t")
+        public LanguageDataTransformToTsv() : base()
         {
-            WriterOptions.Add("HasHeaderRecord", false);
+            
         }
         #endregion
 

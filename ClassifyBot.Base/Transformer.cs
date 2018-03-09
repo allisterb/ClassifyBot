@@ -82,6 +82,7 @@ namespace ClassifyBot
             {
                 Warn("Output file {0} exists and will be overwritten.", OutputFile.FullName);
             }
+
             return StageResult.SUCCESS;
         }
         #endregion
@@ -111,7 +112,7 @@ namespace ClassifyBot
         [Option('f', "output-file", Required = true, HelpText = "Output data file name for transformed dataset.")]
         public string OutputFileName { get; set; }
 
-        [Option('o', "overwrite", Required = false, Default = false, HelpText = "Ovewrite existing output data file if it exists.")]
+        [Option('w', "overwrite", Required = false, Default = false, HelpText = "Ovewrite existing output data file if it exists.")]
         public bool OverwriteOutputFile { get; set; }
 
         [Option('b', "batch", Required = false, HelpText = "Batch the number of records transformed.", Default = 0)]

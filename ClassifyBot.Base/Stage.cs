@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
+using System.Text.RegularExpressions;
 
 
 using CommandLine;
@@ -15,28 +15,30 @@ namespace ClassifyBot
         #region Constructors
         public Stage()
         {
-            foreach (PropertyInfo prop in this.GetType().GetProperties())
-            {
-                if (!StageOptions.ContainsKey(prop.Name))
-                {
-                    StageOptions.Add(prop.Name, prop.GetValue(this));
-                }
-            }
+
         }
         #endregion
 
         #region Properties
         public virtual ILogger L { get; } = Log.ForContext<Stage>();
-        
+
         public static Dictionary<string, object> StageOptions { get; } = new Dictionary<string, object>();
 
         public bool Initialized { get; protected set; } = false;
+
+        public Dictionary<string, string> AdditionalOptions => ParseAdditionalOptions(AdditionalOptionsString);
 
         [Option("debug", HelpText = "Enable debug output.", Required = false)]
         public bool DebugOutput { get; set; }
 
         [Option("verbose", HelpText = "Enable verbose output.", Required = false)]
         public bool VerboseOutput { get; set; }
+
+        [Option('o', "options", HelpText = "Any additional options fior the stage in the format opt1=val,opt2=val2...", Required = false)]
+        public string AdditionalOptionsString
+        {
+            get; set;
+        }
 
         //[Option("explicit", HelpText = "Enable explicit loading of assemblies.", Required = false)]
         public string ExplicitAssemblies { get; set; }
@@ -70,6 +72,34 @@ namespace ClassifyBot
                     prop.SetValue(o, p[prop.Name]);
                 }
             }
+        }
+
+        public static Dictionary<string, string> ParseAdditionalOptions(string o)
+        {
+            Dictionary<string, string> options = new Dictionary<string, string>();
+            if (o.Empty())
+            {
+                return options;
+            }
+            Regex re = new Regex(@"(\w+)\=([^\,]+)", RegexOptions.Compiled);
+            string[] pairs = o.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+            foreach (string s in pairs)
+            {
+                Match m = re.Match(s);
+                if (!m.Success)
+                {
+                    options.Add("_ERROR_", s);
+                }
+                else if (options.ContainsKey(m.Groups[1].Value))
+                {
+                    options[m.Groups[1].Value] = m.Groups[2].Value;
+                }
+                else
+                {
+                    options.Add(m.Groups[1].Value, m.Groups[2].Value);
+                }
+            }
+            return options;
         }
         #endregion
 
