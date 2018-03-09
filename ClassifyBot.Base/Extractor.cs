@@ -27,6 +27,8 @@ namespace ClassifyBot
         #endregion
 
         #region Overriden members
+        public override FileInfo OutputFile => OutputFileName.Empty() ? null : new FileInfo(OutputFileName);
+
         public override StageResult Run()
         {
             StageResult r;
@@ -64,8 +66,6 @@ namespace ClassifyBot
         #endregion
 
         #region Properties
-        public override FileInfo OutputFile => OutputFileName.Empty() ? null : new FileInfo(OutputFileName);
-
         public List<TRecord> ExtractedRecords { get; protected set; } = new List<TRecord>();
 
         [Option('f', "output-file", Required = true, HelpText = "Output data file name for dataset. A file with .json or .json.gz extension will be created with this name.")]

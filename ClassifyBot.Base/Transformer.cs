@@ -75,7 +75,7 @@ namespace ClassifyBot
             }
             if (OutputFile.Exists && !OverwriteOutputFile)
             {
-                Error("The output file {0} exists but the overwrite option was not specified.");
+                Error("The output file {0} exists but the overwrite option was not specified.", OutputFile.FullName);
                 return StageResult.OUTPUT_ERROR;
             }
             else if (OutputFile.Exists)
@@ -88,9 +88,19 @@ namespace ClassifyBot
         #endregion
 
         #region Abstract members
-        public abstract StageResult Transform(int? recordBatchSize = null, int? recordLimit = null, Dictionary<string, string> options = null);
+        public virtual StageResult Transform(int? recordBatchSize = null, int? recordLimit = null, Dictionary<string, string> options = null)
+        {
+            for (int i = 0; i < InputRecords.Count; i++)
+            {
+                OutputRecords.Add(TransformInputToOutput(L, StageOptions, InputRecords[i]));
+            }
+            Info("Transformed {0} records with maximum {1} features to {2}.", OutputRecords.Count, OutputRecords.Max(r => r.Features.Count), OutputFileName);
+            return StageResult.SUCCESS;
+        }
 
-        protected abstract Func<ILogger, StreamWriter, IEnumerable<TRecord>, Dictionary<string, object>, StageResult> WriteFileStream { get; }
+        protected abstract Func<ILogger, Dictionary<string, object>, TRecord, TRecord> TransformInputToOutput { get; }
+
+        protected abstract Func<ILogger, StreamWriter, List<TRecord>, Dictionary<string, object>, StageResult> WriteFileStream { get; }
         #endregion
 
         #region Properties

@@ -17,7 +17,7 @@ namespace ClassifyBot
         public Record(string label, params TFeature[] features)
         {
             this.Label = label;
-            this.Features = features;
+            this.Features = features.ToList();
         }
 
         #endregion
@@ -25,7 +25,9 @@ namespace ClassifyBot
         #region Properties
         public int? Id { get; set; }
         public string Label { get; set; }
-        public TFeature[] Features { get; set; }
+        public List<TFeature> Features { get; set; }
         #endregion
+
+        
     }
 }

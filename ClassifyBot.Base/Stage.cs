@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -26,7 +27,9 @@ namespace ClassifyBot
 
         public bool Initialized { get; protected set; } = false;
 
-        public Dictionary<string, string> AdditionalOptions => ParseAdditionalOptions(AdditionalOptionsString);
+        public Dictionary<string, object> AdditionalOptions => ParseAdditionalOptions(AdditionalOptionsString);
+
+        public static SortedList<int, string> FeatureMap { get; } = new SortedList<int, string>();
 
         [Option("debug", HelpText = "Enable debug output.", Required = false)]
         public bool DebugOutput { get; set; }
@@ -63,7 +66,7 @@ namespace ClassifyBot
         public virtual void Verbose(string messageTemplate, params object[] propertyValues) => L.Verbose(messageTemplate, propertyValues);
         public virtual void Warn(string messageTemplate, params object[] propertyValues) => L.Warning(messageTemplate, propertyValues);
 
-        public static void SetPropFromDict(Type t, object o, Dictionary<string, object> p)
+        protected static void SetPropFromDict(Type t, object o, Dictionary<string, object> p)
         {
             foreach (PropertyInfo prop in t.GetProperties())
             {
@@ -74,9 +77,9 @@ namespace ClassifyBot
             }
         }
 
-        public static Dictionary<string, string> ParseAdditionalOptions(string o)
+        protected static Dictionary<string, object> ParseAdditionalOptions(string o)
         {
-            Dictionary<string, string> options = new Dictionary<string, string>();
+            Dictionary<string, object> options = new Dictionary<string, object>();
             if (o.Empty())
             {
                 return options;
@@ -100,6 +103,12 @@ namespace ClassifyBot
                 }
             }
             return options;
+        }
+
+        protected static bool StageResultSuccess(StageResult rtest, out StageResult r)
+        {
+            r = rtest;
+            return r == StageResult.SUCCESS ? true : false;
         }
         #endregion
 

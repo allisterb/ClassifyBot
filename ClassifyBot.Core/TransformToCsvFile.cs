@@ -21,21 +21,22 @@ namespace ClassifyBot
         #endregion
 
         #region Overriden members
-        public override StageResult Transform(int? recordBatchSize = null, int? recordLimit = null, Dictionary<string, string> options = null)
-        {
-
-            OutputRecords = InputRecords;
-            return StageResult.SUCCESS;
-        }
-
-
-        protected override Func<ILogger, StreamWriter, IEnumerable<TRecord>, Dictionary<string, object>, StageResult> WriteFileStream { get; } = (logger, sw, records, options) =>
+        protected override Func<ILogger, StreamWriter, List<TRecord>, Dictionary<string, object>, StageResult> WriteFileStream { get; } = (logger, sw, records, options) =>
         {
             using (CsvWriter csv = new CsvWriter(sw))
             {
+                csv.Configuration.HasHeaderRecord = false;
+                csv.Configuration.
                 SetPropFromDict(csv.Configuration.GetType(), csv.Configuration, options);
-                csv.WriteRecords(records.Select(r => new { label = r.Label, text = r.Features[0] }));
-                csv.Flush();
+                for (int i = 0; i < records.Count(); i++)
+                {
+                    csv.WriteField(records[i].Label);
+                    for (int f = 0; f < records[i].Features.Count; f++)
+                    {
+                        csv.WriteField(records[i].Features[f]);
+                    }
+                    csv.NextRecord();
+                }
                 return StageResult.SUCCESS;
             }
 
@@ -52,7 +53,7 @@ namespace ClassifyBot
             {
                 if (AdditionalOptions.Count > 0)
                 {
-                    foreach (KeyValuePair<string, string> kv in AdditionalOptions)
+                    foreach (KeyValuePair<string, object> kv in AdditionalOptions)
                     {
                         WriterOptions.Add(kv.Key, kv.Value);
                     }
