@@ -10,24 +10,35 @@ namespace ClassifyBot
     public class Record<TFeature> : IRecord<TFeature> where TFeature : ICloneable, IComparable, IComparable<TFeature>, IConvertible, IEquatable<TFeature>
     {
         #region Constructors
-        public Record(int id, string label, params TFeature[] features) : this(label, features)
+        public Record(string id, (string, float) label, params (string, TFeature)[] features) : this(label, features)
         {
             this.Id = id;
         }
-        public Record(string label, params TFeature[] features)
+
+        public Record(int id, (string, float) label, params (string, TFeature)[] features) : this(label, features)
         {
-            this.Label = label;
-            this.Features = features.ToList();
+            this._Id = id;
         }
 
-        #endregion
-        
-        #region Properties
-        public int? Id { get; set; }
-        public string Label { get; set; }
-        public List<TFeature> Features { get; set; }
-        #endregion
+        public Record(int id, string label, params (string, TFeature)[] features) : this(id, (label, 1), features) { }
+
+        protected Record( (string,float) label, params (string, TFeature) [] features)
+        {
+            this.Labels.Add(label);
+            for (int i = 0; i < features.Length; i++)
+            {
+                this.Features.Add(features[i]);
+            }
+        }
 
         
+        #endregion
+
+        #region Properties
+        public int? _Id { get; }
+        public string Id { get; set; }
+        public List<ValueTuple<string, float>> Labels { get; set; } = new List<(string, float)>();
+        public List<ValueTuple<string, TFeature>> Features { get; set; } = new List<(string, TFeature)>();
+        #endregion
     }
 }

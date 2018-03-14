@@ -3,11 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
-using System.Reflection;
 using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 using CommandLine;
 using Newtonsoft.Json;
@@ -15,21 +11,10 @@ using Serilog;
 
 namespace ClassifyBot
 {
-    public abstract class Transformer<TRecord, TFeature> : Stage, ITransformer<TRecord, TFeature>
-        where TFeature : ICloneable, IComparable, IComparable<TFeature>, IConvertible, IEquatable<TFeature> where TRecord : Record<TFeature>
+    public abstract class Loader<TRecord, TFeature> : Stage, ILoader<TRecord, TFeature> where TFeature : ICloneable, IComparable, IComparable<TFeature>, IConvertible, IEquatable<TFeature> where TRecord : Record<TFeature>
     {
-        #region Constructors
-        public Transformer()
-        {
-            Contract.Requires(!InputFileName.Empty());
-            Contract.Requires(!OutputFileName.Empty());
-        }
-        #endregion
-
-        #region Overriden members
+        #region Overidden members
         public override FileInfo InputFile => InputFileName.Empty() ? null : new FileInfo(InputFileName);
-
-        public override FileInfo OutputFile => OutputFileName.Empty() ? null : new FileInfo(OutputFileName);
 
         public override StageResult Run()
         {
@@ -42,11 +27,7 @@ namespace ClassifyBot
             {
                 return r;
             }
-            if ((r = Transform()) != StageResult.SUCCESS)
-            {
-                return r;
-            }
-            if ((r = Save()) != StageResult.SUCCESS)
+            if ((r = Load()) != StageResult.SUCCESS)
             {
                 return r;
             }
@@ -56,75 +37,72 @@ namespace ClassifyBot
 
         protected override StageResult Init()
         {
-            Contract.Requires(InputFile != null && OutputFile == null);
+            Contract.Requires(InputFile != null && TrainingFile != null && TestFile != null);
+
             if (!InputFile.CheckExistsAndReportError(L))
             {
                 return StageResult.INPUT_ERROR;
             }
-            if (OutputFile.Exists && !OverwriteOutputFile)
+
+            if (TrainingFile.Exists && !OverwriteOutputFile)
             {
-                Error("The output file {0} exists but the overwrite option was not specified.", OutputFile.FullName);
+                Error("The training data file {0} exists but the overwrite option was not specified.", OutputFile.FullName);
                 return StageResult.OUTPUT_ERROR;
             }
-            else if (OutputFile.Exists)
+            else if (TrainingFile.Exists)
             {
-                Warn("Output file {0} exists and will be overwritten.", OutputFile.FullName);
+                Warn("Training data file {0} exists and will be overwritten.", OutputFile.FullName);
             }
 
-            return StageResult.SUCCESS;
-        }
-
-        protected override StageResult Save()
-        {
-            Contract.Requires(OutputRecords != null);
-            if (OutputRecords.Count == 0)
+            if (TestFile.Exists && !OverwriteOutputFile)
             {
-                Warn("0 records transformed from file {0}. Not writing to output file.", InputFile.FullName);
-                return StageResult.SUCCESS;
+                Error("The test data file {0} exists but the overwrite option was not specified.", TestFile.FullName);
+                return StageResult.OUTPUT_ERROR;
             }
-            JsonSerializer serializer = new JsonSerializer();
-            serializer.Formatting = Formatting.Indented;
-            using (FileStream fs = new FileStream(OutputFile.FullName, FileMode.Create))
-            using (StreamWriter sw = new StreamWriter(fs, Encoding.UTF8))
+            else if (TestFile.Exists)
             {
-                serializer.Serialize(sw, OutputRecords);
-
+                Warn("Test data file {0} exists and will be overwritten.", TestFile.FullName);
             }
-            Info("Wrote {0} output records to {1}.", OutputRecords.Count, OutputFileName);
+
             return StageResult.SUCCESS;
         }
         #endregion
 
         #region Abstract members
-        public virtual StageResult Transform(int? recordBatchSize = null, int? recordLimit = null, Dictionary<string, string> options = null)
-        {
-            for (int i = 0; i < InputRecords.Count; i++)
-            {
-                OutputRecords.Add(TransformInputToOutput(L, StageOptions, InputRecords[i]));
-            }
-            Info("Transformed {0} records with maximum {1} features to {2}.", OutputRecords.Count, OutputRecords.Max(r => r.Features.Count), OutputFileName);
-            return StageResult.SUCCESS;
-        }
-
-        protected abstract Func<ILogger, Dictionary<string, object>, TRecord, TRecord> TransformInputToOutput { get; }
+        protected abstract Func<ILogger, StreamWriter, List<TRecord>, Dictionary<string, object>, StageResult> WriteFileStream { get; }
         #endregion
 
         #region Properties
-        public List<TRecord> InputRecords { get; protected set; } = new List<TRecord>();
+        public FileInfo TrainingFile => TrainingFileName.Empty() ? null : new FileInfo(TrainingFileName);
 
-        public List<TRecord> OutputRecords { get; protected set; } = new List<TRecord>();
+        public FileInfo TestFile => TestFileName.Empty() ? null : new FileInfo(TestFileName);
+
+        public List<TRecord> TrainingRecords { get; protected set; } = new List<TRecord>();
+
+        public List<TRecord> TestRecords { get; protected set; } = new List<TRecord>();
+
+        public List<TRecord> InputRecords { get; protected set; } = new List<TRecord>();
 
         public Dictionary<string, object> ReaderOptions { get; } = new Dictionary<string, object>();
 
         public Dictionary<string, object> WriterOptions { get; } = new Dictionary<string, object>();
 
-        [Option('i', "input-file", Required = true, HelpText = "Input data file name for transformation.")]
+        [Option('i', "input-file", Required = true, HelpText = "Input data file name for loading.")]
         public string InputFileName { get; set; }
 
-        [Option('f', "output-file", Required = true, HelpText = "Output data file name for transformed dataset.")]
-        public string OutputFileName { get; set; }
+        [Option('f', "output-file", Required = true, HelpText = "Output data file name prefix. Training and test data files will be created with this prefix.")]
+        public string OutputFilePrefix { get; set; }
 
-        [Option('w', "overwrite", Required = false, Default = false, HelpText = "Ovewrite existing output data file if it exists.")]
+        [Option('i', "train-file", Required = true, HelpText = "Input file name with training data for classifier")]
+        public string TrainingFileName { get; set; }
+
+        [Option('t', "test-file", Required = true, HelpText = "Input file name with test data for classifier")]
+        public string TestFileName { get; set; }
+
+        [Option('s', "split", Required = true, HelpText = "Split the input dataset into training/test datasets with this ratio.", Default = 0)]
+        public int TrainingTestSplit { get; set; }
+
+        [Option('w', "overwrite", Required = false, Default = false, HelpText = "Ovewrite existing output data files if they exist.")]
         public bool OverwriteOutputFile { get; set; }
 
         [Option('b', "batch", Required = false, HelpText = "Batch the number of records transformed.", Default = 0)]
@@ -135,6 +113,11 @@ namespace ClassifyBot
         #endregion
 
         #region Methods
+        public virtual StageResult Load(int? recordBatchSize = null, int? recordLimit = null, Dictionary<string, string> options = null)
+        {
+            return StageResult.SUCCESS;
+        }
+
         protected virtual StageResult Read()
         {
             if (InputFile.Extension == ".gz")
@@ -167,7 +150,6 @@ namespace ClassifyBot
                 return StageResult.SUCCESS;
             }
         }
-
         #endregion
     }
 }

@@ -10,13 +10,13 @@ using Serilog;
 
 namespace ClassifyBot
 {
-    public abstract class TransformToCsvFile<TRecord, TFeature> : Transformer<TRecord, TFeature>
+    public abstract class LoadToCsvFile<TRecord, TFeature> : Loader<TRecord, TFeature>
         where TFeature : ICloneable, IComparable, IComparable<TFeature>, IConvertible, IEquatable<TFeature> where TRecord : Record<TFeature>
     {
         #region Constructors
-        public TransformToCsvFile(string delimiter = ",") : base()
+        public LoadToCsvFile(string delimiter = ",") : base()
         {
-            
+            WriterOptions.Add("Delimiter", delimiter);   
         }
         #endregion
 
@@ -26,14 +26,13 @@ namespace ClassifyBot
             using (CsvWriter csv = new CsvWriter(sw))
             {
                 csv.Configuration.HasHeaderRecord = false;
-                csv.Configuration.
                 SetPropFromDict(csv.Configuration.GetType(), csv.Configuration, options);
                 for (int i = 0; i < records.Count(); i++)
                 {
-                    csv.WriteField(records[i].Label);
+                    csv.WriteField(records[i].Labels[0].Item1);
                     for (int f = 0; f < records[i].Features.Count; f++)
                     {
-                        csv.WriteField(records[i].Features[f]);
+                        csv.WriteField(records[i].Features[f].Item2);
                     }
                     csv.NextRecord();
                 }

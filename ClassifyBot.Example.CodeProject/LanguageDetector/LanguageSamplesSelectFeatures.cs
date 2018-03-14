@@ -7,19 +7,18 @@ using Serilog;
 
 namespace ClassifyBot.Example.CodeProject.LanguageDetector
 {
-    [Verb("langdata-to-tsv", HelpText = "Transform extracted language data into a TSV file.")]
-    public class LanguageDataTransformToTsv : TransformToCsvFile<LanguageItem, string>
+    [Verb("langdata-features", HelpText = "Select features from language samples data.")]
+    public class LanguageSamplesSelectFeatures : Transformer<LanguageItem, string>
     {
         #region Constructor
-        public LanguageDataTransformToTsv() : base("\t") {}
+        public LanguageSamplesSelectFeatures() : base() {}
         #endregion
 
         #region Overriden members
         protected override Func<ILogger, Dictionary<string, object>, LanguageItem, LanguageItem> TransformInputToOutput { get; } = (logger, options, input) =>
         {
-            string text = input.Features[0].Trim();
-            StringBuilder textBuilder = new StringBuilder(input.Features[0].Trim());
-
+            string text = input.Features[0].Item2.Trim();
+            StringBuilder textBuilder = new StringBuilder(input.Features[0].Item2.Trim());
             Regex doubleQuote = new Regex("\\\".*?\\\"", RegexOptions.Compiled | RegexOptions.Multiline);
             Regex singleQuote = new Regex("\\\'.*?\\\"", RegexOptions.Compiled | RegexOptions.Multiline);
             text = text.Replace('\t', ' '); //Remove tabs
@@ -29,14 +28,14 @@ namespace ClassifyBot.Example.CodeProject.LanguageDetector
             text = doubleQuote.Replace(text, new MatchEvaluator(ReplaceStringLiteral)); //Remove any doublequote string literals
             text = text.Replace("&lt;", "<");
             text = text.Replace("&gt;", ">");
-            LanguageItem output = new LanguageItem(input.Id.Value, input.Label, text);
+            LanguageItem output = new LanguageItem(input._Id.Value, input.Labels[0].Item1, text);
             if (Regex.IsMatch(text, "{.*?}"))
             {
-                output.Features.Add(FeatureMap[1]);
+                output.Features.Add((FeatureMap[1], FeatureMap[1]));
             }
             if (Regex.IsMatch(text, "; "))
             {
-                output.Features.Add(FeatureMap[2]);
+                output.Features.Add((FeatureMap[2], FeatureMap[2]));
             }
             return output;
         };
@@ -54,6 +53,8 @@ namespace ClassifyBot.Example.CodeProject.LanguageDetector
             FeatureMap.Add(2, "HAS_SEMICOLON_TOKEN");
             return StageResult.SUCCESS;
         }
+
+        
         #endregion
 
         #region Methods

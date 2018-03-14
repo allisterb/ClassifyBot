@@ -56,7 +56,7 @@ namespace ClassifyBot
             }
             else
             {
-                return StageResult.CREATED;
+                return StageResult.SUCCESS;
             }
         }
         #endregion
@@ -71,7 +71,7 @@ namespace ClassifyBot
         [Option('f', "output-file", Required = true, HelpText = "Output data file name for dataset. A file with .json or .json.gz extension will be created with this name.")]
         public string OutputFileName { get; set; }
 
-        [Option('o', "overwrite", Required = false, Default = false, HelpText = "Ovewrite existing output data file if it exists.")]
+        [Option('w', "overwrite", Required = false, Default = false, HelpText = "Ovewrite existing output data file if it exists.")]
         public bool OverwriteOutputFile { get; set; }
 
         [Option('a', "append", Required = false, Default = false, HelpText = "Append extracted data to existing output file if it exists.")]
