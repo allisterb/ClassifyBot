@@ -61,9 +61,5 @@ namespace ClassifyBot
             }
         }
         #endregion
-
-        #region Properties
-
-        #endregion
     }
 }

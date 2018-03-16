@@ -84,11 +84,22 @@ namespace ClassifyBot
             }
             JsonSerializer serializer = new JsonSerializer();
             serializer.Formatting = Formatting.Indented;
-            using (FileStream fs = new FileStream(OutputFile.FullName, FileMode.Create))
-            using (StreamWriter sw = new StreamWriter(fs, Encoding.UTF8))
+            if (!CompressOutputFile)
             {
-                serializer.Serialize(sw, OutputRecords);
-
+                using (FileStream fs = new FileStream(OutputFile.FullName, FileMode.Create))
+                using (StreamWriter sw = new StreamWriter(fs, Encoding.UTF8))
+                {
+                    serializer.Serialize(sw, OutputRecords);
+                }
+            }
+            else
+            {
+                using (FileStream fs = new FileStream(OutputFile.FullName, FileMode.Create))
+                using (GZipStream gzs = new GZipStream(fs, CompressionMode.Compress))
+                using (StreamWriter sw = new StreamWriter(gzs, Encoding.UTF8))
+                {
+                    serializer.Serialize(sw, OutputRecords);
+                }
             }
             Info("Wrote {0} output records to {1}.", OutputRecords.Count, OutputFileName);
             return StageResult.SUCCESS;
@@ -110,28 +121,9 @@ namespace ClassifyBot
         #endregion
 
         #region Properties
-        public List<TRecord> InputRecords { get; protected set; } = new List<TRecord>();
+        public virtual List<TRecord> InputRecords { get; protected set; } = new List<TRecord>();
 
-        public List<TRecord> OutputRecords { get; protected set; } = new List<TRecord>();
-
-        public Dictionary<string, object> ReaderOptions { get; } = new Dictionary<string, object>();
-
-        public Dictionary<string, object> WriterOptions { get; } = new Dictionary<string, object>();
-
-        [Option('i', "input-file", Required = true, HelpText = "Input data file name for transformation.")]
-        public string InputFileName { get; set; }
-
-        [Option('f', "output-file", Required = true, HelpText = "Output data file name for transformed dataset.")]
-        public string OutputFileName { get; set; }
-
-        [Option('w', "overwrite", Required = false, Default = false, HelpText = "Ovewrite existing output data file if it exists.")]
-        public bool OverwriteOutputFile { get; set; }
-
-        [Option('b', "batch", Required = false, HelpText = "Batch the number of records transformed.", Default = 0)]
-        public int RecordBatchSize { get; set; }
-
-        [Option('l', "records", Required = false, HelpText = "Limit the number of records transformed.", Default = 0)]
-        public int RecordLimitSize { get; set; }
+        public virtual List<TRecord> OutputRecords { get; protected set; } = new List<TRecord>();
         #endregion
 
         #region Methods

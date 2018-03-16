@@ -13,8 +13,21 @@ namespace ClassifyBot
 {
     public abstract class Loader<TRecord, TFeature> : Stage, ILoader<TRecord, TFeature> where TFeature : ICloneable, IComparable, IComparable<TFeature>, IConvertible, IEquatable<TFeature> where TRecord : Record<TFeature>
     {
+        #region Constructors
+        public Loader()
+        {
+            Contract.Requires(!OutputFilePrefix.Empty());
+            Contract.Requires(!InputFileName.Empty());
+        }
+        #endregion
+
         #region Overidden members
         public override FileInfo InputFile => InputFileName.Empty() ? null : new FileInfo(InputFileName);
+
+        [Option(Hidden = true)]
+        public override string OutputFileName => null;
+
+        public override FileInfo OutputFile => null;
 
         public override StageResult Run()
         {
@@ -28,6 +41,10 @@ namespace ClassifyBot
                 return r;
             }
             if ((r = Load()) != StageResult.SUCCESS)
+            {
+                return r;
+            }
+            if ((r = Save()) != StageResult.SUCCESS)
             {
                 return r;
             }
@@ -46,12 +63,12 @@ namespace ClassifyBot
 
             if (TrainingFile.Exists && !OverwriteOutputFile)
             {
-                Error("The training data file {0} exists but the overwrite option was not specified.", OutputFile.FullName);
+                Error("The training data file {0} exists but the overwrite option was not specified.", TrainingFile.FullName);
                 return StageResult.OUTPUT_ERROR;
             }
             else if (TrainingFile.Exists)
             {
-                Warn("Training data file {0} exists and will be overwritten.", OutputFile.FullName);
+                Warn("Training data file {0} exists and will be overwritten.", TrainingFile.FullName);
             }
 
             if (TestFile.Exists && !OverwriteOutputFile)
@@ -66,6 +83,27 @@ namespace ClassifyBot
 
             return StageResult.SUCCESS;
         }
+
+        protected override StageResult Save()
+        {
+            Contract.Requires(TrainingRecords.Count > 0);
+            Contract.Requires(TestRecords.Count > 0);
+            StageResult r = StageResult.OUTPUT_ERROR;
+            if ((r = Save(TrainingFile, TrainingRecords)) != StageResult.SUCCESS)
+            {
+                return StageResult.OUTPUT_ERROR;
+            }
+            Info("Wrote {0} training records to file {1}.", TrainingRecords.Count, TrainingFile.FullName);
+            if ((r = Save(TestFile, TestRecords)) != StageResult.SUCCESS)
+            {
+                return StageResult.OUTPUT_ERROR;
+            }
+            Info("Wrote {0} test records to file {1}.", TestRecords.Count, TestFile.FullName);
+            return StageResult.SUCCESS;
+        }
+
+        protected override StageResult Cleanup() => StageResult.SUCCESS;
+
         #endregion
 
         #region Abstract members
@@ -83,38 +121,32 @@ namespace ClassifyBot
 
         public List<TRecord> InputRecords { get; protected set; } = new List<TRecord>();
 
-        public Dictionary<string, object> ReaderOptions { get; } = new Dictionary<string, object>();
+        public string TrainingFileName => OutputFilePrefix + ".train.tsv";
 
-        public Dictionary<string, object> WriterOptions { get; } = new Dictionary<string, object>();
+        public string TestFileName => OutputFilePrefix + ".test.tsv";
 
-        [Option('i', "input-file", Required = true, HelpText = "Input data file name for loading.")]
-        public string InputFileName { get; set; }
-
-        [Option('f', "output-file", Required = true, HelpText = "Output data file name prefix. Training and test data files will be created with this prefix.")]
+        [Option('p', "output-prefix", Required = true, HelpText = "Output data file name prefix. Training and test data files will be created with this prefix.")]
         public string OutputFilePrefix { get; set; }
 
-        [Option('i', "train-file", Required = true, HelpText = "Input file name with training data for classifier")]
-        public string TrainingFileName { get; set; }
-
-        [Option('t', "test-file", Required = true, HelpText = "Input file name with test data for classifier")]
-        public string TestFileName { get; set; }
-
-        [Option('s', "split", Required = true, HelpText = "Split the input dataset into training/test datasets with this ratio.", Default = 0)]
+        [Option('s', "split", Required = false, HelpText = "Split the input dataset into training/test datasets with this ratio.", Default = 8)]
         public int TrainingTestSplit { get; set; }
-
-        [Option('w', "overwrite", Required = false, Default = false, HelpText = "Ovewrite existing output data files if they exist.")]
-        public bool OverwriteOutputFile { get; set; }
-
-        [Option('b', "batch", Required = false, HelpText = "Batch the number of records transformed.", Default = 0)]
-        public int RecordBatchSize { get; set; }
-
-        [Option('l', "records", Required = false, HelpText = "Limit the number of records transformed.", Default = 0)]
-        public int RecordLimitSize { get; set; }
         #endregion
 
         #region Methods
         public virtual StageResult Load(int? recordBatchSize = null, int? recordLimit = null, Dictionary<string, string> options = null)
         {
+            Contract.Requires(InputRecords.Count > 0);
+            float s = TrainingTestSplit;
+            float c = InputRecords.Count;
+            int splitCount = (int)((1f / s) * c);
+            for (int i = 0; i < splitCount; i++)
+            {
+                TestRecords.Add(InputRecords[i]);
+            }
+            for (int i = splitCount; i < InputRecords.Count; i++)
+            {
+                TrainingRecords.Add(InputRecords[i]);
+            }
             return StageResult.SUCCESS;
         }
 
@@ -149,6 +181,36 @@ namespace ClassifyBot
                 Info("Read {0} records from {1}.", InputRecords.Count, InputFile.FullName);
                 return StageResult.SUCCESS;
             }
+        }
+
+        protected virtual StageResult Save(FileInfo file, List<TRecord> records)
+        {
+            Contract.Requires(records != null);
+            if (records.Count == 0)
+            {
+                Error("0 records found to write to file {0}.", file.FullName);
+                return StageResult.INPUT_ERROR;
+            }
+            StageResult r = StageResult.OUTPUT_ERROR;
+            if (!CompressOutputFile)
+            {
+                using (FileStream fs = new FileStream(file.FullName, FileMode.Create))
+                using (StreamWriter sw = new StreamWriter(fs, Encoding.UTF8))
+                {
+                    r = WriteFileStream(L, sw, records, WriterOptions);
+                }
+            }
+            else
+            {
+                using (FileStream fs = new FileStream(file.FullName, FileMode.Create))
+                using (GZipStream gzs = new GZipStream(fs, CompressionMode.Compress))
+                using (StreamWriter sw = new StreamWriter(gzs, Encoding.UTF8))
+                {
+                    r = WriteFileStream(L, sw, records, WriterOptions);
+                }
+
+            }
+            return r;
         }
         #endregion
     }

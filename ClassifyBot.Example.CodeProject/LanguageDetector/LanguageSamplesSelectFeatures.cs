@@ -29,14 +29,16 @@ namespace ClassifyBot.Example.CodeProject.LanguageDetector
             text = text.Replace("&lt;", "<");
             text = text.Replace("&gt;", ">");
             LanguageItem output = new LanguageItem(input._Id.Value, input.Labels[0].Item1, text);
+            string lexicalFeature = string.Empty;
             if (Regex.IsMatch(text, "{.*?}"))
             {
-                output.Features.Add((FeatureMap[1], FeatureMap[1]));
+                lexicalFeature = lexicalFeature += FeatureMap[1] + " ";
             }
             if (Regex.IsMatch(text, "; "))
             {
-                output.Features.Add((FeatureMap[2], FeatureMap[2]));
+                lexicalFeature = lexicalFeature += FeatureMap[2] + " ";
             }
+            output.Features.Add(("LEXICAL", lexicalFeature.Trim()));
             return output;
         };
 
