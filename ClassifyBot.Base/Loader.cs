@@ -17,18 +17,12 @@ namespace ClassifyBot
         public Loader()
         {
             Contract.Requires(!OutputFilePrefix.Empty());
-            Contract.Requires(!InputFileName.Empty());
+            Contract.Requires(!TrainingFileName.Empty());
+            Contract.Requires(!TestFileName.Empty());
         }
         #endregion
 
         #region Overidden members
-        public override FileInfo InputFile => InputFileName.Empty() ? null : new FileInfo(InputFileName);
-
-        [Option(Hidden = true)]
-        public override string OutputFileName => null;
-
-        public override FileInfo OutputFile => null;
-
         public override StageResult Run()
         {
             StageResult r;
@@ -115,6 +109,8 @@ namespace ClassifyBot
 
         public FileInfo TestFile => TestFileName.Empty() ? null : new FileInfo(TestFileName);
 
+        public FileInfo InputFile => InputFileName.Empty() ? null : new FileInfo(InputFileName);
+
         public List<TRecord> TrainingRecords { get; protected set; } = new List<TRecord>();
 
         public List<TRecord> TestRecords { get; protected set; } = new List<TRecord>();
@@ -124,6 +120,9 @@ namespace ClassifyBot
         public string TrainingFileName => OutputFilePrefix + ".train.tsv";
 
         public string TestFileName => OutputFilePrefix + ".test.tsv";
+
+        [Option('i', "input-file", Required = true, HelpText = "Input data file name for stage operation.")]
+        public virtual string InputFileName { get; set; }
 
         [Option('p', "output-prefix", Required = true, HelpText = "Output data file name prefix. Training and test data files will be created with this prefix.")]
         public string OutputFilePrefix { get; set; }

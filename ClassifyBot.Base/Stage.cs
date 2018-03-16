@@ -21,8 +21,6 @@ namespace ClassifyBot
         #endregion
 
         #region Abstract members
-        public abstract FileInfo InputFile { get; }
-        public abstract FileInfo OutputFile { get; }
         public abstract StageResult Run();
         protected abstract StageResult Init();
         protected abstract StageResult Save();
@@ -37,6 +35,14 @@ namespace ClassifyBot
         public bool Initialized { get; protected set; } = false;
 
         public Dictionary<string, object> AdditionalOptions => ParseAdditionalOptions(AdditionalOptionsString);
+
+        public List<FileInfo> InputFiles { get; protected set; } = new List<FileInfo>();
+
+        public List<FileInfo> OutputFiles { get; protected set; } = new List<FileInfo>();
+
+        public Dictionary<string, object> ReaderOptions { get; } = new Dictionary<string, object>();
+
+        public Dictionary<string, object> WriterOptions { get; } = new Dictionary<string, object>();
 
         public static SortedList<int, string> FeatureMap { get; } = new SortedList<int, string>();
 
@@ -55,17 +61,6 @@ namespace ClassifyBot
         //[Option("explicit", HelpText = "Enable explicit loading of assemblies.", Required = false)]
         public string ExplicitAssemblies { get; set; }
 
-        public string[] CompressedFileExtensions = new string[3] { ".zip", ".tar.gz", ".tar.bz" };
-
-        public Dictionary<string, object> ReaderOptions { get; } = new Dictionary<string, object>();
-
-        public Dictionary<string, object> WriterOptions { get; } = new Dictionary<string, object>();
-
-        [Option('i', "input-file", Required = true, HelpText = "Input data file name for stage operation.")]
-        public virtual string InputFileName { get; set; }
-
-        [Option('f', "output-file", Required = true, HelpText = "Output data file name for stage operation.")]
-        public virtual string OutputFileName { get; set; }
 
         [Option('w', "overwrite", Required = false, Default = false, HelpText = "Ovewrite existing output data file if it exists.")]
         public virtual bool OverwriteOutputFile { get; set; }
@@ -132,6 +127,10 @@ namespace ClassifyBot
             r = rtest;
             return r == StageResult.SUCCESS ? true : false;
         }
+        #endregion
+
+        #region Fields
+        protected static string[] CompressedFileExtensions = new string[3] { ".zip", ".tar.gz", ".tar.bz" };
         #endregion
     }
 }

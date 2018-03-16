@@ -32,13 +32,6 @@ namespace ClassifyBot
         protected abstract Func<ILogger, StreamReader, IEnumerable<TRecord>> ReadFileStream { get; }
         #endregion
 
-        #region Properties
-        [Option('i', "input-file", Required = true, HelpText = "Input data file name for dataset. A file with a .zip or .gz or .tar.gz extension will be automatically decompressed.")]
-        public virtual string InputFileName { get; set; }
-
-        public override FileInfo InputFile => InputFileName.Empty() ? null : new FileInfo(InputFileName);
-        #endregion
-
         #region Implemented members
         public override StageResult Extract(int? recordBatchSize = null, int? recordLimit = null, Dictionary<string, string> options = null)
         {

@@ -27,10 +27,6 @@ namespace ClassifyBot
         #endregion
 
         #region Overriden members
-        public override FileInfo InputFile => InputFileName.Empty() ? null : new FileInfo(InputFileName);
-
-        public override FileInfo OutputFile => OutputFileName.Empty() ? null : new FileInfo(OutputFileName);
-
         public override StageResult Run()
         {
             StageResult r;
@@ -121,9 +117,19 @@ namespace ClassifyBot
         #endregion
 
         #region Properties
+        public FileInfo InputFile => InputFileName.Empty() ? null : new FileInfo(InputFileName);
+
+        public FileInfo OutputFile => OutputFileName.Empty() ? null : new FileInfo(OutputFileName);
+
         public virtual List<TRecord> InputRecords { get; protected set; } = new List<TRecord>();
 
         public virtual List<TRecord> OutputRecords { get; protected set; } = new List<TRecord>();
+
+        [Option('i', "input-file", Required = true, HelpText = "Input data file name for stage operation.")]
+        public virtual string InputFileName { get; set; }
+
+        [Option('f', "output-file", Required = true, HelpText = "Output data file name for stage operation.")]
+        public virtual string OutputFileName { get; set; }
         #endregion
 
         #region Methods

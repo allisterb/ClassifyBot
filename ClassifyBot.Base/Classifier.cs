@@ -20,7 +20,6 @@ namespace ClassifyBot
         }
         #endregion
 
-
         #region Properties
         public FileInfo TrainingFile { get; protected set; }
 
@@ -28,23 +27,20 @@ namespace ClassifyBot
 
         public FileInfo ModelFile { get; protected set; }
 
-        [Option('i', "training-file", Required = true, HelpText = "Input file name with training data for classifier")]
+        [Option('t', "training-file", Required = true, HelpText = "Input file name with training data for classifier")]
         public string TrainingFileName { get; set; }
 
-        [Option('t', "training-file", Required = true, HelpText = "Input file name with test data for classifier")]
+        [Option('e', "training-file", Required = true, HelpText = "Input file name with test data for classifier")]
         public string TestFileName { get; set; }
 
         [Option('m', "model-file", Required = true, HelpText = "Output file name for classifier model.")]
         public string ModelFileName { get; set; }
 
-        [Value(0, Required = true, HelpText = "The classifier operation to perform: load, train, or test.")]
-        public string Operation { get; set; }
-
-        public static string[] Operations { get; } = new string[3] { "load", "train", "test" };
+        [Option("train", HelpText = "Train a classifier model using the training and test data files.", SetName = "op")]
+        public bool TrainOp { get; set; }
         #endregion
 
-        #region Members
-        public abstract StageResult Load(Func<int> split, Dictionary<string, string> options = null);
+        #region Abstract members
         public abstract StageResult Train(Dictionary<string, string> options = null);
         #endregion
     }
