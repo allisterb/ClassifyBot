@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+
 using System.Text;
 using System.Threading.Tasks;
 
@@ -18,10 +20,9 @@ namespace ClassifyBot
             {
                 throw new ArgumentException("The cmdText parameter must not be null and empty.");
             }
-            CommandText = cmdText;
-            CommandOptions = cmdOptions;
-            shell = new MeSh.Shell(o => { });
             this.WorkingDirectory = workingDirectory;
+            CommandText = cmdText;
+            CommandOptions = cmdOptions.ToList();
             shell = new MeSh.Shell(o => o.WorkingDirectory(WorkingDirectory));
         }
         #endregion
@@ -29,7 +30,7 @@ namespace ClassifyBot
         #region Properties
         public string CommandText { get; protected set; }
         public string WorkingDirectory { get; protected set; }
-        public object[] CommandOptions { get; protected set; }
+        public List<object> CommandOptions { get; protected set; }
         public Task CommandTask { get; protected set; }
         public bool WorkingDirectoryExists => !WorkingDirectory.Empty() ? Directory.Exists(WorkingDirectory) : false;
 
@@ -99,7 +100,7 @@ namespace ClassifyBot
         {
             try
             {
-                meshCommand = shell.Run(CommandText, CommandOptions);
+                meshCommand = shell.Run(CommandText, CommandOptions.ToArray());
                 return CommandTask = meshCommand.Task;
             }
             catch (Exception e)

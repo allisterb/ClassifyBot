@@ -14,6 +14,8 @@ namespace ClassifyBot
         #region Overriden members
         public override StageResult Train(Dictionary<string, string> options = null)
         {
+            javaCommand = new JavaCommand(JavaHome, ClassPath, "edu.stanford.nlp.classify.ColumnDataClassifier", "-mx16000m");
+            Task c = javaCommand.Run();
             return StageResult.SUCCESS;
         }
         
@@ -83,9 +85,9 @@ namespace ClassifyBot
                 if (c.IsCompleted && !version.Success)
                 {
                     Error("Could not detect Java version: {0}", version.StandardError);
+                    return StageResult.FAILED;
                 }
             }
-    
             return StageResult.SUCCESS;
 
         }
