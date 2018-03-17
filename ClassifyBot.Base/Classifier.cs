@@ -74,7 +74,7 @@ namespace ClassifyBot
 
         public FileInfo ModelFile => ModelFileName.Empty() ? null : new FileInfo(ModelFileName);
 
-        [Option('t', "training-file", Required = true, HelpText = "Input file name with training data for classifier")]
+        [Option('t', "train-file", Required = true, HelpText = "Input file name with training data for classifier")]
         public string TrainingFileName { get; set; }
 
         [Option('e', "test-file", Required = true, HelpText = "Input file name with test data for classifier")]

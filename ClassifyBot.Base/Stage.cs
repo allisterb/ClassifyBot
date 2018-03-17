@@ -8,7 +8,9 @@ using System.Text.RegularExpressions;
 
 
 using CommandLine;
+using MeSh = Medallion.Shell;
 using Serilog;
+
 namespace ClassifyBot
 {
     public abstract class Stage
@@ -126,6 +128,46 @@ namespace ClassifyBot
         {
             r = rtest;
             return r == StageResult.SUCCESS ? true : false;
+        }
+
+        protected bool CheckCommandStartedAndReport(Command c)
+        {
+            if (!c.Started)
+            {
+                if (c.Exception != null)
+                {
+                    Error(c.Exception, "The command {0} did not start.", c.Text);
+                }
+                else
+                {
+                    Error(c.Exception, "The command {0} did not start.", c.Text);
+                }
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
+        protected bool CheckCommandSuccessAndReport(Command c)
+        {
+            if (!c.Success)
+            {
+                if (c.Exception != null)
+                {
+                    Error(c.Exception, "The command {0} failed: {1} {2}", c.Text, c.OutputText, c.ErrorText);
+                }
+                else
+                {
+                    Error(c.Exception, "The command {0} failed: {1} {2}", c.Text, c.OutputText, c.ErrorText);
+                }
+                return false;
+            }
+            else
+            {
+                return true;
+            }
         }
         #endregion
 

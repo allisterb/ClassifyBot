@@ -14,8 +14,24 @@ namespace ClassifyBot
         #region Overriden members
         public override StageResult Train(Dictionary<string, string> options = null)
         {
-            javaCommand = new JavaCommand(JavaHome, ClassPath, "edu.stanford.nlp.classify.ColumnDataClassifier", "-mx16000m");
+            javaCommand = new JavaCommand(JavaHome, ClassPath, "edu.stanford.nlp.classify.ColumnDataClassifier", "-mx16000m", 
+                "-trainFile", TrainingFile.FullName, "-testFile", TestFile.FullName);
             Task c = javaCommand.Run();
+            if (!CheckCommandStartedAndReport(javaCommand))
+            {
+                return StageResult.FAILED;
+            }
+            c.Wait();
+            if (!CheckCommandSuccessAndReport(javaCommand))
+            {
+                return StageResult.FAILED;
+            }
+
+            if (javaCommand.OutputText.ToLower().Contains("usage") || javaCommand.ErrorText.ToLower().Contains("usage"))
+            {
+                Error("Classifier parameters are incorrect. Command output: {0} {1}", javaCommand.OutputText.Replace(Environment.NewLine, " "), javaCommand.ErrorText.Replace(Environment.NewLine, " "));
+                return StageResult.FAILED;
+            }
             return StageResult.SUCCESS;
         }
         
@@ -70,7 +86,7 @@ namespace ClassifyBot
 
             Command version = new Command(Path.Combine(JavaHome, "bin"), "java", "-version");
             Task c = version.Run();
-            if (!version.CommandStarted)
+            if (!version.Started)
             {
                 Error("Could not detect Java version.");
                 return StageResult.FAILED;
@@ -80,11 +96,11 @@ namespace ClassifyBot
                 c.Wait();
                 if (c.IsCompleted && version.Success)
                 {
-                    Info(version.StandardError);
+                    Info(version.ErrorText.Replace(Environment.NewLine, " "));
                 }
                 if (c.IsCompleted && !version.Success)
                 {
-                    Error("Could not detect Java version: {0}", version.StandardError);
+                    Error("Could not detect Java version: {0}", version.OutputText);
                     return StageResult.FAILED;
                 }
             }
@@ -110,6 +126,10 @@ namespace ClassifyBot
 
         [Option('C', "class-path", Required = false, HelpText = "The path to the Stanford NLP Classifier jar file. If this is not specified then the JAVA_HOME environment variable will be used")]
         public virtual string ClassPath { get; set; }
+        #endregion
+
+        #region Methods
+
         #endregion
 
         #region Fields

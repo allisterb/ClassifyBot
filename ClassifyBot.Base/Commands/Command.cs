@@ -21,20 +21,20 @@ namespace ClassifyBot
                 throw new ArgumentException("The cmdText parameter must not be null and empty.");
             }
             this.WorkingDirectory = workingDirectory;
-            CommandText = cmdText;
+            Text = cmdText;
             CommandOptions = cmdOptions.ToList();
             shell = new MeSh.Shell(o => o.WorkingDirectory(WorkingDirectory));
         }
         #endregion
 
         #region Properties
-        public string CommandText { get; protected set; }
+        public string Text { get; protected set; }
         public string WorkingDirectory { get; protected set; }
         public List<object> CommandOptions { get; protected set; }
-        public Task CommandTask { get; protected set; }
+        public Task Task { get; protected set; }
         public bool WorkingDirectoryExists => !WorkingDirectory.Empty() ? Directory.Exists(WorkingDirectory) : false;
 
-        public bool CommandStarted => meshCommand != null;
+        public bool Started => meshCommand != null;
 
         public Exception Exception { get; protected set; }
         
@@ -46,7 +46,7 @@ namespace ClassifyBot
                 {
                     return _Success.Value;
                 }
-                else if (CommandTask.IsCompleted)
+                else if (Task.IsCompleted)
                 {
                     _Success = CommandResult.Success;
                     return _Success.Value;
@@ -58,19 +58,19 @@ namespace ClassifyBot
             }
         }
 
-        public string StandardOutput => CommandResult?.StandardOutput;
+        public string OutputText => CommandResult?.StandardOutput;
 
-        public string StandardError => CommandResult?.StandardError;
+        public string ErrorText => CommandResult?.StandardError;
 
         protected MeSh.CommandResult CommandResult
         {
             get
             {
-                if (!CommandStarted)
+                if (!Started)
                 {
                     throw new InvalidOperationException("The command has not started.");
                 }
-                else if (CommandTask.IsCanceled || CommandTask.IsFaulted)
+                else if (Task.IsCanceled || Task.IsFaulted)
                 {
                     return null;
                 }
@@ -87,7 +87,7 @@ namespace ClassifyBot
                     catch (Exception e)
                     {
                         Exception = e;
-                        L.Error(e, "Exception thrown running command {0}.", CommandText);
+                        L.Error(e, "Exception thrown running command {0}.", Text);
                     }
                     return commandResult;
                 }
@@ -100,18 +100,20 @@ namespace ClassifyBot
         {
             try
             {
-                meshCommand = shell.Run(CommandText, CommandOptions.ToArray());
-                return CommandTask = meshCommand.Task;
+                meshCommand = shell.Run(Text, CommandOptions.ToArray());
+                return Task = meshCommand.Task;
             }
             catch (Exception e)
             {
                 Exception = e;
-                L.Error(e, "An exception was thrown attempting to execute command {0}.", CommandText);
+                L.Error(e, "An exception was thrown attempting to execute command {0}.", Text);
                 _Success = false;
-                return CommandTask = Task.FromException(e);
+                return Task = Task.FromException(e);
             }
             
         }
+
+
         #endregion
 
         #region Fields
