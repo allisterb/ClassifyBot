@@ -10,7 +10,7 @@ using HtmlAgilityPack;
 
 namespace ClassifyBot.Example.CodeProject.LanguageDetector
 {
-    [Verb("extract-langdata-local", HelpText = "Extract language samples data from local zip file.")]
+    [Verb("langdata-extract-local", HelpText = "Extract language samples data from local zip file.")]
     public class LanguageSamplesLocalExtractor : FileExtract<LanguageItem, string>
     {
         #region Constructors

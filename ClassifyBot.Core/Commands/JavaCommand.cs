@@ -5,13 +5,14 @@ using System.Text;
 
 using Serilog;
 
-namespace ClassifyBot.Commands
+namespace ClassifyBot
 {
     public class JavaCommand : Command
     {
         #region Constructors
-        public JavaCommand(string classPath, params object[] options) : base("java", options)
+        public JavaCommand(string javaHome, string classPath, params object[] options) : base(javaHome, "java", options)
         {
+            _Java_Home = javaHome;
             this.ClassPath = classPath;
             if (Java_Home_Exists)
             {
@@ -23,14 +24,6 @@ namespace ClassifyBot.Commands
                 string javaCommand = "java";
                 CommandText = "{0} -cp {1} {2}".F(javaCommand, ClassPath, CommandOptions).Trim();
             }
-        }
-
-        public JavaCommand(string java_home, string classPath, params object[] options) : this("java", options)
-        {
-            _Java_Home = java_home;
-            string javaCommand = Path.Combine(Java_Home, "bin", "java");
-            CommandText = "{0} -cp {1} {2}".F(javaCommand, ClassPath, CommandOptions).Trim();
-
         }
         #endregion
 
@@ -57,7 +50,6 @@ namespace ClassifyBot.Commands
         #endregion
 
         #region Fields
-        private static ILogger L = Log.ForContext<JavaCommand>();
         private static string _Java_Home;
         #endregion
     }

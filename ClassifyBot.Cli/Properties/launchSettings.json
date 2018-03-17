@@ -2,7 +2,7 @@
   "profiles": {
     "ClassifyBot.Cli": {
       "commandName": "Project",
-      "commandLineArgs": "extract-langdata-local -i ..\\data\\LanguageSamples.zip -f ..\\data\\LanguageSamples.json"
+      "commandLineArgs": "langdata-train -J  \"C:\\Java\\jdk9\" -C  \"C:\\Java\\stanford-corenlp-full-2016-10-31\\stanford-classifier.jar\" -t C:\\Projects\\ClassifyBot\\data\\LanguageSamples.train.tsv -e C:\\Projects\\ClassifyBot\\data\\LanguageSamples.test.tsv -m data\\model.gz"
     }
   }
 }
