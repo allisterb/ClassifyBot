@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
 
 using System.Threading.Tasks;
 using CommandLine;
@@ -15,11 +16,57 @@ namespace ClassifyBot
         public override StageResult Train(Dictionary<string, string> options = null)
         {
             javaCommand = new JavaCommand(JavaHome, ClassPath, "edu.stanford.nlp.classify.ColumnDataClassifier", "-mx16000m", 
-                "-trainFile", TrainingFile.FullName, "-testFile", TestFile.FullName);
+                "-trainFile", TrainingFile.FullName, "-testFile", TestFile.FullName, "-prop", @"C:\Projects\ClassifyBot\data\mood.prop");
             Task c = javaCommand.Run();
             if (!CheckCommandStartedAndReport(javaCommand))
             {
                 return StageResult.FAILED;
+            }
+ 
+
+            ClassifierOutput = new List<string>();
+            foreach (string s in javaCommand.GetOutputAndErrorLines())
+            {
+                if (s.StartsWith("Built this classifier"))
+                {
+                    Match m = builtClassifierRegex.Match(s);
+                    if (m.Success)
+                    {
+                        ClassifierType = m.Groups[1].Value;
+                        NumberofFeatures = Int32.Parse(m.Groups[2].Value);
+                        NumberofClasses = Int32.Parse(m.Groups[3].Value);
+                        NumberofParameters = Int32.Parse(m.Groups[4].Value);
+                        Info("Built classifier {0} with {1} features, {2} classes and {3} parameters.", ClassifierType, NumberofFeatures, NumberofClasses, NumberofParameters);
+                    }
+                    else
+                    {
+                        Error("Could not parse classifier output line: {0}.", s);
+                        return StageResult.FAILED;
+                    }
+                }
+                if (s.StartsWith("Reading dataset from {0} ... done".F(TrainingFile.FullName)))
+                {
+                    ReadTrainingDataset = true;
+                    Match m = readDataSetRegex.Match(s);
+                    if (m.Success)
+                    {
+                        TrainingDataSetItems = Int32.Parse(m.Groups[3].Value);
+                        Info("{0} items in training dataset read in {1} s.", TrainingDataSetItems, m.Groups[2].Value);
+                    }
+                    
+                }
+                if (s.StartsWith("Reading dataset from {0} ... done".F(TestFile.FullName)))
+                {
+                    ReadTestDataset = true;
+                    Match m = readDataSetRegex.Match(s);
+                    if (m.Success)
+                    {
+                        TestDataSetItems = Int32.Parse(m.Groups[3].Value);
+                        Info("{0} items in test dataset read in {1} s.", TestDataSetItems, m.Groups[2].Value);
+                    }
+
+                }
+                ClassifierOutput.Add(s);
             }
             c.Wait();
             if (!CheckCommandSuccessAndReport(javaCommand))
@@ -27,12 +74,6 @@ namespace ClassifyBot
                 return StageResult.FAILED;
             }
 
-            if (javaCommand.OutputText.ToLower().Contains("usage") || javaCommand.ErrorText.ToLower().Contains("usage"))
-            {
-                Error("Classifier parameters are incorrect. Command output: {0}", javaCommand.ErrorText.Replace(Environment.NewLine, " "));
-                return StageResult.FAILED;
-            }
-            Info(javaCommand.OutputText);
             return StageResult.SUCCESS;
         }
         
@@ -63,7 +104,7 @@ namespace ClassifyBot
             }
             if (!Directory.Exists(JavaHome))
             {
-                Error("The Java Home directory specified does not exist: {0}.", JavaHome);
+                Error("The Java home directory specified does not exist: {0}.", JavaHome);
                 return StageResult.INVALID_OPTIONS;
             }
 
@@ -127,6 +168,21 @@ namespace ClassifyBot
 
         [Option('C', "class-path", Required = false, HelpText = "The path to the Stanford NLP Classifier jar file. If this is not specified then the JAVA_HOME environment variable will be used")]
         public virtual string ClassPath { get; set; }
+
+        public List<string> ClassifierOutput { get; protected set; }
+
+
+
+        public int TrainingDataSetItems { get; protected set; }
+        public int TestDataSetItems { get; protected set; }
+        public bool ReadTrainingDataset { get; protected set; }
+
+        public bool ReadTestDataset { get; protected set; }
+
+        public string ClassifierType { get; protected set; }
+        public int NumberofFeatures { get; protected set; }
+        public int NumberofClasses { get; protected set; }
+        public int NumberofParameters { get; protected set; }
         #endregion
 
         #region Methods
@@ -135,6 +191,9 @@ namespace ClassifyBot
 
         #region Fields
         protected JavaCommand javaCommand;
+        private static Regex builtClassifierRegex = new Regex("Built this classifier: (\\S+) with (\\d+) features, (\\d+) classes, and (\\d+) parameters.", RegexOptions.Compiled);
+        private static Regex readDataSetRegex = new Regex("Reading dataset from (.+)done \\[(\\d+\\.\\d+)s, (\\d+) items\\]", RegexOptions.Compiled);
+        private static Regex classRegex = new Regex("Cls (\\S+): TP=(\\d+) FN=(\\d+) FP=(\\d+) TN=(\\d+); Acc 0.(\\d+) P 0.(\\d+) R 0.(\\d+) F1 0.(\\d+)", RegexOptions.Compiled);
         #endregion
     }
 }

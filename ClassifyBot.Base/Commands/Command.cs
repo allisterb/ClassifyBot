@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using ExpectNet;
 using MeSh = Medallion.Shell;
 using Serilog;
 
@@ -110,6 +111,18 @@ namespace ClassifyBot
                 _Success = false;
                 return Task = Task.FromException(e);
             }    
+        }
+
+        public IEnumerable<string> GetOutputAndErrorLines()
+        {
+            if (!Started)
+            {
+                throw new InvalidOperationException("The command has not started.");
+            }
+            else
+            {
+                return meshCommand?.GetOutputAndErrorLines();
+            }
         }
         #endregion
 

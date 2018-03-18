@@ -29,16 +29,34 @@ namespace ClassifyBot.Example.CodeProject.LanguageDetector
             text = text.Replace("&lt;", "<");
             text = text.Replace("&gt;", ">");
             LanguageItem output = new LanguageItem(input._Id.Value, input.Labels[0].Item1, text);
+            
             string lexicalFeature = string.Empty;
             if (Regex.IsMatch(text, "{.*?}"))
             {
                 lexicalFeature = lexicalFeature += FeatureMap[1] + " ";
             }
+            else
+            {
+                lexicalFeature = lexicalFeature += "NO_" + FeatureMap[1] + " ";
+            }
             if (Regex.IsMatch(text, "; "))
             {
                 lexicalFeature = lexicalFeature += FeatureMap[2] + " ";
             }
+            else
+            {
+                lexicalFeature = lexicalFeature += "NO_" + FeatureMap[2] + " ";
+            }
+            if (Regex.IsMatch(text, "<.*?>"))
+            {
+                lexicalFeature = lexicalFeature += FeatureMap[3] + " ";
+            }
+            else
+            {
+                lexicalFeature = lexicalFeature += "NO_" + FeatureMap[3] + " ";
+            }
             output.Features.Add(("LEXICAL", lexicalFeature.Trim()));
+            
             return output;
         };
 
@@ -51,8 +69,9 @@ namespace ClassifyBot.Example.CodeProject.LanguageDetector
         {
             if (!StageResultSuccess(base.Init(), out StageResult r)) return r;
             FeatureMap.Add(0, "TEXT");
-            FeatureMap.Add(1, "HAS_CURLY_BRACES_TOKEN");
-            FeatureMap.Add(2, "HAS_SEMICOLON_TOKEN");
+            FeatureMap.Add(1, "CURLY_BRACES_TOKEN");
+            FeatureMap.Add(2, "SEMICOLON_TOKEN");
+            FeatureMap.Add(3, "MARKUP_TOKEN");
             return StageResult.SUCCESS;
         }
 

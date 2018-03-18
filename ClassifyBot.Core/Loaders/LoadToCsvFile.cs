@@ -18,6 +18,7 @@ namespace ClassifyBot
         {
             WriterOptions.Add("Delimiter", delimiter);
             WriterOptions.Add("HasHeaderRecord", false);
+            WriterOptions.Add("QuoteNoFields", true);
         }
         #endregion
 

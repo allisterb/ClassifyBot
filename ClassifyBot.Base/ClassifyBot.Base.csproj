@@ -15,4 +15,8 @@
     <PackageReference Include="Serilog" Version="2.6.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Expect.NET\Expect.NETStandard\Expect.NETStandard.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -23,30 +23,52 @@ namespace ClassifyBot
         static LoggerConfiguration LoggerConfiguration { get; set; }
         static ILogger L;
         static bool ExitToEnvironment { get; set; }
-        public static bool LogToRollingFile { get; set; }
-        public static bool LogToConsole { get; set; } = true;
-        public static bool Debug { get; set; } = true;
+        public static bool WithLogFile { get; set; } = false;
+        public static string LogFileName { get; set; }
+        public static bool WithoutConsole { get; set; } = false;
+
+        public static bool WithDebugOutput { get; set; } = false;
         #endregion
 
         #region Methods
         public static void RunAndExit(string[] args)
         {
+            if (args.Contains("--with-debug"))
+            {
+                WithDebugOutput = true;
+            }
+            if (args.Contains("--with-logfile"))
+            {
+                WithLogFile = true;
+            }
+            if (args.Contains("--without-console"))
+            {
+                WithoutConsole = true;
+            }
+
             ExitToEnvironment = true;
             LoggerConfiguration = new LoggerConfiguration();
-            if (Debug)
+            if (WithDebugOutput)
             {
                 LoggerConfiguration = LoggerConfiguration.MinimumLevel.Debug();
             }
-            if (LogToConsole)
+            if (!WithoutConsole)
             {
                 LoggerConfiguration = LoggerConfiguration.WriteTo.Console();
             }
-            if (LogToRollingFile)
+            if (WithLogFile)
             {
-                LoggerConfiguration = LoggerConfiguration.WriteTo.RollingFile(Path.Combine("logs", "ClassifyBot") + "-{Date}.log");
+                LogFileName = Path.Combine("logs", "ClassifyBot") + "-{Date}.log";
+                LoggerConfiguration = LoggerConfiguration.WriteTo.RollingFile(LogFileName);
             }
+
             Log.Logger = LoggerConfiguration.CreateLogger();
             L = Log.ForContext<Stage>();
+            if (WithLogFile)
+            {
+                L.Information("Log file is at {0}.", LogFileName);
+            }
+
             StageResult result= Driver.MarshalOptionsForStage(args, out Stage stage, out string optionsHelp);
             if (result == StageResult.INVALID_OPTIONS && stage == null && !optionsHelp.Empty())
             {

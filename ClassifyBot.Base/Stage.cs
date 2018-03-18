@@ -48,11 +48,14 @@ namespace ClassifyBot
 
         public static SortedList<int, string> FeatureMap { get; } = new SortedList<int, string>();
 
-        [Option("debug", HelpText = "Enable debug output.", Required = false)]
-        public bool DebugOutput { get; set; }
+        [Option("with-debug", HelpText = "Enable debug output.", Required = false)]
+        public bool WithDebugOutput { get; set; }
 
-        [Option("verbose", HelpText = "Enable verbose output.", Required = false)]
-        public bool VerboseOutput { get; set; }
+        [Option("with-logfile", HelpText = "Log output to a text file.", Required = false)]
+        public bool WithLogFile { get; set; }
+
+        [Option("without-console", HelpText = "Don't log output to console.", Required = false)]
+        public bool WithoutConsole { get; set; }
 
         [Option('o', "options", HelpText = "Any additional options for the stage in the format opt1=val,opt2=val2...", Required = false)]
         public string AdditionalOptionsString
