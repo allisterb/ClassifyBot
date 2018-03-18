@@ -15,6 +15,12 @@ namespace ClassifyBot
         #region Overriden members
         public override StageResult Train(Dictionary<string, string> options = null)
         {
+            foreach (KeyValuePair<string, object> kv in AdditionalOptions)
+            {
+                ClassifierProperties.Add(kv.Key, kv.Value);
+                Info("Using additional classifier property {0}={1}.", kv.Key, kv.Value);
+            }
+
             ClassifierPropsFile = CreatePropsFile(ClassifierProperties);
             if (!ClassifierPropsFile.Exists)
             {
@@ -191,9 +197,7 @@ namespace ClassifyBot
             {"1.useSplitWords", true },
             {"1.splitWordsRegexp", "\\\\s+" },
             {"2.useSplitWords", true },
-            {"2.splitWordsRegexp", "\\\\s+" },
-            {"1.useSplitWordPairs", true },
-            {"2.useSplitWordPairs", "\\\\s+" }
+            {"2.splitWordsRegexp", "\\\\s+" }
         };
 
         public FileInfo ClassifierPropsFile { get; protected set; }

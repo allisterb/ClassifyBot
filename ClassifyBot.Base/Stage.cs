@@ -106,7 +106,7 @@ namespace ClassifyBot
             {
                 return options;
             }
-            Regex re = new Regex(@"(\w+)\=([^\,]+)", RegexOptions.Compiled);
+            Regex re = new Regex(@"([^\,]+)\=([^\,]+)", RegexOptions.Compiled);
             string[] pairs = o.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
             foreach (string s in pairs)
             {
