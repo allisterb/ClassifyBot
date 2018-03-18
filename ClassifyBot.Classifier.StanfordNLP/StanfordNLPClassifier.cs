@@ -15,15 +15,24 @@ namespace ClassifyBot
         #region Overriden members
         public override StageResult Train(Dictionary<string, string> options = null)
         {
+            ClassifierPropsFile = CreatePropsFile(ClassifierProperties);
+            if (!ClassifierPropsFile.Exists)
+            {
+                Error("Could not find classifier props file {0}.", ClassifierPropsFile.FullName);
+            }
+            else
+            {
+                Debug("Using classifier props file {0}.", ClassifierPropsFile.FullName);
+            }
+
             javaCommand = new JavaCommand(JavaHome, ClassPath, "edu.stanford.nlp.classify.ColumnDataClassifier", "-mx16000m", 
-                "-trainFile", TrainingFile.FullName, "-testFile", TestFile.FullName, "-prop", @"C:\Projects\ClassifyBot\data\mood.prop");
+                "-trainFile", TrainingFile.FullName, "-testFile", TestFile.FullName, "-prop", ClassifierPropsFile.FullName);
             Task c = javaCommand.Run();
             if (!CheckCommandStartedAndReport(javaCommand))
             {
                 return StageResult.FAILED;
             }
  
-
             ClassifierOutput = new List<string>();
             foreach (string s in javaCommand.GetOutputAndErrorLines())
             {
@@ -44,6 +53,7 @@ namespace ClassifyBot
                         return StageResult.FAILED;
                     }
                 }
+
                 if (s.StartsWith("Reading dataset from {0} ... done".F(TrainingFile.FullName)))
                 {
                     ReadTrainingDataset = true;
@@ -55,6 +65,7 @@ namespace ClassifyBot
                     }
                     
                 }
+
                 if (s.StartsWith("Reading dataset from {0} ... done".F(TestFile.FullName)))
                 {
                     ReadTestDataset = true;
@@ -67,7 +78,9 @@ namespace ClassifyBot
 
                 }
                 ClassifierOutput.Add(s);
+                Debug(s);
             }
+
             c.Wait();
             if (!CheckCommandSuccessAndReport(javaCommand))
             {
@@ -152,6 +165,10 @@ namespace ClassifyBot
 
         protected override StageResult Cleanup()
         {
+            if (ClassifierPropsFile != null && ClassifierPropsFile.Exists)
+            {
+                ClassifierPropsFile.Delete();
+            }
             return StageResult.SUCCESS;
         }
 
@@ -169,16 +186,24 @@ namespace ClassifyBot
         [Option('C', "class-path", Required = false, HelpText = "The path to the Stanford NLP Classifier jar file. If this is not specified then the JAVA_HOME environment variable will be used")]
         public virtual string ClassPath { get; set; }
 
+        public virtual Dictionary<string, object> ClassifierProperties { get; } = new Dictionary<string, object>()
+        {
+            {"1.useSplitWords", true },
+            {"1.splitWordsRegexp", "\\\\s+" },
+            {"2.useSplitWords", true },
+            {"2.splitWordsRegexp", "\\\\s+" },
+            {"1.useSplitWordPairs", true },
+            {"2.useSplitWordPairs", "\\\\s+" }
+        };
+
+        public FileInfo ClassifierPropsFile { get; protected set; }
         public List<string> ClassifierOutput { get; protected set; }
-
-
+        
 
         public int TrainingDataSetItems { get; protected set; }
         public int TestDataSetItems { get; protected set; }
         public bool ReadTrainingDataset { get; protected set; }
-
         public bool ReadTestDataset { get; protected set; }
-
         public string ClassifierType { get; protected set; }
         public int NumberofFeatures { get; protected set; }
         public int NumberofClasses { get; protected set; }
@@ -186,7 +211,18 @@ namespace ClassifyBot
         #endregion
 
         #region Methods
-
+        protected FileInfo CreatePropsFile(Dictionary<string, object> properties)
+        {
+            using (TextWriter tw = File.CreateText("classifier.prop"))
+            {
+                foreach(KeyValuePair<string, object> kv in properties)
+                {
+                    tw.WriteLine("{0}={1}".F(kv.Key, kv.Value));
+                }
+            }
+            FileInfo file = new FileInfo("classifier.prop");
+            return  file;
+        }
         #endregion
 
         #region Fields
