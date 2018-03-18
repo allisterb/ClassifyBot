@@ -18,7 +18,7 @@ namespace ClassifyBot.Example.CodeProject.LanguageDetector
         #endregion
 
         #region Overriden members
-        protected override Func<ILogger, StreamReader, IEnumerable<LanguageItem>> ReadFileStream { get; } = (logger, r) =>
+        protected override Func<ILogger, StreamReader, IEnumerable<LanguageItem>> ReadRecordsFromFileStream { get; } = (logger, r) =>
         {
             HtmlDocument doc = new HtmlDocument();
             doc.Load(r);

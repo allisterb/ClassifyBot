@@ -21,7 +21,7 @@ namespace ClassifyBot
         #endregion
 
         #region Abstract members
-        public abstract StageResult Train(Dictionary<string, string> options = null);
+        public abstract StageResult Train(Dictionary<string, object> options = null);
         #endregion
 
         #region Overidden members
@@ -74,6 +74,10 @@ namespace ClassifyBot
 
         public FileInfo ModelFile => ModelFileName.Empty() ? null : new FileInfo(ModelFileName);
 
+        public IEnumerable<IClassStatistic> ClassStatistics => _ClassStatistics;
+
+        public IEnumerable<IClassifierResult> Results => _Results;
+
         [Option('t', "train-file", Required = true, HelpText = "Input file name with training data for classifier")]
         public string TrainingFileName { get; set; }
 
@@ -85,8 +89,12 @@ namespace ClassifyBot
 
         [Option("train", HelpText = "Train a classifier model using the training and test data files.", SetName = "op")]
         public bool TrainOp { get; set; }
+
+        protected List<ClassStatistic> _ClassStatistics = new List<ClassStatistic>();
+
+        protected List<ClassifierResult> _Results = new List<ClassifierResult>();
         #endregion
 
-        
+
     }
 }

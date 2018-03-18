@@ -27,7 +27,7 @@ namespace ClassifyBot.Pipeline.CodeProject.SpamFilter
         [Option('u', "url", Required = false, Hidden = true)]
         public override string InputFileUrl => string.Empty;
 
-        protected override Func<ILogger, StreamReader, IEnumerable<EmailItem>> ReadFileStream { get; } = (logger, r) =>
+        protected override Func<ILogger, StreamReader, IEnumerable<EmailItem>> ReadRecordsFromFileStream { get; } = (logger, r) =>
         {
             return null;
         };

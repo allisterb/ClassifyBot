@@ -21,7 +21,7 @@ namespace ClassifyBot.Example.CodeProject.LanguageDetector
         [Option('u', "url", Required = false, Hidden = true)]
         public override string InputFileUrl { get; set; }
 
-        protected override Func<ILogger, StreamReader, IEnumerable<LanguageItem>> ReadFileStream { get; } = (logger, r) =>
+        protected override Func<ILogger, StreamReader, IEnumerable<LanguageItem>> ReadRecordsFromFileStream { get; } = (logger, r) =>
         {
             HtmlDocument doc = new HtmlDocument();
             doc.Load(r);

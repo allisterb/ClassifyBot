@@ -5,6 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="SerilogTimings" Version="2.2.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\ClassifyBot.Core\ClassifyBot.Core.csproj" />
   </ItemGroup>
 

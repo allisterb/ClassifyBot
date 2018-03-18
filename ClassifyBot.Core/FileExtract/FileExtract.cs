@@ -29,7 +29,7 @@ namespace ClassifyBot
         #endregion
 
         #region Abstract members
-        protected abstract Func<ILogger, StreamReader, IEnumerable<TRecord>> ReadFileStream { get; }
+        protected abstract Func<ILogger, StreamReader, IEnumerable<TRecord>> ReadRecordsFromFileStream { get; }
         #endregion
 
         #region Implemented members
@@ -62,7 +62,7 @@ namespace ClassifyBot
                     using (Stream rs = reader.OpenEntryStream())
                     using (StreamReader r = new StreamReader(rs))
                     {
-                        ExtractedRecords.AddRange(ReadFileStream(L, r));
+                        ExtractedRecords.AddRange(ReadRecordsFromFileStream(L, r));
                     }
                 }
             }
@@ -72,7 +72,7 @@ namespace ClassifyBot
                 using (FileStream f = InputFile.OpenRead())
                 using (StreamReader r = new StreamReader(f))
                 {
-                    ExtractedRecords.AddRange(ReadFileStream(L, r));
+                    ExtractedRecords.AddRange(ReadRecordsFromFileStream(L, r));
                 }
 
             }

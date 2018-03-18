@@ -13,7 +13,7 @@ namespace ClassifyBot
     public abstract class StanfordNLPClassifier<TRecord, TFeature> : Classifier<TRecord, TFeature> where TFeature : ICloneable, IComparable, IComparable<TFeature>, IConvertible, IEquatable<TFeature> where TRecord : Record<TFeature>
     {
         #region Overriden members
-        public override StageResult Train(Dictionary<string, string> options = null)
+        public override StageResult Train(Dictionary<string, object> options = null)
         {
             foreach (KeyValuePair<string, object> kv in AdditionalOptions)
             {
@@ -60,7 +60,7 @@ namespace ClassifyBot
                     }
                 }
 
-                if (s.StartsWith("Reading dataset from {0} ... done".F(TrainingFile.FullName)))
+                else if (s.StartsWith("Reading dataset from {0} ... done".F(TrainingFile.FullName)))
                 {
                     ReadTrainingDataset = true;
                     Match m = readDataSetRegex.Match(s);
@@ -69,10 +69,14 @@ namespace ClassifyBot
                         TrainingDataSetItems = Int32.Parse(m.Groups[3].Value);
                         Info("{0} items in training dataset read in {1} s.", TrainingDataSetItems, m.Groups[2].Value);
                     }
-                    
+                    else
+                    {
+                        Error("Could not parse classifier output line: {0}.", s);
+                        return StageResult.FAILED;
+                    }
                 }
 
-                if (s.StartsWith("Reading dataset from {0} ... done".F(TestFile.FullName)))
+                else if (s.StartsWith("Reading dataset from {0} ... done".F(TestFile.FullName)))
                 {
                     ReadTestDataset = true;
                     Match m = readDataSetRegex.Match(s);
@@ -81,7 +85,50 @@ namespace ClassifyBot
                         TestDataSetItems = Int32.Parse(m.Groups[3].Value);
                         Info("{0} items in test dataset read in {1} s.", TestDataSetItems, m.Groups[2].Value);
                     }
+                    else
+                    {
+                        Error("Could not parse classifier output line: {0}.", s);
+                        return StageResult.FAILED;
+                    }
+                }
 
+                else if (s.StartsWith("Cls"))
+                {
+                    Match m = classStatisticRegex.Match(s);
+                    if (m.Success)
+                    {
+                        ClassStatistic cs = new ClassStatistic()
+                        {
+                            Name = m.Groups[1].Value,
+                            TruePositives = Int32.Parse(m.Groups[2].Value),
+                            FalsePositives = Int32.Parse(m.Groups[3].Value),
+                            TrueNegatives = Int32.Parse(m.Groups[4].Value),
+                            Accuracy = Single.Parse(m.Groups[5].Value),
+                            Precision = Single.Parse(m.Groups[6].Value),
+                            Recall = Single.Parse(m.Groups[7].Value),
+                            F1 = Single.Parse(m.Groups[8].Value)
+                        };
+                        _ClassStatistics.Add(cs);
+                        Info(s);
+                    }
+                    else
+                    {
+                        L.Error("Could not parse class statistic: {0}.", s);
+                    }
+                }
+
+                else if (resultRegex.IsMatch(s))
+                {
+                    Match m = resultRegex.Match(s);
+                    ClassifierResult cr = new ClassifierResult()
+                    {
+                        GoldAnswer = m.Groups[1].Value,
+                        ClassifierAnswer = m.Groups[2].Value,
+                        P_GoldAnswer = Single.Parse(m.Groups[3].Value),
+                        P_ClAnswer = Single.Parse(m.Groups[4].Value)
+
+                    };
+                    _Results.Add(cr);
                 }
                 ClassifierOutput.Add(s);
                 Debug(s);
@@ -92,7 +139,8 @@ namespace ClassifyBot
             {
                 return StageResult.FAILED;
             }
-
+            Info("Got {0} class statistics.", _ClassStatistics.Count);
+            Info("Got {0} results.", _Results.Count);
             return StageResult.SUCCESS;
         }
         
@@ -197,7 +245,8 @@ namespace ClassifyBot
             {"1.useSplitWords", true },
             {"1.splitWordsRegexp", "\\\\s+" },
             {"2.useSplitWords", true },
-            {"2.splitWordsRegexp", "\\\\s+" }
+            {"2.splitWordsRegexp", "\\\\s+" },
+            {"displayedColumn", -1 }
         };
 
         public FileInfo ClassifierPropsFile { get; protected set; }
@@ -212,6 +261,9 @@ namespace ClassifyBot
         public int NumberofFeatures { get; protected set; }
         public int NumberofClasses { get; protected set; }
         public int NumberofParameters { get; protected set; }
+
+        public float MicroAveragedF1 { get; protected set; }
+        public float MacroAveragedF1 { get; protected set; }
         #endregion
 
         #region Methods
@@ -233,7 +285,8 @@ namespace ClassifyBot
         protected JavaCommand javaCommand;
         private static Regex builtClassifierRegex = new Regex("Built this classifier: (\\S+) with (\\d+) features, (\\d+) classes, and (\\d+) parameters.", RegexOptions.Compiled);
         private static Regex readDataSetRegex = new Regex("Reading dataset from (.+)done \\[(\\d+\\.\\d+)s, (\\d+) items\\]", RegexOptions.Compiled);
-        private static Regex classRegex = new Regex("Cls (\\S+): TP=(\\d+) FN=(\\d+) FP=(\\d+) TN=(\\d+); Acc 0.(\\d+) P 0.(\\d+) R 0.(\\d+) F1 0.(\\d+)", RegexOptions.Compiled);
+        private static Regex classStatisticRegex = new Regex("Cls (\\S+): TP=(\\d+) FN=(\\d+) FP=(\\d+) TN=(\\d+); Acc (\\d+.\\d+) P (\\d+.\\d+) R (\\d+.\\d+) F1 (\\d+.\\d+)", RegexOptions.Compiled);
+        private static Regex resultRegex = new Regex("(\\S+)\\s+(\\S+)\\s+(\\d+.\\d+)\\s+(\\d+.\\d+)", RegexOptions.Compiled);
         #endregion
     }
 }
