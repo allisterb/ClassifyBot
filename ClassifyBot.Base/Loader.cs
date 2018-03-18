@@ -49,7 +49,7 @@ namespace ClassifyBot
         protected override StageResult Init()
         {
             Contract.Requires(InputFile != null && TrainingFile != null && TestFile != null);
-
+            
             if (!InputFile.CheckExistsAndReportError(L))
             {
                 return StageResult.INPUT_ERROR;

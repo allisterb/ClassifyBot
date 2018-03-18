@@ -16,7 +16,8 @@ namespace ClassifyBot
         #region Constructors
         public LoadToCsvFile(string delimiter = ",") : base()
         {
-            WriterOptions.Add("Delimiter", delimiter);   
+            WriterOptions.Add("Delimiter", delimiter);
+            WriterOptions.Add("HasHeaderRecord", false);
         }
         #endregion
 
@@ -25,7 +26,6 @@ namespace ClassifyBot
         {
             using (CsvWriter csv = new CsvWriter(sw))
             {
-                csv.Configuration.HasHeaderRecord = false;
                 SetPropFromDict(csv.Configuration.GetType(), csv.Configuration, options);
                 for (int i = 0; i < records.Count(); i++)
                 {
@@ -48,17 +48,20 @@ namespace ClassifyBot
             {
                 return r;
             }
-            else
+       
+            if (AdditionalOptions.Count > 0)
             {
-                if (AdditionalOptions.Count > 0)
+                foreach (KeyValuePair<string, object> kv in AdditionalOptions)
                 {
-                    foreach (KeyValuePair<string, object> kv in AdditionalOptions)
+                    if (WriterOptions.ContainsKey(kv.Key))
                     {
-                        WriterOptions.Add(kv.Key, kv.Value);
+                        WriterOptions.Remove(kv.Key);
                     }
+                    WriterOptions.Add(kv.Key, kv.Value);
                 }
-                return StageResult.SUCCESS;
             }
+            return StageResult.SUCCESS;
+            
         }
         #endregion
     }

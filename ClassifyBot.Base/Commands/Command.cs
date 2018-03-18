@@ -109,11 +109,8 @@ namespace ClassifyBot
                 L.Error(e, "An exception was thrown attempting to execute command {0}.", Text);
                 _Success = false;
                 return Task = Task.FromException(e);
-            }
-            
+            }    
         }
-
-
         #endregion
 
         #region Fields

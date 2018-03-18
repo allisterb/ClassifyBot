@@ -27,7 +27,7 @@ namespace ClassifyBot.Example.CodeProject.LanguageDetector
             doc.Load(r);
             HtmlNodeCollection nodes = doc.DocumentNode.SelectNodes("//pre");
             logger.Information("Got {0} language data items from file.", nodes.Count);
-            return nodes.Select(n => new LanguageItem(n.Line, n.Attributes["lang"].Value, n.InnerText));
+            return nodes.Select(n => new LanguageItem(n.Line, n.Attributes["lang"].Value, n.InnerText.StripUTF8BOM()));
         };
         #endregion
     }

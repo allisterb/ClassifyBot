@@ -29,9 +29,10 @@ namespace ClassifyBot
 
             if (javaCommand.OutputText.ToLower().Contains("usage") || javaCommand.ErrorText.ToLower().Contains("usage"))
             {
-                Error("Classifier parameters are incorrect. Command output: {0} {1}", javaCommand.OutputText.Replace(Environment.NewLine, " "), javaCommand.ErrorText.Replace(Environment.NewLine, " "));
+                Error("Classifier parameters are incorrect. Command output: {0}", javaCommand.ErrorText.Replace(Environment.NewLine, " "));
                 return StageResult.FAILED;
             }
+            Info(javaCommand.OutputText);
             return StageResult.SUCCESS;
         }
         

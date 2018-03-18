@@ -19,7 +19,7 @@ namespace ClassifyBot
         where TFeature : ICloneable, IComparable, IComparable<TFeature>, IConvertible, IEquatable<TFeature> where TRecord : Record<TFeature>
     {
         #region Constructors
-        public Transformer()
+        public Transformer() : base()
         {
             Contract.Requires(!InputFileName.Empty());
             Contract.Requires(!OutputFileName.Empty());

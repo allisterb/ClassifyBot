@@ -83,5 +83,12 @@ namespace ClassifyBot
         {
             return value.Equals("true", StringComparison.OrdinalIgnoreCase);
         }
+
+        public static string StripUTF8BOM(this string s)
+        {
+            string _byteOrderMarkUtf8 = Encoding.UTF8.GetString(Encoding.UTF8.GetPreamble());
+            return s.Replace(_byteOrderMarkUtf8, string.Empty);
+
+        }
     }
 }
