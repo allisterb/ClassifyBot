@@ -30,10 +30,19 @@ namespace ClassifyBot
                 SetPropFromDict(csv.Configuration.GetType(), csv.Configuration, options);
                 for (int i = 0; i < records.Count(); i++)
                 {
-                    csv.WriteField(records[i].Labels[0].Item1);
-                    for (int f = 0; f < records[i].Features.Count; f++)
+                    TRecord record = records[i];
+                    if (!record.Id.Empty())
                     {
-                        csv.WriteField(records[i].Features[f].Item2);
+                        csv.WriteField(record.Id);
+                    }
+                    else if (record._Id.HasValue)
+                    {
+                        csv.WriteField(record._Id);
+                    }
+                    csv.WriteField(record.Labels[0].Item1);
+                    for (int f = 0; f < record.Features.Count; f++)
+                    {
+                        csv.WriteField(record.Features[f].Item2);
                     }
                     csv.NextRecord();
                 }
@@ -64,6 +73,8 @@ namespace ClassifyBot
             return StageResult.SUCCESS;
             
         }
+
+        protected override StageResult Cleanup() => StageResult.SUCCESS;
         #endregion
     }
 }

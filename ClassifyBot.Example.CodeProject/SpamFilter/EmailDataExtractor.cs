@@ -19,11 +19,6 @@ namespace ClassifyBot.Pipeline.CodeProject.SpamFilter
         #endregion
 
         #region Overriden members
-        public override StageResult Run()
-        {
-            Extract();
-            return StageResult.SUCCESS;
-        }
         [Option('u', "url", Required = false, Hidden = true)]
         public override string InputFileUrl => string.Empty;
 

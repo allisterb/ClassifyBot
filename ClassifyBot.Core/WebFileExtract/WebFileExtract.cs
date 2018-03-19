@@ -34,7 +34,21 @@ namespace ClassifyBot
         #endregion
 
         #region Overriden members
-        public override StageResult Extract(int? recordBatchSize = null, int? recordLimit = null, Dictionary<string, string> options = null)
+        protected override StageResult Init()
+        {
+            if (Uri.TryCreate(InputFileUrl, UriKind.RelativeOrAbsolute, out Uri result))
+            {
+                InputFileUri = result;
+                return StageResult.SUCCESS;
+            }
+            else
+            {
+                Error("The input file Url {0} is not a valid Uri.".F(InputFileUrl));
+                return StageResult.INPUT_ERROR;
+            }
+        }
+
+        protected override StageResult Extract(int? recordBatchSize = null, int? recordLimit = null, Dictionary<string, string> options = null)
         {
             Contract.Requires(InputFileUri != null);
             if (InputFileUri.Segments.Any(s => s.EndsWith(".zip")))
@@ -67,20 +81,6 @@ namespace ClassifyBot
                 return StageResult.INPUT_ERROR;
             }
             return base.Extract();  
-        }
-
-        protected override StageResult Init()
-        {
-            if (Uri.TryCreate(InputFileUrl, UriKind.RelativeOrAbsolute, out Uri result))
-            {
-                InputFileUri = result;
-                return StageResult.SUCCESS;
-            }
-            else
-            {
-                Error("The input file Url {0} is not a valid Uri.".F(InputFileUrl));
-                return StageResult.INPUT_ERROR;
-            }
         }
 
         protected override StageResult Cleanup()

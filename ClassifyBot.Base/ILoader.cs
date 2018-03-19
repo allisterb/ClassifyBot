@@ -7,7 +7,7 @@ namespace ClassifyBot
 {
     public interface ILoader<TRecord, TFeature> where TFeature : ICloneable, IComparable, IComparable<TFeature>, IConvertible, IEquatable<TFeature> where TRecord : Record<TFeature>
     {
-        StageResult Load(int? recordBatchSize = null, int? recordLimit = null, Dictionary<string, string> options = null);
+        StageResult Run(Dictionary<string, object> options = null);
         FileInfo InputFile { get; }
         FileInfo TrainingFile { get; }
         FileInfo TestFile { get; }

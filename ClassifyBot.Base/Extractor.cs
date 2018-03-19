@@ -27,7 +27,7 @@ namespace ClassifyBot
         #endregion
 
         #region Overriden members
-        public override StageResult Run()
+        public override StageResult Run(Dictionary<string, object> options = null)
         {
             StageResult r;
             if ((r = Init()) != StageResult.SUCCESS)
@@ -38,7 +38,7 @@ namespace ClassifyBot
             {
                 return r;
             }
-            if ((r = Save()) != StageResult.SUCCESS)
+            if ((r = Write()) != StageResult.SUCCESS)
             {
                 return r;
             }
@@ -57,28 +57,12 @@ namespace ClassifyBot
                 return StageResult.SUCCESS;
             }
         }
-        #endregion
 
-        #region Abstract methods
-        public abstract StageResult Extract(int? recordBatchSize = null, int? recordLimit = null, Dictionary<string, string> options = null);
-        #endregion
+        protected override StageResult Read() => StageResult.SUCCESS;
 
-        #region Properties
-        public List<TRecord> ExtractedRecords { get; protected set; } = new List<TRecord>();
+        protected override StageResult Process() => Extract();
 
-        public FileInfo InputFile => InputFileName.Empty() ? null : new FileInfo(InputFileName);
-
-        public FileInfo OutputFile => OutputFileName.Empty() ? null : new FileInfo(OutputFileName);
-
-        [Option('i', "input-file", Required = true, HelpText = "Input data file name for stage operation.")]
-        public virtual string InputFileName { get; set; }
-
-        [Option('f', "output-file", Required = true, HelpText = "Output data file name for stage operation.")]
-        public virtual string OutputFileName { get; set; }
-        #endregion
-
-        #region Methods
-        protected override StageResult Save()
+        protected override StageResult Write()
         {
             Contract.Requires(ExtractedRecords != null);
             if (ExtractedRecords.Count == 0)
@@ -109,5 +93,24 @@ namespace ClassifyBot
             return StageResult.SUCCESS;
         }
         #endregion
+
+        #region Abstract methods
+        protected abstract StageResult Extract(int? recordBatchSize = null, int? recordLimit = null, Dictionary<string, string> options = null);
+        #endregion
+
+        #region Properties
+        public List<TRecord> ExtractedRecords { get; protected set; } = new List<TRecord>();
+
+        public FileInfo InputFile => InputFileName.Empty() ? null : new FileInfo(InputFileName);
+
+        public FileInfo OutputFile => OutputFileName.Empty() ? null : new FileInfo(OutputFileName);
+
+        [Option('i', "input-file", Required = true, HelpText = "Input data file name for stage operation.")]
+        public virtual string InputFileName { get; set; }
+
+        [Option('f', "output-file", Required = true, HelpText = "Output data file name for stage operation.")]
+        public virtual string OutputFileName { get; set; }
+        #endregion
+
     }
 }

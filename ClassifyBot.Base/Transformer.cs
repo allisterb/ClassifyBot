@@ -27,7 +27,7 @@ namespace ClassifyBot
         #endregion
 
         #region Overriden members
-        public override StageResult Run()
+        public override StageResult Run(Dictionary<string, object> options = null)
         {
             StageResult r;
             if ((r = Init()) != StageResult.SUCCESS)
@@ -42,7 +42,7 @@ namespace ClassifyBot
             {
                 return r;
             }
-            if ((r = Save()) != StageResult.SUCCESS)
+            if ((r = Write()) != StageResult.SUCCESS)
             {
                 return r;
             }
@@ -70,70 +70,7 @@ namespace ClassifyBot
             return StageResult.SUCCESS;
         }
 
-        protected override StageResult Save()
-        {
-            Contract.Requires(OutputRecords != null);
-            if (OutputRecords.Count == 0)
-            {
-                Warn("0 records transformed from file {0}. Not writing to output file.", InputFile.FullName);
-                return StageResult.SUCCESS;
-            }
-            JsonSerializer serializer = new JsonSerializer();
-            serializer.Formatting = Formatting.Indented;
-            if (!CompressOutputFile)
-            {
-                using (FileStream fs = new FileStream(OutputFile.FullName, FileMode.Create))
-                using (StreamWriter sw = new StreamWriter(fs, Encoding.UTF8))
-                {
-                    serializer.Serialize(sw, OutputRecords);
-                }
-            }
-            else
-            {
-                using (FileStream fs = new FileStream(OutputFile.FullName, FileMode.Create))
-                using (GZipStream gzs = new GZipStream(fs, CompressionMode.Compress))
-                using (StreamWriter sw = new StreamWriter(gzs, Encoding.UTF8))
-                {
-                    serializer.Serialize(sw, OutputRecords);
-                }
-            }
-            Info("Wrote {0} output records to {1}.", OutputRecords.Count, OutputFileName);
-            return StageResult.SUCCESS;
-        }
-        #endregion
-
-        #region Abstract members
-        public virtual StageResult Transform(int? recordBatchSize = null, int? recordLimit = null, Dictionary<string, string> options = null)
-        {
-            for (int i = 0; i < InputRecords.Count; i++)
-            {
-                OutputRecords.Add(TransformInputToOutput(L, StageOptions, InputRecords[i]));
-            }
-            Info("Transformed {0} records with maximum {1} features to {2}.", OutputRecords.Count, OutputRecords.Max(r => r.Features.Count), OutputFileName);
-            return StageResult.SUCCESS;
-        }
-
-        protected abstract Func<ILogger, Dictionary<string, object>, TRecord, TRecord> TransformInputToOutput { get; }
-        #endregion
-
-        #region Properties
-        public FileInfo InputFile => InputFileName.Empty() ? null : new FileInfo(InputFileName);
-
-        public FileInfo OutputFile => OutputFileName.Empty() ? null : new FileInfo(OutputFileName);
-
-        public virtual List<TRecord> InputRecords { get; protected set; } = new List<TRecord>();
-
-        public virtual List<TRecord> OutputRecords { get; protected set; } = new List<TRecord>();
-
-        [Option('i', "input-file", Required = true, HelpText = "Input data file name for stage operation.")]
-        public virtual string InputFileName { get; set; }
-
-        [Option('f', "output-file", Required = true, HelpText = "Output data file name for stage operation.")]
-        public virtual string OutputFileName { get; set; }
-        #endregion
-
-        #region Methods
-        protected virtual StageResult Read()
+        protected override StageResult Read()
         {
             if (InputFile.Extension == ".gz")
             {
@@ -166,6 +103,70 @@ namespace ClassifyBot
             }
         }
 
+        protected override StageResult Process() => Transform();
+
+        protected override StageResult Write()
+        {
+            Contract.Requires(OutputRecords != null);
+            if (OutputRecords.Count == 0)
+            {
+                Warn("0 records transformed from file {0}. Not writing to output file.", InputFile.FullName);
+                return StageResult.SUCCESS;
+            }
+            JsonSerializer serializer = new JsonSerializer();
+            serializer.Formatting = Formatting.Indented;
+            if (!CompressOutputFile)
+            {
+                using (FileStream fs = new FileStream(OutputFile.FullName, FileMode.Create))
+                using (StreamWriter sw = new StreamWriter(fs, Encoding.UTF8))
+                {
+                    serializer.Serialize(sw, OutputRecords);
+                }
+            }
+            else
+            {
+                using (FileStream fs = new FileStream(OutputFile.FullName, FileMode.Create))
+                using (GZipStream gzs = new GZipStream(fs, CompressionMode.Compress))
+                using (StreamWriter sw = new StreamWriter(gzs, Encoding.UTF8))
+                {
+                    serializer.Serialize(sw, OutputRecords);
+                }
+            }
+            Info("Wrote {0} output records to {1}.", OutputRecords.Count, OutputFileName);
+            return StageResult.SUCCESS;
+        }
+        #endregion
+
+        #region Abstract members
+        protected abstract Func<ILogger, Dictionary<string, object>, TRecord, TRecord> TransformInputToOutput { get; }
+        #endregion
+
+        #region Properties
+        public FileInfo InputFile => InputFileName.Empty() ? null : new FileInfo(InputFileName);
+
+        public FileInfo OutputFile => OutputFileName.Empty() ? null : new FileInfo(OutputFileName);
+
+        public virtual List<TRecord> InputRecords { get; protected set; } = new List<TRecord>();
+
+        public virtual List<TRecord> OutputRecords { get; protected set; } = new List<TRecord>();
+
+        [Option('i', "input-file", Required = true, HelpText = "Input data file name for stage operation.")]
+        public virtual string InputFileName { get; set; }
+
+        [Option('f', "output-file", Required = true, HelpText = "Output data file name for stage operation.")]
+        public virtual string OutputFileName { get; set; }
+        #endregion
+
+        #region Methods
+        protected virtual StageResult Transform(int? recordBatchSize = null, int? recordLimit = null, Dictionary<string, string> options = null)
+        {
+            for (int i = 0; i < InputRecords.Count; i++)
+            {
+                OutputRecords.Add(TransformInputToOutput(L, StageOptions, InputRecords[i]));
+            }
+            Info("Transformed {0} records with maximum {1} features to {2}.", OutputRecords.Count, OutputRecords.Max(r => r.Features.Count), OutputFileName);
+            return StageResult.SUCCESS;
+        }
         #endregion
     }
 }

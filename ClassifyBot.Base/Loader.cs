@@ -23,7 +23,7 @@ namespace ClassifyBot
         #endregion
 
         #region Overidden members
-        public override StageResult Run()
+        public override StageResult Run(Dictionary<string, object> options = null)
         {
             StageResult r;
             if ((r = Init()) != StageResult.SUCCESS)
@@ -38,7 +38,7 @@ namespace ClassifyBot
             {
                 return r;
             }
-            if ((r = Save()) != StageResult.SUCCESS)
+            if ((r = Write()) != StageResult.SUCCESS)
             {
                 return r;
             }
@@ -78,7 +78,42 @@ namespace ClassifyBot
             return StageResult.SUCCESS;
         }
 
-        protected override StageResult Save()
+        protected override StageResult Read()
+        {
+            if (InputFile.Extension == ".gz")
+            {
+                using (GZipStream gzs = new GZipStream(InputFile.OpenRead(), CompressionMode.Decompress))
+                using (StreamReader r = new StreamReader(gzs))
+                using (JsonTextReader reader = new JsonTextReader(r))
+                {
+                    JsonSerializer serializer = new JsonSerializer();
+                    InputRecords = serializer.Deserialize<List<TRecord>>(reader);
+                }
+            }
+            else
+            {
+                using (StreamReader r = new StreamReader(InputFile.OpenRead()))
+                using (JsonTextReader reader = new JsonTextReader(r))
+                {
+                    JsonSerializer serializer = new JsonSerializer();
+                    InputRecords = serializer.Deserialize<List<TRecord>>(reader);
+                }
+            }
+            if (InputRecords == null || InputRecords.Count == 0)
+            {
+                Error("Did not read any records from {0}.", InputFile.FullName);
+                return StageResult.INPUT_ERROR;
+            }
+            else
+            {
+                Info("Read {0} records from {1}.", InputRecords.Count, InputFile.FullName);
+                return StageResult.SUCCESS;
+            }
+        }
+
+        protected override StageResult Process() => Load();
+
+        protected override StageResult Write()
         {
             Contract.Requires(TrainingRecords.Count > 0);
             Contract.Requires(TestRecords.Count > 0);
@@ -95,9 +130,6 @@ namespace ClassifyBot
             Info("Wrote {0} test records to file {1}.", TestRecords.Count, TestFile.FullName);
             return StageResult.SUCCESS;
         }
-
-        protected override StageResult Cleanup() => StageResult.SUCCESS;
-
         #endregion
 
         #region Abstract members
@@ -132,7 +164,7 @@ namespace ClassifyBot
         #endregion
 
         #region Methods
-        public virtual StageResult Load(int? recordBatchSize = null, int? recordLimit = null, Dictionary<string, string> options = null)
+        protected virtual StageResult Load(int? recordBatchSize = null, int? recordLimit = null, Dictionary<string, string> options = null)
         {
             Contract.Requires(InputRecords.Count > 0);
             float s = TrainingTestSplit;
@@ -147,39 +179,6 @@ namespace ClassifyBot
                 TrainingRecords.Add(InputRecords[i]);
             }
             return StageResult.SUCCESS;
-        }
-
-        protected virtual StageResult Read()
-        {
-            if (InputFile.Extension == ".gz")
-            {
-                using (GZipStream gzs = new GZipStream(InputFile.OpenRead(), CompressionMode.Decompress))
-                using (StreamReader r = new StreamReader(gzs))
-                using (JsonTextReader reader = new JsonTextReader(r))
-                {
-                    JsonSerializer serializer = new JsonSerializer();
-                    InputRecords = serializer.Deserialize<List<TRecord>>(reader);
-                }
-            }
-            else
-            {
-                using (StreamReader r = new StreamReader(InputFile.OpenRead()))
-                using (JsonTextReader reader = new JsonTextReader(r))
-                {
-                    JsonSerializer serializer = new JsonSerializer();
-                    InputRecords = serializer.Deserialize<List<TRecord>>(reader);
-                }
-            }
-            if (InputRecords == null || InputRecords.Count == 0)
-            {
-                Error("Did not read any records from {0}.", InputFile.FullName);
-                return StageResult.INPUT_ERROR;
-            }
-            else
-            {
-                Info("Read {0} records from {1}.", InputRecords.Count, InputFile.FullName);
-                return StageResult.SUCCESS;
-            }
         }
 
         protected virtual StageResult Save(FileInfo file, List<TRecord> records)

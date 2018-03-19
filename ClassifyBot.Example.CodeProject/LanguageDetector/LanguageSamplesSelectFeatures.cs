@@ -60,11 +60,6 @@ namespace ClassifyBot.Example.CodeProject.LanguageDetector
             return output;
         };
 
-        protected override StageResult Cleanup()
-        {
-            return StageResult.SUCCESS;
-        }
-
         protected override StageResult Init()
         {
             if (!StageResultSuccess(base.Init(), out StageResult r)) return r;
@@ -75,7 +70,7 @@ namespace ClassifyBot.Example.CodeProject.LanguageDetector
             return StageResult.SUCCESS;
         }
 
-        
+        protected override StageResult Cleanup() => StageResult.SUCCESS;
         #endregion
 
         #region Methods

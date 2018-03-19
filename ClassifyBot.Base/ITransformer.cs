@@ -8,6 +8,6 @@ namespace ClassifyBot
 {
     public interface ITransformer<TRecord, TFeature> where TFeature : ICloneable, IComparable, IComparable<TFeature>, IConvertible, IEquatable<TFeature> where TRecord : Record<TFeature> 
     {
-        StageResult Transform(int? recordBatchSize = null, int? recordLimit = null, Dictionary<string, string> options = null);
+        StageResult Run(Dictionary<string, object> options = null);
     }
 }

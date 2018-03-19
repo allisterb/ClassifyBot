@@ -23,9 +23,11 @@ namespace ClassifyBot
         #endregion
 
         #region Abstract members
-        public abstract StageResult Run();
+        public abstract StageResult Run(Dictionary<string, object> options = null);
         protected abstract StageResult Init();
-        protected abstract StageResult Save();
+        protected abstract StageResult Read();
+        protected abstract StageResult Process();
+        protected abstract StageResult Write();
         protected abstract StageResult Cleanup();
         #endregion
 

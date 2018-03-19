@@ -226,11 +226,9 @@ namespace ClassifyBot
             return StageResult.SUCCESS;
         }
 
-        protected override StageResult Save()
-        {
-            return
-                 StageResult.SUCCESS;
-        }
+        protected override StageResult Write() => StageResult.SUCCESS;
+        protected override StageResult Process() => StageResult.SUCCESS;
+        protected override StageResult Read() => StageResult.SUCCESS;
         #endregion
 
         #region Properties

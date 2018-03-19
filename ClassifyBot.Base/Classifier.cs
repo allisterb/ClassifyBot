@@ -25,7 +25,7 @@ namespace ClassifyBot
         #endregion
 
         #region Overidden members
-        public override StageResult Run()
+        public override StageResult Run(Dictionary<string, object> options)
         {
             StageResult r;
             if ((r = Init()) != StageResult.SUCCESS)
@@ -36,7 +36,7 @@ namespace ClassifyBot
             {
                 return r;
             }
-            if ((r = Save()) != StageResult.SUCCESS)
+            if ((r = Write()) != StageResult.SUCCESS)
             {
                 return r;
             }

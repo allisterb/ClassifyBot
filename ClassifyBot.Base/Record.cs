@@ -15,12 +15,12 @@ namespace ClassifyBot
             this.Id = id;
         }
 
-        public Record(int id, (string, float) label, params (string, TFeature)[] features) : this(label, features)
+        public Record(int? id, (string, float) label, params (string, TFeature)[] features) : this(label, features)
         {
             this._Id = id;
         }
 
-        public Record(int id, string label, params (string, TFeature)[] features) : this(id, (label, 1), features) { }
+        public Record(int? id, string label, params (string, TFeature)[] features) : this(id, (label, 1), features) { }
 
         protected Record( (string,float) label, params (string, TFeature) [] features)
         {
@@ -35,7 +35,7 @@ namespace ClassifyBot
         #endregion
 
         #region Properties
-        public int? _Id { get; }
+        public int? _Id { get; set; }
         public string Id { get; set; }
         public List<ValueTuple<string, float>> Labels { get; set; } = new List<(string, float)>();
         public List<ValueTuple<string, TFeature>> Features { get; set; } = new List<(string, TFeature)>();

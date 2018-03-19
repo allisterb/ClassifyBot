@@ -33,9 +33,8 @@ namespace ClassifyBot
         #endregion
 
         #region Implemented members
-        public override StageResult Extract(int? recordBatchSize = null, int? recordLimit = null, Dictionary<string, string> options = null)
+        protected override StageResult Extract(int? recordBatchSize = null, int? recordLimit = null, Dictionary<string, string> options = null)
         {
-            
             if (CompressedFileExtensions.Contains(InputFile.Extension))
             {
                 using (FileStream stream = InputFile.OpenRead())

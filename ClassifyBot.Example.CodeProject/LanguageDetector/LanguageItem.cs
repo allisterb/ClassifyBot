@@ -8,7 +8,7 @@ namespace ClassifyBot.Example.CodeProject.LanguageDetector
 {
     public class LanguageItem : Record<string>
     {
-        public LanguageItem(int lineNo, string languageName, string languageText) : base(lineNo, (languageName, 1), ("TEXT", languageText)) {}
+        public LanguageItem(int? lineNo, string languageName, string languageText) : base(lineNo, (languageName, 1), ("TEXT", languageText)) {}
     }
     
 }
