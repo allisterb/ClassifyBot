@@ -23,34 +23,6 @@ namespace ClassifyBot
         #endregion
 
         #region Overriden members
-        protected override Func<ILogger, StreamWriter, List<TRecord>, Dictionary<string, object>, StageResult> WriteFileStream { get; } = (logger, sw, records, options) =>
-        {
-            using (CsvWriter csv = new CsvWriter(sw))
-            {
-                SetPropFromDict(csv.Configuration.GetType(), csv.Configuration, options);
-                for (int i = 0; i < records.Count(); i++)
-                {
-                    TRecord record = records[i];
-                    if (!record.Id.Empty())
-                    {
-                        csv.WriteField(record.Id);
-                    }
-                    else if (record._Id.HasValue)
-                    {
-                        csv.WriteField(record._Id);
-                    }
-                    csv.WriteField(record.Labels[0].Item1);
-                    for (int f = 0; f < record.Features.Count; f++)
-                    {
-                        csv.WriteField(record.Features[f].Item2);
-                    }
-                    csv.NextRecord();
-                }
-                return StageResult.SUCCESS;
-            }
-
-        };
-
         protected override StageResult Init()
         {
             StageResult r;
@@ -73,8 +45,6 @@ namespace ClassifyBot
             return StageResult.SUCCESS;
             
         }
-
-        protected override StageResult Cleanup() => StageResult.SUCCESS;
         #endregion
     }
 }
