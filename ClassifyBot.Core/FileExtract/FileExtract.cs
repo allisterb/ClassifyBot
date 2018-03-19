@@ -32,7 +32,7 @@ namespace ClassifyBot
         protected abstract Func<ILogger, StreamReader, IEnumerable<TRecord>> ReadRecordsFromFileStream { get; }
         #endregion
 
-        #region Implemented members
+        #region Overridden members
         protected override StageResult Extract(int? recordBatchSize = null, int? recordLimit = null, Dictionary<string, string> options = null)
         {
             if (CompressedFileExtensions.Contains(InputFile.Extension))

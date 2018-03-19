@@ -36,8 +36,6 @@ namespace ClassifyBot
 
         public static Dictionary<string, object> StageOptions { get; } = new Dictionary<string, object>();
 
-        public bool Initialized { get; protected set; } = false;
-
         public Dictionary<string, object> AdditionalOptions => ParseAdditionalOptions(AdditionalOptionsString);
 
         public List<FileInfo> InputFiles { get; protected set; } = new List<FileInfo>();
@@ -47,8 +45,6 @@ namespace ClassifyBot
         public Dictionary<string, object> ReaderOptions { get; } = new Dictionary<string, object>();
 
         public Dictionary<string, object> WriterOptions { get; } = new Dictionary<string, object>();
-
-        public static SortedList<int, string> FeatureMap { get; } = new SortedList<int, string>();
 
         [Option("with-debug", HelpText = "Enable debug output.", Required = false)]
         public bool WithDebugOutput { get; set; }
@@ -67,7 +63,6 @@ namespace ClassifyBot
 
         //[Option("explicit", HelpText = "Enable explicit loading of assemblies.", Required = false)]
         public string ExplicitAssemblies { get; set; }
-
 
         [Option('w', "overwrite", Required = false, Default = false, HelpText = "Ovewrite existing output data file if it exists.")]
         public virtual bool OverwriteOutputFile { get; set; }

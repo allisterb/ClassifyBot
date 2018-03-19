@@ -24,8 +24,9 @@ namespace ClassifyBot
             this.WorkingDirectory = workingDirectory;
             Text = cmdText;
             CommandOptions = cmdOptions.ToList();
-            shell = new MeSh.Shell(o => o.WorkingDirectory(WorkingDirectory));
         }
+
+        public Command(string cmdText, params object[] cmdOptions) : this(Directory.GetCurrentDirectory(), cmdText, cmdOptions) {}
         #endregion
 
         #region Properties
@@ -101,6 +102,7 @@ namespace ClassifyBot
         {
             try
             {
+                shell = new MeSh.Shell(o => o.WorkingDirectory(WorkingDirectory));
                 meshCommand = shell.Run(Text, CommandOptions.ToArray());
                 return Task = meshCommand.Task;
             }

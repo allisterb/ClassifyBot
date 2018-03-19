@@ -22,6 +22,26 @@ namespace ClassifyBot
 
         public Record(int? id, string label, params (string, TFeature)[] features) : this(id, (label, 1), features) { }
 
+        public Record(int? _id, string id, (string, float) label, params (string, TFeature)[] features) : this(label, features)
+        {
+            this._Id = _id;
+            this.Id = id;
+        }
+
+        public Record(int? _id, string id, params (string, float)[] labels) : this(labels)
+        {
+            this._Id = _id;
+            this.Id = id;
+        }
+
+        protected Record(params (string, float)[] labels)
+        {
+            for (int i = 0; i < labels.Length; i++)
+            {
+                this.Labels.Add(labels[i]);
+            }
+        }
+
         protected Record( (string,float) label, params (string, TFeature) [] features)
         {
             this.Labels.Add(label);
@@ -30,6 +50,8 @@ namespace ClassifyBot
                 this.Features.Add(features[i]);
             }
         }
+
+
 
         
         #endregion

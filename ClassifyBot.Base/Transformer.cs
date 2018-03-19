@@ -155,6 +155,8 @@ namespace ClassifyBot
 
         [Option('f', "output-file", Required = true, HelpText = "Output data file name for stage operation.")]
         public virtual string OutputFileName { get; set; }
+
+        public static SortedList<int, string> FeatureMap { get; } = new SortedList<int, string>();
         #endregion
 
         #region Methods

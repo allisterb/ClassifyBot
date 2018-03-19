@@ -6,6 +6,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="logs\**" />
+    <EmbeddedResource Remove="logs\**" />
+    <None Remove="logs\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Serilog" Version="2.6.0" />
     <PackageReference Include="Serilog.Enrichers.Process" Version="2.0.1" />
     <PackageReference Include="Serilog.Enrichers.Thread" Version="3.0.0" />
@@ -16,6 +22,7 @@
   <ItemGroup>
     <ProjectReference Include="..\ClassifyBot.Core\ClassifyBot.Core.csproj" />
     <ProjectReference Include="..\ClassifyBot.Example.CodeProject\ClassifyBot.Example.CodeProject.csproj" />
+    <ProjectReference Include="..\ClassifyBot.Example.TCCC\ClassifyBot.Example.TCCC.csproj" />
   </ItemGroup>
 
 </Project>
