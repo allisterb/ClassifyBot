@@ -191,7 +191,6 @@ namespace ClassifyBot.Example.TCCC
 
             }
 
-            
             //Hate phrase
             for (int h = 0; h < hatePhrases.Length; h++)
             {
@@ -201,9 +200,7 @@ namespace ClassifyBot.Example.TCCC
                     break;
                 }
             }
-
-           
-
+            logger.Debug("Comment \'{0}\' has features {1}.", text, output.Features.Select(f => "{0}:{1}".F(f.Item1, f.Item2)));
             return output;
         };
 

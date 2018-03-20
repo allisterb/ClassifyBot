@@ -18,6 +18,7 @@ namespace ClassifyBot.Example.TCCC
             using (CsvReader csv = new CsvReader(sr))
             {
                 SetPropFromDict(csv.Configuration.GetType(), csv.Configuration, options);
+                int recordLimitSize = (int)options["RecordLimitSize"];
                 List<Comment> comments = new List<Comment>();
                 var dataRow = new
                 {
@@ -36,9 +37,17 @@ namespace ClassifyBot.Example.TCCC
                 int i = 0;
                 while (csv.Read())
                 {
-
                     var r = csv.GetRecord(dataRow);
                     comments.Add(new Comment(i++, r.id, r.comment_text, r.toxic, r.severe_toxic, r.obscene, r.threat, r.insult, r.identity_hate));
+                    if (i  % 20000 == 0)
+                    {
+                        logger.Information("Extracted {0} records from CSV file.", i);
+                    }
+                    if ((recordLimitSize > 0) && (i == recordLimitSize))
+                    {
+                        logger.Information("Stopping extraction at record limit {0}.", i);
+                        break;
+                    }
                 }
                 return comments;
             }

@@ -13,6 +13,7 @@ using CommandLine;
 using Newtonsoft.Json;
 using Serilog;
 
+
 namespace ClassifyBot
 {
     public abstract class Transformer<TRecord, TFeature> : Stage, ITransformer<TRecord, TFeature>
@@ -72,6 +73,7 @@ namespace ClassifyBot
 
         protected override StageResult Read()
         {
+            Info("Deserializing records from {0}...", InputFile.FullName);
             if (InputFile.Extension == ".gz")
             {
                 using (GZipStream gzs = new GZipStream(InputFile.OpenRead(), CompressionMode.Decompress))
@@ -165,6 +167,15 @@ namespace ClassifyBot
             for (int i = 0; i < InputRecords.Count; i++)
             {
                 OutputRecords.Add(TransformInputToOutput(L, WriterOptions, InputRecords[i]));
+                if ((i + 1) % 1000 == 0)
+                {
+                    Info("Transformed {0} of {1} records...", i, InputRecords.Count);
+                }
+                if ((RecordLimitSize > 0) && (i + 1 == RecordLimitSize))
+                {
+                    Info("Stopping transformation at record limit {0}.", i + 1);
+                    break;
+                }
             }
             Info("Transformed {0} records with maximum {1} features to {2}.", OutputRecords.Count, OutputRecords.Max(r => r.Features.Count), OutputFileName);
             return StageResult.SUCCESS;

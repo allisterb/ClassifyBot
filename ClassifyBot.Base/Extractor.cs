@@ -52,10 +52,8 @@ namespace ClassifyBot
             {
                 return StageResult.INPUT_ERROR;
             }
-            else
-            {
-                return StageResult.SUCCESS;
-            }
+            WriterOptions.Add("RecordLimitSize", RecordLimitSize);
+            return StageResult.SUCCESS;
         }
 
         protected override StageResult Read() => StageResult.SUCCESS;
