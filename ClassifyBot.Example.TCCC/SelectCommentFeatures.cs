@@ -67,13 +67,33 @@ namespace ClassifyBot.Example.TCCC
                 output.Features.Add((FeatureMap[1], "QUESTION_MARK"));
             }
 
-            string[] words = wordSplitter.Split(text);
+            string[] words = wordSplitter.Split(text).Select(w => w.ToAlphaNumeric()).ToArray();
             for (int i = 0; i < words.Length; i++)
             {
-                string w = words[i].Trim();
+                string w = words[i].ToAlphaNumeric();//Trim('\r', '\n', '\t', '.', ',', '!', ';');
+                if (w.StartsWith("http") || Int32.TryParse(w, out int integer) || Single.TryParse(w, out float fp))
+                {
+                    continue;
+                }
+                string wlower = w.ToLower();
+                string wupper = w.ToUpper();
+                
+                //All caps
+                if(w.Length > 3 && w.IsAlphaNumeric() && w == wupper)
+                {
+                    output.Features.Add((FeatureMap[1], "ALL_CAPS"));
+                }
+
+                //Slang
+                int sl = Array.IndexOf(slangWords, wlower);
+                if (sl >= 0)
+                {
+                    output.Features.Add((FeatureMap[2], "SLANG"));
+                    text = text.Replace(w, slangWords[sl].Split('\t')[1].Trim());
+                }
 
                 //Profanity
-                if (profanityWords.Contains(w))
+                if (profanityWords.Contains(wlower))
                 {
                     output.Features.Add((FeatureMap[2], "PROFANITY"));
                 }
@@ -81,12 +101,12 @@ namespace ClassifyBot.Example.TCCC
                 //Negative emotion
                 for (int n = 0; n < negativeEmotionWords.Length; n++)
                 {
-                    if (negativeEmotionWords[n].Contains(w))
+                    if (negativeEmotionWords[n].Split(';').Contains(wlower))
                     {
                         string[] nw = negativeEmotionWords[n].Split(';');
                         for (int j = 0; j < nw.Length; j++)
                         {
-                            if (nw[j] == w)
+                            if (nw[j] == wlower)
                             {
                                 output.Features.Add((FeatureMap[2], negativeEmotionWordLabls[j].ToUpper()));
                                 break;
@@ -98,12 +118,12 @@ namespace ClassifyBot.Example.TCCC
                 //Positive emotion
                 for (int p = 0; p < positiveEmotionWords.Length; p++)
                 {
-                    if (positiveEmotionWords[p].Contains(w))
+                    if (positiveEmotionWords[p].Split(';').Contains(wlower))
                     {
                         string[] pw = positiveEmotionWords[p].Split(';');
                         for (int j = 0; j < pw.Length; j++)
                         {
-                            if (pw[j] == w)
+                            if (pw[j] == wlower)
                             {
                                 output.Features.Add((FeatureMap[2], positiveEmotionWordLabls[j].ToUpper()));
                                 break;
@@ -115,12 +135,12 @@ namespace ClassifyBot.Example.TCCC
                 //Ambiguous emotion
                 for (int a = 0; a < ambiguousEmotionWords.Length; a++)
                 {
-                    if (ambiguousEmotionWords[a].Contains(w))
+                    if (ambiguousEmotionWords[a].Split(';').Contains(wlower))
                     {
                         string[] aw = ambiguousEmotionWords[a].Split(';');
                         for (int j = 0; j < aw.Length; j++)
                         {
-                            if (aw[j] == w)
+                            if (aw[j] == wlower)
                             {
                                 output.Features.Add((FeatureMap[2], ambiguousEmotionWordLabels[j].ToUpper()));
                                 break;
@@ -130,19 +150,30 @@ namespace ClassifyBot.Example.TCCC
                 }
 
                 // Identity hate               
-                if (identityHateWords.Contains(w))
+                if (identityHateWords.Contains(w.ToLower()))
                 {
                     output.Features.Add((FeatureMap[2], "HATE_WORD"));
-                    break;
                 }
-                
+
+                // Personal               
+                if (w.ToLower().StartsWith("you") || w.ToLower() == "he")
+                {
+                    output.Features.Add((FeatureMap[2], "PERSONAL"));
+                }
+
+                // Possessive               
+                if (w.ToLower() == "me" || w.ToLower() == "my" || w.ToLower() == "mine")
+                {
+                    output.Features.Add((FeatureMap[2], "POSSESSIVE"));
+                }
+
             }
 
             
-
+            //Hate phrase
             for (int h = 0; h < hatePhrases.Length; h++)
             {
-                if (text.Contains(hatePhrases[h].Split(',')[0]))
+                if (text.ToLower().Contains(hatePhrases[h].Split(',')[0]))
                 {
                     output.Features.Add((FeatureMap[2], "HATE_PHRASE"));
                     break;
@@ -182,7 +213,7 @@ namespace ClassifyBot.Example.TCCC
         protected static Regex wordSplitter = new Regex("\\s+", RegexOptions.Compiled);
 
         #region Word lists
-        protected string[] slangWords = @"121	one to one
+        protected static string[] slangWords = @"121	one to one
             a/s/l	age, sex, location
             adn	any day now
             afaik	as far as I know
@@ -583,7 +614,7 @@ namespace ClassifyBot.Example.TCCC
                 ;;wrothful;;;;;;;
                 ;;yucky;;;;;;;".Split("\r\n".ToCharArray(), StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()).ToArray();
 
-        protected static string[] positiveEmotionWordLabls = "njoy;love;enthusiasm;gratitude;self-pride;calmness;fearlessness;positive-expectation;positive-hope;positive-fear;affection;liking".Split(';');
+        protected static string[] positiveEmotionWordLabls = "joy;love;enthusiasm;gratitude;self-pride;calmness;fearlessness;positive-expectation;positive-hope;positive-fear;affection;liking".Split(';');
 
         protected static string[] positiveEmotionWords = @"appreciated;admirable;avid;appreciatively;;allay;assure;anticipate;bucked_up;;;
             banter;admirably;eager;grateful;;assuasive;confident;cliff-hanging;encourage;;;
@@ -699,7 +730,7 @@ namespace ClassifyBot.Example.TCCC
             solace;;;;;;;;;;;
             soothe;;;;;;;;;;;
             stimulating;;;;;;;;;;;
-            teased;;;;;;;;;;;
+            teased;;;thanks;;;;;;;;
             thrill;;;;;;;;;;;
             tickle;;;;;;;;;;;
             titillate;;;;;;;;;;;

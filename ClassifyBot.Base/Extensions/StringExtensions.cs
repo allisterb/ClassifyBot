@@ -2,6 +2,7 @@
 
 using System;
 using System.Globalization;
+using System.Linq;
 using System.Text;
 
 namespace ClassifyBot
@@ -89,6 +90,17 @@ namespace ClassifyBot
             string _byteOrderMarkUtf8 = Encoding.UTF8.GetString(Encoding.UTF8.GetPreamble());
             return s.Replace(_byteOrderMarkUtf8, string.Empty);
 
+        }
+
+        public static bool IsAlphaNumeric(this string value)
+        {
+            return value.All(c => Char.IsLetterOrDigit(c));
+        }
+
+        public static string ToAlphaNumeric(this string s)
+        {
+            char[] chars = s.Where(c => Char.IsLetterOrDigit(c)).ToArray();
+            return new String(chars);
         }
     }
 }
