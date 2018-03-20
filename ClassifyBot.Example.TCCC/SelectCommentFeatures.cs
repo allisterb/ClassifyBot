@@ -17,29 +17,36 @@ namespace ClassifyBot.Example.TCCC
 
         static SelectCommentFeatures()
         {
-            var sw = slangWords.Select(s => s.Split("\t".ToCharArray(), StringSplitOptions.RemoveEmptyEntries))
-                .Select(s => new KeyValuePair<string, string>(s[0], s[1]));
-            foreach (KeyValuePair<string, string> kv in sw)
-            {
-                Slang.Add(kv.Key, kv.Value);
-            }
+            Slang = (Lookup<string, string>) slangWords
+                .Select(s => s.Split("\t".ToCharArray(), StringSplitOptions.RemoveEmptyEntries))
+                .Select(s => new KeyValuePair<string, string>(s[0], s[1]))
+                .ToLookup((x => x.Key), (x => x.Value));
+            
+            WordSentiment = (Lookup<string, float>) sentimentWords
+                .Where(s => s.Contains("\t")).Select(s => s.Split("\t".ToCharArray(), StringSplitOptions.RemoveEmptyEntries))
+                .Select(s => new KeyValuePair<string, float>(s[0], Single.Parse(s[1])))
+                .ToLookup((x => x.Key), (x => x.Value));
+            
+            PositiveEmotionWords = (Lookup<string, string>)positiveEmotionWords
+                .Select(a => a.Split(';')
+                .Select((s, i) => new KeyValuePair<string, string>(positiveEmotionWordLabels[i], s)))
+                .SelectMany(x => x)
+                .ToLookup((x => x.Key), (x => x.Value));
 
-            var senw = sentimentWords.Where(s => s.Contains("\t")).Select(s => s.Split("\t".ToCharArray(), StringSplitOptions.RemoveEmptyEntries))
-                .Select(s => new KeyValuePair<string, float>(s[0], Single.Parse(s[1])));
-            foreach (KeyValuePair<string, float> kv in senw)
-            {
-                if (!WordSentiment.ContainsKey(kv.Key))
-                {
-                    WordSentiment.Add(kv.Key, kv.Value);
-                }
-            }
+            NegativeEmotionWords = (Lookup<string, string>)negativeEmotionWords
+                .Select(a => a.Split(';')
+                .Select((s, i) => new KeyValuePair<string, string>(negativeEmotionWordLabels[i], s)))
+                .SelectMany(x => x)
+                .ToLookup((x => x.Key), (x => x.Value));
 
-            AmbiguousEmotionWords = (Lookup<string, string>) ambiguousEmotionWords.Select(a => a.Split(';').Select((s, i) => new KeyValuePair<string, string>(ambiguousEmotionWordLabels[i], s))).SelectMany(x => x).ToLookup((x => x.Key), (x => x.Value));
+            AmbiguousEmotionWords = (Lookup<string, string>) ambiguousEmotionWords
+                .Select(a => a.Split(';')
+                .Select((s, i) => new KeyValuePair<string, string>(ambiguousEmotionWordLabels[i], s)))
+                .SelectMany(x => x)
+                .ToLookup((x => x.Key), (x => x.Value));
         }
 
         #endregion
-
-        //.Select((s, i) => s.SelectMany(x =>x))
 
         #region Overriden members
         protected override StageResult Init()
@@ -110,11 +117,10 @@ namespace ClassifyBot.Example.TCCC
                 }
 
                 //Slang
-                int sl = Array.IndexOf(slangWords, wlower);
-                if (sl >= 0)
+                if (Slang.Contains(wlower))
                 {
                     output.Features.Add((FeatureMap[2], "SLANG"));
-                    text = text.Replace(w, slangWords[sl].Split('\t')[1].Trim());
+                    text = text.Replace(wlower, Slang[wlower].First());
                 }
 
                 //Profanity
@@ -124,78 +130,49 @@ namespace ClassifyBot.Example.TCCC
                 }
 
                 //Negative emotion
-                for (int n = 0; n < negativeEmotionWords.Length; n++)
+                if (NegativeEmotionWords.Any(g => g.Contains(wlower)))
                 {
-                    if (negativeEmotionWords[n].Split(';').Contains(wlower))
-                    {
-                        string[] nw = negativeEmotionWords[n].Split(';');
-                        for (int j = 0; j < nw.Length; j++)
-                        {
-                            if (nw[j] == wlower)
-                            {
-                                output.Features.Add((FeatureMap[2], negativeEmotionWordLabls[j].ToUpper()));
-                                break;
-                            }
-                        }
-                    }
+                    output.Features.Add((FeatureMap[2], NegativeEmotionWords.First(g => g.Contains(wlower)).Key));
+                    break;
                 }
 
+
                 //Positive emotion
-                for (int p = 0; p < positiveEmotionWords.Length; p++)
+                if (PositiveEmotionWords.Any(g => g.Contains(wlower)))
                 {
-                    if (positiveEmotionWords[p].Split(';').Contains(wlower))
-                    {
-                        string[] pw = positiveEmotionWords[p].Split(';');
-                        for (int j = 0; j < pw.Length; j++)
-                        {
-                            if (pw[j] == wlower)
-                            {
-                                output.Features.Add((FeatureMap[2], positiveEmotionWordLabls[j].ToUpper()));
-                                break;
-                            }
-                        }
-                    }
+                    output.Features.Add((FeatureMap[2], PositiveEmotionWords.First(g => g.Contains(wlower)).Key));
+                    break;
                 }
 
                 //Ambiguous emotion
-                for (int a = 0; a < ambiguousEmotionWords.Length; a++)
+                if (AmbiguousEmotionWords.Any(g => g.Contains(wlower)))
                 {
-                    if (ambiguousEmotionWords[a].Split(';').Contains(wlower))
-                    {
-                        string[] aw = ambiguousEmotionWords[a].Split(';');
-                        for (int j = 0; j < aw.Length; j++)
-                        {
-                            if (aw[j] == wlower)
-                            {
-                                output.Features.Add((FeatureMap[2], ambiguousEmotionWordLabels[j].ToUpper()));
-                                break;
-                            }
-                        }
-                    }
+                    output.Features.Add((FeatureMap[2], AmbiguousEmotionWords.First(g => g.Contains(wlower)).Key));
+                    break;
                 }
 
                 //Sentiment
-                for (int s = 0; s < sentimentWords.Length; s++)
+
+
+                if (WordSentiment.Contains(wlower))
                 {
-                    if (sentimentWords[s].Split('\t')[0] == wlower)
+                    if (output.Features.Any(f => f.Item1 == FeatureMap[5]))
                     {
-                        if (output.Features.Any(f => f.Item1 == FeatureMap[5]))
-                        {
-                            (string, string) orig = output.Features.First(f => f.Item1 == FeatureMap[5]);
-                            Single orig_score = Single.Parse(orig.Item2);
-                            Single new_score = Single.Parse(sentimentWords[s].Split('\t')[1]) + orig_score;
-                            output.Features.Remove(orig);
-                            output.Features.Add((FeatureMap[5], new_score.ToString()));
-                            break;
-                        }
-                        else
-                        {
-                            output.Features.Add((FeatureMap[5], sentimentWords[s].Split('\t')[1]));
-                            break;
-                        }
-                        
+                        (string, string) orig = output.Features.First(f => f.Item1 == FeatureMap[5]);
+                        Single orig_score = Single.Parse(orig.Item2);
+                        Single new_score = WordSentiment[wlower].First() + orig_score;
+                        output.Features.Remove(orig);
+                        output.Features.Add((FeatureMap[5], new_score.ToString()));
+                        break;
                     }
+                    else
+                    {
+                        output.Features.Add((FeatureMap[5], WordSentiment[wlower].First().ToString()));
+                        break;
+                    }
+                        
                 }
+                
                 // Identity hate               
                 if (identityHateWords.Contains(w.ToLower()))
                 {
@@ -237,9 +214,13 @@ namespace ClassifyBot.Example.TCCC
 
         #region Properties
 
-        public static Dictionary<string, string> Slang { get; protected set; } = new Dictionary<string, string>();
+        public static Lookup<string, string> Slang { get; protected set; }
 
-        public static Dictionary<string, float> WordSentiment { get; protected set; } = new Dictionary<string, float>();
+        public static Lookup<string, float> WordSentiment { get; protected set; }
+
+        public static Lookup<string, string> PositiveEmotionWords { get; protected set; }
+
+        public static Lookup<string, string> NegativeEmotionWords { get; protected set; }
 
         public static Lookup<string, string> AmbiguousEmotionWords { get; protected set; }
 
@@ -419,7 +400,7 @@ namespace ClassifyBot.Example.TCCC
             "wichser", "wop", "xrated", "xxx", "Lipshits", "Mother Fukkah", "zabourah", "Phuk", "Poonani",
             "puta", "recktum", "sharmute", "Shyty", "smut", "vullva", "yed"};
 
-        protected static string[] negativeEmotionWordLabls = "negative-fear;sadness;general-dislike;ingratitude;shame;compassion;humility;despair;anxiety;daze".Split(';');
+        protected static string[] negativeEmotionWordLabels = "negative-fear;sadness;general-dislike;ingratitude;shame;compassion;humility;despair;anxiety;daze".Split(';');
 
         protected static string[] negativeEmotionWords = @"affright;aggrieve;abhor;;abase;affectionate;abase;abject;afraid;bedaze
                 afraid;bad;abhorrent;;abash;caring;chagrin;abjectly;anxious;daze
@@ -660,7 +641,7 @@ namespace ClassifyBot.Example.TCCC
                 ;;wrothful;;;;;;;
                 ;;yucky;;;;;;;".Split("\r\n".ToCharArray(), StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()).ToArray();
 
-        protected static string[] positiveEmotionWordLabls = "joy;love;enthusiasm;gratitude;self-pride;calmness;fearlessness;positive-expectation;positive-hope;positive-fear;affection;liking".Split(';');
+        protected static string[] positiveEmotionWordLabels = "joy;love;enthusiasm;gratitude;self-pride;calmness;fearlessness;positive-expectation;positive-hope;positive-fear;affection;liking".Split(';');
 
         protected static string[] positiveEmotionWords = @"appreciated;admirable;avid;appreciatively;;allay;assure;anticipate;bucked_up;;;
             banter;admirably;eager;grateful;;assuasive;confident;cliff-hanging;encourage;;;
