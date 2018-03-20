@@ -71,7 +71,7 @@ namespace ClassifyBot.Example.TCCC
             for (int i = 0; i < words.Length; i++)
             {
                 string w = words[i].ToAlphaNumeric();//Trim('\r', '\n', '\t', '.', ',', '!', ';');
-                if (w.StartsWith("http") || Int32.TryParse(w, out int integer) || Single.TryParse(w, out float fp))
+                if (w.Empty() || w.StartsWith("http") || Int32.TryParse(w, out int integer) || Single.TryParse(w, out float fp))
                 {
                     continue;
                 }
@@ -149,6 +149,28 @@ namespace ClassifyBot.Example.TCCC
                     }
                 }
 
+                //Sentiment
+                for (int s = 0; s < sentimentWords.Length; s++)
+                {
+                    if (sentimentWords[s].Split('\t')[0] == wlower)
+                    {
+                        if (output.Features.Any(f => f.Item1 == FeatureMap[5]))
+                        {
+                            (string, string) orig = output.Features.First(f => f.Item1 == FeatureMap[5]);
+                            Single orig_score = Single.Parse(orig.Item2);
+                            Single new_score = Single.Parse(sentimentWords[s].Split('\t')[1]) + orig_score;
+                            output.Features.Remove(orig);
+                            output.Features.Add((FeatureMap[5], new_score.ToString()));
+                            break;
+                        }
+                        else
+                        {
+                            output.Features.Add((FeatureMap[5], sentimentWords[s].Split('\t')[1]));
+                            break;
+                        }
+                        
+                    }
+                }
                 // Identity hate               
                 if (identityHateWords.Contains(w.ToLower()))
                 {
@@ -674,7 +696,7 @@ namespace ClassifyBot.Example.TCCC
             gratifying;entrancing;;;;;;;;;;
             gratifyingly;fascinate;;;;;;;;;;
             happily;fascinating;;;;;;;;;;
-            happy;favor;;;;;;;;;;
+            happy;favor;;hero;;;;;;;;
             hearten;favorable;;;;;;;;;;
             hilarious;favorably;;;;;;;;;;
             hilariously;favour;;;;;;;;;;
