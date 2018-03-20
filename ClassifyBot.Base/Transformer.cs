@@ -164,7 +164,7 @@ namespace ClassifyBot
         {
             for (int i = 0; i < InputRecords.Count; i++)
             {
-                OutputRecords.Add(TransformInputToOutput(L, StageOptions, InputRecords[i]));
+                OutputRecords.Add(TransformInputToOutput(L, WriterOptions, InputRecords[i]));
             }
             Info("Transformed {0} records with maximum {1} features to {2}.", OutputRecords.Count, OutputRecords.Max(r => r.Features.Count), OutputFileName);
             return StageResult.SUCCESS;

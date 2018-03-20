@@ -13,7 +13,7 @@ namespace ClassifyBot.Example.TCCC
     public class SelectCommentFeatures : Transformer<Comment, string>
     {
         #region Constructor
-        public SelectCommentFeatures() : base() {}
+        public SelectCommentFeatures() : base() { }
         #endregion
 
         #region Overriden members
@@ -70,7 +70,7 @@ namespace ClassifyBot.Example.TCCC
             string[] words = wordSplitter.Split(text);
             for (int i = 0; i < words.Length; i++)
             {
-                string w = words[i];
+                string w = words[i].Trim();
 
                 //Profanity
                 if (profanityWords.Contains(w))
@@ -92,7 +92,6 @@ namespace ClassifyBot.Example.TCCC
                                 break;
                             }
                         }
-                        break;
                     }
                 }
 
@@ -110,7 +109,6 @@ namespace ClassifyBot.Example.TCCC
                                 break;
                             }
                         }
-                        break;
                     }
                 }
 
@@ -129,19 +127,18 @@ namespace ClassifyBot.Example.TCCC
                             }
                         }
                     }
-                    break;
                 }
-            }
 
-            //Identity hate
-            for (int h = 0; h < identityHateWords.Length; h++)
-            {
-                if (text.Contains(identityHateWords[h]))
+                // Identity hate               
+                if (identityHateWords.Contains(w))
                 {
                     output.Features.Add((FeatureMap[2], "HATE_WORD"));
                     break;
                 }
+                
             }
+
+            
 
             for (int h = 0; h < hatePhrases.Length; h++)
             {
@@ -152,63 +149,24 @@ namespace ClassifyBot.Example.TCCC
                 }
             }
 
-            //if (profanityWords)
-            //StringBuilder textBuilder = new StringBuilder(input.Features[0].Item2.Trim());
-            /*
-            Regex doubleQuote = new Regex("\\\".*?\\\"", RegexOptions.Compiled | RegexOptions.Multiline);
-            Regex singleQuote = new Regex("\\\'.*?\\\"", RegexOptions.Compiled | RegexOptions.Multiline);
-            text = text.Replace('\t', ' '); //Remove tabs
-            text = text.Replace("\r\n", " "); // Replace Windows line breaks with space
-            text = text.Replace('\n', ' '); // Replace Linux line breaks with space
-            text = singleQuote.Replace(text, new MatchEvaluator(ReplaceStringLiteral)); //Remove any quote string literals
-            text = doubleQuote.Replace(text, new MatchEvaluator(ReplaceStringLiteral)); //Remove any doublequote string literals
-            text = text.Replace("&lt;", "<");
-            text = text.Replace("&gt;", ">");
-            */
+           
 
-            string lexicalFeature = string.Empty;
-            if (Regex.IsMatch(text, "{.*?}"))
-            {
-                lexicalFeature = lexicalFeature += FeatureMap[1] + " ";
-            }
-            else
-            {
-                lexicalFeature = lexicalFeature += "NO_" + FeatureMap[1] + " ";
-            }
-            if (Regex.IsMatch(text, "; "))
-            {
-                lexicalFeature = lexicalFeature += FeatureMap[2] + " ";
-            }
-            else
-            {
-                lexicalFeature = lexicalFeature += "NO_" + FeatureMap[2] + " ";
-            }
-            if (Regex.IsMatch(text, "<.*?>"))
-            {
-                lexicalFeature = lexicalFeature += FeatureMap[3] + " ";
-            }
-            else
-            {
-                lexicalFeature = lexicalFeature += "NO_" + FeatureMap[3] + " ";
-            }
-            //output.Features.Add(("LEXICAL", lexicalFeature.Trim()));
-            
-            return null;
+            return output;
         };
 
-       
+
 
         protected override StageResult Cleanup() => StageResult.SUCCESS;
         #endregion
 
         #region Properties
-        public static List<string> TokenFeatures { get; protected set; }  = new List<string> { "ELLIPSIS", "SINGLE_EXCLAMATION_MARK", "MULTIPLE_EXCLAMATION_MARK", "SINGLE_QUESTION_MARK", "MULTIPLE_QUESTION_MARK", "NEGATIVE_EMOTICON", "POSITIVE_EMOTICON" };
+        public static List<string> TokenFeatures { get; protected set; } = new List<string> { "ELLIPSIS", "SINGLE_EXCLAMATION_MARK", "MULTIPLE_EXCLAMATION_MARK", "SINGLE_QUESTION_MARK", "MULTIPLE_QUESTION_MARK", "NEGATIVE_EMOTICON", "POSITIVE_EMOTICON" };
 
-        public static List<string> LexicalFeatures { get; protected set; } = new List<string> { "PROFANITY_WORD", "NEGATIVE_EMOTION_WORD", "POSITIVE_EMOTIION_WORD", "HATE_WORD", "HEDGE_WORD"};
+        public static List<string> LexicalFeatures { get; protected set; } = new List<string> { "PROFANITY_WORD", "NEGATIVE_EMOTION_WORD", "POSITIVE_EMOTIION_WORD", "HATE_WORD", "HEDGE_WORD" };
 
         public static Dictionary<string, float> WordSentiment { get; protected set; }
 
-        [Option("with-fulltext-feature", Required = true, Default = false, HelpText = "Include the full text of the comment as a feature. This is off by default.")]
+        [Option("with-fulltext-feature", Required = false, Default = false, HelpText = "Include the full text of the comment as a feature. This is off by default.")]
         public bool WithFullTextFeature { get; set; }
         #endregion
 
@@ -313,7 +271,7 @@ namespace ClassifyBot.Example.TCCC
             wtf	what the fuck
             wtg	way to go
             wtgp	want to go private
-            ym	young man".Split('\r', '\n').Select(s => s.Trim()).ToArray();
+            ym	young man".Split("\r\n".ToCharArray(), StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()).ToArray();
 
 
         protected static string[] hedgeWords = {"almost", "apparent", "apparently", "appear", "appeared", "appears",
@@ -623,7 +581,7 @@ namespace ClassifyBot.Example.TCCC
                 ;;wrathfully;;;;;;;
                 ;;wroth;;;;;;;
                 ;;wrothful;;;;;;;
-                ;;yucky;;;;;;;".Split('\r', '\n').Select(s => s.Trim()).ToArray();
+                ;;yucky;;;;;;;".Split("\r\n".ToCharArray(), StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()).ToArray();
 
         protected static string[] positiveEmotionWordLabls = "njoy;love;enthusiasm;gratitude;self-pride;calmness;fearlessness;positive-expectation;positive-hope;positive-fear;affection;liking".Split(';');
 
@@ -760,7 +718,7 @@ namespace ClassifyBot.Example.TCCC
             walk_on_air;;;;;;;;;;;
             wallow;;;;;;;;;;;
             with_happiness;;;;;;;;;;;
-            with_pride;;;;;;;;;;;".Split('\r', '\n').Select(s => s.Trim()).ToArray();
+            with_pride;;;;;;;;;;;".Split("\r\n".ToCharArray(), StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()).ToArray();
 
         protected static string[] ambiguousEmotionWordLabels = "thing; gravity;surprise;ambiguous-agitation;ambiguous-fear;pensiveness;ambiguous-expectation".Split(';');
 
@@ -829,7 +787,7 @@ namespace ClassifyBot.Example.TCCC
             ;;wonderful;;;;
             ;;wonderfully;;;;
             ;;wondrous;;;;
-            ;;wondrously;;;;".Split('\r', '\n').Select(s => s.Trim()).ToArray();
+            ;;wondrously;;;;".Split("\r\n".ToCharArray(), StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()).ToArray();
 
         protected static string[] emoticonWords = @"%-(	-1
             %-)	1
@@ -946,7 +904,7 @@ namespace ClassifyBot.Example.TCCC
             |8C	-1
             |8c	-1
             |D	1
-            }:)	1".Split('\r', '\n').Select(s => s.Trim()).ToArray();
+            }:)	1".Split("\r\n".ToCharArray(), StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()).ToArray();
 
         protected static string[] identityHateWords = {
             "uncivilised",
@@ -2162,7 +2120,7 @@ namespace ClassifyBot.Example.TCCC
             niggers are in my,0.714
             wit a lame nigga,0.556
             you a lame bitch,0.556
-            you fuck wit a,0.556".Split('\r', '\n').Select(s => s.Trim()).ToArray();
+            you fuck wit a,0.556".Split("\r\n".ToCharArray(), StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()).ToArray();
 
         protected static string[] sentimentWords = @"$:	-1.5
             %)	-0.4
@@ -9673,7 +9631,7 @@ namespace ClassifyBot.Example.TCCC
             }:( -2
             }:)	0.4
             }:-(    -2.1
-            }:-)	0.3".Split('\r', '\n').Select(s => s.Trim()).ToArray();
+            }:-)	0.3".Split("\r\n".ToCharArray(), StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()).ToArray();
         #endregion
 
         #endregion

@@ -8,7 +8,7 @@ using CommandLine;
 
 namespace ClassifyBot.Pipeline.CodeProject.SpamFilter
 {
-    [Verb("emaildata-extract", HelpText = "Extract email data from the CodeProject site into a common JSON format.")]
+    //[Verb("emaildata-extract", HelpText = "Extract email data from the CodeProject site into a common JSON format.")]
     public class EmailDataExtractor : WebFileExtractor<EmailItem, string>
     {
         #region Constructors

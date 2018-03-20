@@ -2,7 +2,7 @@
   "profiles": {
     "ClassifyBot.Cli": {
       "commandName": "Project",
-      "commandLineArgs": "langdata-features -i C:\\Projects\\ClassifyBot\\data\\LanguageSamples.json.gz -f C:\\Projects\\ClassifyBot\\LanguageSamplesWithFeatures.json.gz -c -w"
+      "commandLineArgs": "tcc-features -i C:\\Projects\\ClassifyBot\\data\\TCC\\comments.json.gz -f C:\\Projects\\ClassifyBot\\data\\TCC\\\\CommentsWithFeatures.json -w"
     }
   }
 }
