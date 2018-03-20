@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Diagnostics.Contracts;
 using System.IO;
 using System.IO.Compression;
@@ -12,6 +13,7 @@ using System.Threading.Tasks;
 using CommandLine;
 using Newtonsoft.Json;
 using Serilog;
+using SerilogTimings;
 
 
 namespace ClassifyBot
@@ -164,17 +166,46 @@ namespace ClassifyBot
         #region Methods
         protected virtual StageResult Transform(int? recordBatchSize = null, int? recordLimit = null, Dictionary<string, string> options = null)
         {
-            for (int i = 0; i < InputRecords.Count; i++)
+            if (!ParallelExecution || InputRecords.Count < 100 || ((RecordLimitSize > 0) && (RecordLimitSize < 100)))
             {
-                OutputRecords.Add(TransformInputToOutput(L, WriterOptions, InputRecords[i]));
-                if ((i + 1) % 1000 == 0)
+                using (Operation transformOp = Begin("Transforming {0} records using sequential execution", InputRecords.Count))
                 {
-                    Info("Transformed {0} of {1} records...", i, InputRecords.Count);
+                    for (int i = 0; i < InputRecords.Count; i++)
+                    {
+                        OutputRecords.Add(TransformInputToOutput(L, WriterOptions, InputRecords[i]));
+                        if ((i + 1) % 1000 == 0)
+                        {
+                            Info("Transformed {0} of {1} records...", i, InputRecords.Count);
+                        }
+                        if ((RecordLimitSize > 0) && (i + 1 == RecordLimitSize))
+                        {
+                            Info("Stopping transformation at record limit {0}.", i + 1);
+                            transformOp.Complete();
+                            break;
+                        }
+                    }
+                    transformOp.Complete();
                 }
-                if ((RecordLimitSize > 0) && (i + 1 == RecordLimitSize))
+            }
+            else
+            {
+                int limit = RecordLimitSize > 0 ? RecordLimitSize <= InputRecords.Count ? RecordLimitSize : InputRecords.Count : InputRecords.Count;
+                using (Operation transformOp = Begin("Transforming {0} records using parallel execution", limit))
                 {
-                    Info("Stopping transformation at record limit {0}.", i + 1);
-                    break;
+                    ConcurrentDictionary<int, TRecord> concurrentOutputDictionary = new ConcurrentDictionary<int, TRecord>();
+                    
+                    Parallel.For(0, limit, (i, loop) =>
+                    {
+                        TRecord output = TransformInputToOutput(L, WriterOptions, InputRecords[i]);
+                        concurrentOutputDictionary.TryAdd(i, output);
+                        if ((i + 1) % 1000 == 0)
+                        {
+                            Info("Transformed {0} of {1} records...", i + 1, limit);
+                        }
+                    });
+                    OutputRecords = concurrentOutputDictionary.Values.ToList();
+                    transformOp.Complete();
+                     
                 }
             }
             Info("Transformed {0} records with maximum {1} features to {2}.", OutputRecords.Count, OutputRecords.Max(r => r.Features.Count), OutputFileName);

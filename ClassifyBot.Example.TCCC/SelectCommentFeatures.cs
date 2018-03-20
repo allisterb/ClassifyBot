@@ -70,7 +70,7 @@ namespace ClassifyBot.Example.TCCC
             string[] words = wordSplitter.Split(text).Select(w => w.ToAlphaNumeric()).ToArray();
             for (int i = 0; i < words.Length; i++)
             {
-                string w = words[i].ToAlphaNumeric();//Trim('\r', '\n', '\t', '.', ',', '!', ';');
+                string w = words[i].ToAlphaNumeric();
                 if (w.Empty() || w.StartsWith("http") || Int32.TryParse(w, out int integer) || Single.TryParse(w, out float fp))
                 {
                     continue;
@@ -191,6 +191,7 @@ namespace ClassifyBot.Example.TCCC
 
             }
 
+            /*
             //Hate phrase
             for (int h = 0; h < hatePhrases.Length; h++)
             {
@@ -199,7 +200,7 @@ namespace ClassifyBot.Example.TCCC
                     output.Features.Add((FeatureMap[2], "HATE_PHRASE"));
                     break;
                 }
-            }
+            }*/
             logger.Debug("Comment \'{0}\' has features {1}.", text, output.Features.Select(f => "{0}:{1}".F(f.Item1, f.Item2)));
             return output;
         };

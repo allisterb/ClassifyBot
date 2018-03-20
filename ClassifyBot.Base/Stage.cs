@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -10,6 +11,8 @@ using System.Text.RegularExpressions;
 using CommandLine;
 using MeSh = Medallion.Shell;
 using Serilog;
+using SerilogTimings;
+using SerilogTimings.Extensions;
 
 namespace ClassifyBot
 {
@@ -75,15 +78,24 @@ namespace ClassifyBot
 
         [Option('l', "records", Required = false, HelpText = "Limit the number of records processed for stage operation.", Default = 0)]
         public virtual int RecordLimitSize { get; set; }
+
+        [Option('p', "parallel", Required = false, HelpText = "Use parallel execution where possible.", Default = false)]
+        public virtual bool ParallelExecution { get; set; }
         #endregion
 
         #region Methods
-        public virtual void Info(string messageTemplate, params object[] propertyValues) => L.Information(messageTemplate, propertyValues);
-        public virtual void Debug(string messageTemplate, params object[] propertyValues) => L.Debug(messageTemplate, propertyValues);
-        public virtual void Error(string messageTemplate, params object[] propertyValues) => L.Error(messageTemplate, propertyValues);
-        public virtual void Error(Exception e, string messageTemplate, params object[] propertyValues) => L.Error(e, messageTemplate, propertyValues);
-        public virtual void Verbose(string messageTemplate, params object[] propertyValues) => L.Verbose(messageTemplate, propertyValues);
-        public virtual void Warn(string messageTemplate, params object[] propertyValues) => L.Warning(messageTemplate, propertyValues);
+        [DebuggerStepThrough] public virtual void Info(string messageTemplate, params object[] propertyValues) => L.Information(messageTemplate, propertyValues);
+        [DebuggerStepThrough] public virtual void Debug(string messageTemplate, params object[] propertyValues) => L.Debug(messageTemplate, propertyValues);
+        [DebuggerStepThrough] public virtual void Error(string messageTemplate, params object[] propertyValues) => L.Error(messageTemplate, propertyValues);
+        [DebuggerStepThrough] public virtual void Error(Exception e, string messageTemplate, params object[] propertyValues) => L.Error(e, messageTemplate, propertyValues);
+        [DebuggerStepThrough] public virtual void Verbose(string messageTemplate, params object[] propertyValues) => L.Verbose(messageTemplate, propertyValues);
+        [DebuggerStepThrough] public virtual void Warn(string messageTemplate, params object[] propertyValues) => L.Warning(messageTemplate, propertyValues);
+        [DebuggerStepThrough]
+        public virtual Operation Begin(string messageTemplate, params object[] args) 
+        {
+            Info(messageTemplate + "...", args);
+            return L.BeginOperation(messageTemplate, args);
+        }
 
         protected static void SetPropFromDict(Type t, object o, Dictionary<string, object> p)
         {
