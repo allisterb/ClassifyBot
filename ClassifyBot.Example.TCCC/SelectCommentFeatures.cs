@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -16,9 +17,95 @@ namespace ClassifyBot.Example.TCCC
         #endregion
 
         #region Overriden members
+        protected override StageResult Init()
+        {
+            if (!StageResultSuccess(base.Init(), out StageResult r)) return r;
+
+            FeatureMap.Add(0, "TEXT");
+            FeatureMap.Add(1, "TOKEN");
+            FeatureMap.Add(2, "LEXICAL");
+            FeatureMap.Add(3, "SYNTACTIC");
+            FeatureMap.Add(4, "SEMANTIC");
+            FeatureMap.Add(5, "PRAGMATIC");
+
+            WriterOptions.Add("WithFullTextFeature", WithFullTextFeature);
+            return StageResult.SUCCESS;
+        }
+
         protected override Func<ILogger, Dictionary<string, object>, Comment, Comment> TransformInputToOutput { get; } = (logger, options, input) =>
         {
+            Comment output = new Comment(input._Id.HasValue ? input._Id.Value : 0, input.Id, string.Empty);
+            bool withFullTextFeature = (bool)options["WithFullTextFeature"];
+            if (!withFullTextFeature)
+            {
+                output.Features.RemoveAt(0);
+            }
             string text = input.Features[0].Item2.Trim();
+            string[] words = wordSplitter.Split(text);
+            for (int i = 0; i < words.Length; i++)
+            {
+                string w = words[i];
+
+                //Profanity
+                if (profanityWords.Contains(w))
+                {
+                    output.Features.Add((FeatureMap[2], "PROFANITY"));
+                }
+
+                //Negative emotion
+                for (int n = 0; n < negativeEmotionWords.Length; n++)
+                {
+                    if (negativeEmotionWords[n].Contains(w))
+                    {
+                        string[] nw = negativeEmotionWords[n].Split(';');
+                        for (int j = 0; j < nw.Length; j++)
+                        {
+                            if (nw[j] == w)
+                            {
+                                output.Features.Add((FeatureMap[2], negativeEmotionWordLabls[j].ToUpper()));
+                            }
+                        }
+
+                    }
+                }
+
+                //Positive emotion
+                for (int p = 0; p < positiveEmotionWords.Length; p++)
+                {
+                    if (positiveEmotionWords[p].Contains(w))
+                    {
+                        string[] pw = positiveEmotionWords[p].Split(';');
+                        for (int j = 0; j < pw.Length; j++)
+                        {
+                            if (pw[j] == w)
+                            {
+                                output.Features.Add((FeatureMap[2], positiveEmotionWordLabls[j].ToUpper()));
+                            }
+                        }
+
+                    }
+                }
+
+                //Ambiguous emotion
+                for (int a = 0; a < ambiguousEmotionWords.Length; a++)
+                {
+                    if (ambiguousEmotionWords[a].Contains(w))
+                    {
+                        string[] aw = ambiguousEmotionWords[a].Split(';');
+                        for (int j = 0; j < aw.Length; j++)
+                        {
+                            if (aw[j] == w)
+                            {
+                                output.Features.Add((FeatureMap[2], ambiguousEmotionWordLabels[j].ToUpper()));
+                            }
+                        }
+
+                    }
+                }
+
+            }
+
+
             //if (profanityWords)
             //StringBuilder textBuilder = new StringBuilder(input.Features[0].Item2.Trim());
             /*
@@ -63,29 +150,20 @@ namespace ClassifyBot.Example.TCCC
             return null;
         };
 
-        protected override StageResult Init()
-        {
-            if (!StageResultSuccess(base.Init(), out StageResult r)) return r;
-
-            FeatureMap.Add(0, "TEXT");
-            FeatureMap.Add(1, "TOKEN");
-            FeatureMap.Add(2, "LEXICAL");
-            FeatureMap.Add(3, "SYNTACTIC");
-            FeatureMap.Add(4, "SEMANTIC");
-            FeatureMap.Add(5, "PRAGMATIC");
-            return StageResult.SUCCESS;
-        }
+       
 
         protected override StageResult Cleanup() => StageResult.SUCCESS;
         #endregion
 
         #region Properties
-        [Option('d', "data-dir", Required = true, HelpText = "Path to directory with external data files.")]
-        public virtual string ExternalDataDirPath { get; set; }
+        public static List<string> TokenFeatures { get; protected set; }  = new List<string> { "ELLIPSIS", "SINGLE_EXCLAMATION_MARK", "MULTIPLE_EXCLAMATION_MARK", "SINGLE_QUESTION_MARK", "MULTIPLE_QUESTION_MARK", "NEGATIVE_EMOTICON", "POSITIVE_EMOTICON" };
 
-        public virtual List<string> TokenFeatures { get; protected set; }  = new List<string> { "ELLIPSIS", "SINGLE_EXCLAMATION_MARK", "MULTIPLE_EXCLAMATION_MARK", "SINGLE_QUESTION_MARK", "MULTIPLE_QUESTION_MARK", "NEGATIVE_EMOTICON", "POSITIVE_EMOTICON" };
+        public static List<string> LexicalFeatures { get; protected set; } = new List<string> { "PROFANITY_WORD", "NEGATIVE_EMOTION_WORD", "POSITIVE_EMOTIION_WORD", "HATE_WORD", "HEDGE_WORD"};
 
-        public virtual List<string> LexicalFeatures { get; protected set; } = new List<string> { "HEDGE_WORD", "PROFANITY_WORD", "NEGATIVE_WORD", "POSITIVE_WORD", "HATE_WORD" };
+        public static Dictionary<string, float> WordSentiment { get; protected set; }
+
+        [Option("with-fulltext-feature", Required = true, Default = false, HelpText = "Include the full text of the comment as a feature. This is off by default.")]
+        public bool WithFullTextFeature { get; set; }
         #endregion
 
         #region Methods
@@ -97,6 +175,7 @@ namespace ClassifyBot.Example.TCCC
 
         #region Fields
 
+        protected static Regex wordSplitter = new Regex("\\s+", RegexOptions.Compiled);
         #region Word lists
         protected static string[] hedgeWords = {"almost", "apparent", "apparently", "appear", "appeared", "appears",
           "approximately", "argue", "argued", "argues", "around", "assume",
@@ -544,8 +623,9 @@ namespace ClassifyBot.Example.TCCC
             with_happiness;;;;;;;;;;;
             with_pride;;;;;;;;;;;".Split('\r', '\n');
 
-        protected static string[] ambiguousEmotionWords = @"thing;gravity;surprise;ambiguous-agitation;ambiguous-fear;pensiveness;ambiguous-expectation
-            ;dear;amaze;agitate;fear;brooding;anticipant
+        protected static string[] ambiguousEmotionWordLabels = "thing; gravity;surprise;ambiguous-agitation;ambiguous-fear;pensiveness;ambiguous-expectation".Split(';');
+
+        protected static string[] ambiguousEmotionWords = @";dear;amaze;agitate;fear;brooding;anticipant
             ;devout;amazed;agitated;hero-worship;broody;anticipate
             ;earnest;amazing;electrifying;idolize;contemplative;anticipative
             ;earnestly;amazingly;excite;revere;meditative;desire
