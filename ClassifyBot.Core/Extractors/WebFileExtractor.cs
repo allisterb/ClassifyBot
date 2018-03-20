@@ -13,16 +13,16 @@ using Serilog;
 
 namespace ClassifyBot
 {
-    public abstract class WebFileExtract<TRecord, TFeature> : FileExtract<TRecord, TFeature> where TFeature : ICloneable, IComparable, IComparable<TFeature>, IConvertible, IEquatable<TFeature> where TRecord : Record<TFeature>
+    public abstract class WebFileExtractor<TRecord, TFeature> : FileExtractor<TRecord, TFeature> where TFeature : ICloneable, IComparable, IComparable<TFeature>, IConvertible, IEquatable<TFeature> where TRecord : Record<TFeature>
     {
         #region Constructors
-        public WebFileExtract() : base("{0}-clbot-web-extract-dl.tmp".F(DateTime.Now.Ticks))
+        public WebFileExtractor() : base("{0}-clbot-web-extract-dl.tmp".F(DateTime.Now.Ticks))
         {
             Contract.Requires(!InputFileUrl.Empty());
             
         }
 
-        public WebFileExtract(string _inputFileUrl) : base("{0}-clbot-web-extract-dl.tmp".F(DateTime.Now.Ticks))
+        public WebFileExtractor(string _inputFileUrl) : base("{0}-clbot-web-extract-dl.tmp".F(DateTime.Now.Ticks))
         {
             InputFileUrl = _inputFileUrl;
             if (Uri.TryCreate(InputFileUrl, UriKind.RelativeOrAbsolute, out Uri result))

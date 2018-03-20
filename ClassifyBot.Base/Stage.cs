@@ -70,10 +70,10 @@ namespace ClassifyBot
         [Option('c', "compress", Required = false, Default = false, HelpText = "Output file will be compressed with gzip")]
         public virtual bool CompressOutputFile { get; set; }
 
-        [Option('b', "batch", Required = false, HelpText = "Batch the number of records for stage operation.", Default = 0)]
+        [Option('b', "batch", Required = false, HelpText = "Batch the number of records processed for stage operation.", Default = 0)]
         public virtual int RecordBatchSize { get; set; }
 
-        [Option('l', "records", Required = false, HelpText = "Limit the number of records for stage operation.", Default = 0)]
+        [Option('l', "records", Required = false, HelpText = "Limit the number of records processed for stage operation.", Default = 0)]
         public virtual int RecordLimitSize { get; set; }
         #endregion
 

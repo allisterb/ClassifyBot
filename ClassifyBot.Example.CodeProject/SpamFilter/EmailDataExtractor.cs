@@ -9,7 +9,7 @@ using CommandLine;
 namespace ClassifyBot.Pipeline.CodeProject.SpamFilter
 {
     [Verb("emaildata-extract", HelpText = "Extract email data from the CodeProject site into a common JSON format.")]
-    public class EmailDataExtractor : WebFileExtract<EmailItem, string>
+    public class EmailDataExtractor : WebFileExtractor<EmailItem, string>
     {
         #region Constructors
         public EmailDataExtractor() : base("https://www.codeproject.com/script/Contests/Uploads/1024/LanguageSamples.zip")
@@ -22,7 +22,7 @@ namespace ClassifyBot.Pipeline.CodeProject.SpamFilter
         [Option('u', "url", Required = false, Hidden = true)]
         public override string InputFileUrl => string.Empty;
 
-        protected override Func<ILogger, StreamReader, IEnumerable<EmailItem>> ReadRecordsFromFileStream { get; } = (logger, r) =>
+        protected override Func<ILogger, StreamReader, Dictionary<string, object>, List<EmailItem>> ReadRecordsFromFileStream { get; } = (logger, r, options) =>
         {
             return null;
         };

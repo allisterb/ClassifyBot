@@ -14,22 +14,22 @@ using SharpCompress.IO;
 
 namespace ClassifyBot
 {
-    public abstract class FileExtract<TRecord, TFeature> : Extractor<TRecord, TFeature> where TFeature : ICloneable, IComparable, IComparable<TFeature>, IConvertible, IEquatable<TFeature> where TRecord : Record<TFeature>
+    public abstract class FileExtractor<TRecord, TFeature> : Extractor<TRecord, TFeature> where TFeature : ICloneable, IComparable, IComparable<TFeature>, IConvertible, IEquatable<TFeature> where TRecord : Record<TFeature>
     {
         #region Constructors
-        public FileExtract() : base()
+        public FileExtractor() : base()
         {
             Contract.Requires(InputFile != null);
         }
 
-        public FileExtract(string inputFileName) : base()
+        public FileExtractor(string inputFileName) : base()
         {
             InputFileName = inputFileName;
         }
         #endregion
 
         #region Abstract members
-        protected abstract Func<ILogger, StreamReader, IEnumerable<TRecord>> ReadRecordsFromFileStream { get; }
+        protected abstract Func<ILogger, StreamReader, Dictionary<string, object>, List<TRecord>> ReadRecordsFromFileStream { get; }
         #endregion
 
         #region Overridden members
@@ -61,17 +61,17 @@ namespace ClassifyBot
                     using (Stream rs = reader.OpenEntryStream())
                     using (StreamReader r = new StreamReader(rs))
                     {
-                        ExtractedRecords.AddRange(ReadRecordsFromFileStream(L, r));
+                        ExtractedRecords.AddRange(ReadRecordsFromFileStream(L, r, WriterOptions));
                     }
                 }
             }
             else
             {
-                Info("Reading file {0} with size {1} bytes.", InputFile.Name, InputFile.Length);
+                Info("Reading file {0} with size {1} bytes...", InputFile.Name, InputFile.Length);
                 using (FileStream f = InputFile.OpenRead())
                 using (StreamReader r = new StreamReader(f))
                 {
-                    ExtractedRecords.AddRange(ReadRecordsFromFileStream(L, r));
+                    ExtractedRecords.AddRange(ReadRecordsFromFileStream(L, r, WriterOptions));
                 }
 
             }
