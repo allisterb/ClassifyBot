@@ -13,8 +13,33 @@ namespace ClassifyBot.Example.TCCC
     public class SelectCommentFeatures : Transformer<Comment, string>
     {
         #region Constructor
-        public SelectCommentFeatures() : base() { }
+        public SelectCommentFeatures() : base() {}
+
+        static SelectCommentFeatures()
+        {
+            var sw = slangWords.Select(s => s.Split("\t".ToCharArray(), StringSplitOptions.RemoveEmptyEntries))
+                .Select(s => new KeyValuePair<string, string>(s[0], s[1]));
+            foreach (KeyValuePair<string, string> kv in sw)
+            {
+                Slang.Add(kv.Key, kv.Value);
+            }
+
+            var senw = sentimentWords.Where(s => s.Contains("\t")).Select(s => s.Split("\t".ToCharArray(), StringSplitOptions.RemoveEmptyEntries))
+                .Select(s => new KeyValuePair<string, float>(s[0], Single.Parse(s[1])));
+            foreach (KeyValuePair<string, float> kv in senw)
+            {
+                if (!WordSentiment.ContainsKey(kv.Key))
+                {
+                    WordSentiment.Add(kv.Key, kv.Value);
+                }
+            }
+
+            AmbiguousEmotionWords = (Lookup<string, string>) ambiguousEmotionWords.Select(a => a.Split(';').Select((s, i) => new KeyValuePair<string, string>(ambiguousEmotionWordLabels[i], s))).SelectMany(x => x).ToLookup((x => x.Key), (x => x.Value));
+        }
+
         #endregion
+
+        //.Select((s, i) => s.SelectMany(x =>x))
 
         #region Overriden members
         protected override StageResult Init()
@@ -211,11 +236,12 @@ namespace ClassifyBot.Example.TCCC
         #endregion
 
         #region Properties
-        public static List<string> TokenFeatures { get; protected set; } = new List<string> { "ELLIPSIS", "SINGLE_EXCLAMATION_MARK", "MULTIPLE_EXCLAMATION_MARK", "SINGLE_QUESTION_MARK", "MULTIPLE_QUESTION_MARK", "NEGATIVE_EMOTICON", "POSITIVE_EMOTICON" };
 
-        public static List<string> LexicalFeatures { get; protected set; } = new List<string> { "PROFANITY_WORD", "NEGATIVE_EMOTION_WORD", "POSITIVE_EMOTIION_WORD", "HATE_WORD", "HEDGE_WORD" };
+        public static Dictionary<string, string> Slang { get; protected set; } = new Dictionary<string, string>();
 
-        public static Dictionary<string, float> WordSentiment { get; protected set; }
+        public static Dictionary<string, float> WordSentiment { get; protected set; } = new Dictionary<string, float>();
+
+        public static Lookup<string, string> AmbiguousEmotionWords { get; protected set; }
 
         [Option("with-fulltext-feature", Required = false, Default = false, HelpText = "Include the full text of the comment as a feature. This is off by default.")]
         public bool WithFullTextFeature { get; set; }
