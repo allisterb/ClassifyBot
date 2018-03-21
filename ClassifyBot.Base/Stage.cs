@@ -84,12 +84,12 @@ namespace ClassifyBot
         #endregion
 
         #region Methods
-        [DebuggerStepThrough] public virtual void Info(string messageTemplate, params object[] propertyValues) => L.Information(messageTemplate, propertyValues);
-        [DebuggerStepThrough] public virtual void Debug(string messageTemplate, params object[] propertyValues) => L.Debug(messageTemplate, propertyValues);
-        [DebuggerStepThrough] public virtual void Error(string messageTemplate, params object[] propertyValues) => L.Error(messageTemplate, propertyValues);
-        [DebuggerStepThrough] public virtual void Error(Exception e, string messageTemplate, params object[] propertyValues) => L.Error(e, messageTemplate, propertyValues);
-        [DebuggerStepThrough] public virtual void Verbose(string messageTemplate, params object[] propertyValues) => L.Verbose(messageTemplate, propertyValues);
-        [DebuggerStepThrough] public virtual void Warn(string messageTemplate, params object[] propertyValues) => L.Warning(messageTemplate, propertyValues);
+        [DebuggerStepThrough] protected virtual void Info(string messageTemplate, params object[] propertyValues) => L.Information(messageTemplate, propertyValues);
+        [DebuggerStepThrough] protected virtual void Debug(string messageTemplate, params object[] propertyValues) => L.Debug(messageTemplate, propertyValues);
+        [DebuggerStepThrough] protected virtual void Error(string messageTemplate, params object[] propertyValues) => L.Error(messageTemplate, propertyValues);
+        [DebuggerStepThrough] protected virtual void Error(Exception e, string messageTemplate, params object[] propertyValues) => L.Error(e, messageTemplate, propertyValues);
+        [DebuggerStepThrough] protected virtual void Verbose(string messageTemplate, params object[] propertyValues) => L.Verbose(messageTemplate, propertyValues);
+        [DebuggerStepThrough] protected virtual void Warn(string messageTemplate, params object[] propertyValues) => L.Warning(messageTemplate, propertyValues);
         [DebuggerStepThrough]
         public virtual Operation Begin(string messageTemplate, params object[] args) 
         {
@@ -136,7 +136,7 @@ namespace ClassifyBot
             return options;
         }
 
-        protected static bool StageResultSuccess(StageResult rtest, out StageResult r)
+        protected static bool Success(StageResult rtest, out StageResult r)
         {
             r = rtest;
             return r == StageResult.SUCCESS ? true : false;

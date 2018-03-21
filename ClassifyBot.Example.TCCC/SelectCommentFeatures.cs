@@ -19,31 +19,40 @@ namespace ClassifyBot.Example.TCCC
         {
             Slang = (Lookup<string, string>) slangWords
                 .Select(s => s.Split("\t".ToCharArray(), StringSplitOptions.RemoveEmptyEntries))
-                .Select(s => new KeyValuePair<string, string>(s[0], s[1]))
+                .Select(s => new KeyValuePair<string, string>(s[0].Trim().ToAlphaNumeric(), s[1].Trim().ToAlphaNumeric()))
                 .ToLookup((x => x.Key), (x => x.Value));
             
             WordSentiment = (Lookup<string, float>) sentimentWords
                 .Where(s => s.Contains("\t")).Select(s => s.Split("\t".ToCharArray(), StringSplitOptions.RemoveEmptyEntries))
-                .Select(s => new KeyValuePair<string, float>(s[0], Single.Parse(s[1])))
+                .Select(s => new KeyValuePair<string, float>(s[0].Trim().ToAlphaNumeric(), Single.Parse(s[1])))
                 .ToLookup((x => x.Key), (x => x.Value));
-            
+
+            EmoticonSentiment = (Lookup<string, float>)emoticonWords
+                .Where(s => s.Contains("\t")).Select(s => s.Split("\t".ToCharArray(), StringSplitOptions.RemoveEmptyEntries))
+                .Select(s => new KeyValuePair<string, float>(s[0].Trim().ToAlphaNumeric(), Single.Parse(s[1])))
+                .ToLookup((x => x.Key), (x => x.Value));
+
             PositiveEmotionWords = (Lookup<string, string>)positiveEmotionWords
                 .Select(a => a.Split(';')
-                .Select((s, i) => new KeyValuePair<string, string>(positiveEmotionWordLabels[i], s)))
+                .Select((s, i) => new KeyValuePair<string, string>(positiveEmotionWordLabels[i].ToAlphaNumeric(), s.Trim().ToAlphaNumeric())))
                 .SelectMany(x => x)
                 .ToLookup((x => x.Key), (x => x.Value));
 
             NegativeEmotionWords = (Lookup<string, string>)negativeEmotionWords
                 .Select(a => a.Split(';')
-                .Select((s, i) => new KeyValuePair<string, string>(negativeEmotionWordLabels[i], s)))
+                .Select((s, i) => new KeyValuePair<string, string>(negativeEmotionWordLabels[i].ToAlphaNumeric(), s.Trim().ToAlphaNumeric())))
                 .SelectMany(x => x)
                 .ToLookup((x => x.Key), (x => x.Value));
 
             AmbiguousEmotionWords = (Lookup<string, string>) ambiguousEmotionWords
                 .Select(a => a.Split(';')
-                .Select((s, i) => new KeyValuePair<string, string>(ambiguousEmotionWordLabels[i], s)))
+                .Select((s, i) => new KeyValuePair<string, string>(ambiguousEmotionWordLabels[i].ToAlphaNumeric(), s.ToAlphaNumeric())))
                 .SelectMany(x => x)
                 .ToLookup((x => x.Key), (x => x.Value));
+
+            Profanity = new HashSet<string>(profanityWords.Select(w => w.ToAlphaNumeric()));
+
+            IdentityHateWords = new HashSet<string>(identityHateWords);
         }
 
         #endregion
@@ -51,7 +60,7 @@ namespace ClassifyBot.Example.TCCC
         #region Overriden members
         protected override StageResult Init()
         {
-            if (!StageResultSuccess(base.Init(), out StageResult r)) return r;
+            if (!Success(base.Init(), out StageResult r)) return r;
 
             FeatureMap.Add(0, "TEXT");
             FeatureMap.Add(1, "TOKEN");
@@ -60,49 +69,53 @@ namespace ClassifyBot.Example.TCCC
             FeatureMap.Add(4, "SEMANTIC");
             FeatureMap.Add(5, "SENTIMENT");
             FeatureMap.Add(6, "PRAGMATIC");
-
-            WriterOptions.Add("WithFullTextFeature", WithFullTextFeature);
             return StageResult.SUCCESS;
         }
 
         protected override Func<ILogger, Dictionary<string, object>, Comment, Comment> TransformInputToOutput { get; } = (logger, options, input) =>
         {
-            Comment output = new Comment(input._Id.HasValue ? input._Id.Value : 0, input.Id, string.Empty);
-            bool withFullTextFeature = (bool)options["WithFullTextFeature"];
-            if (!withFullTextFeature)
-            {
-                output.Features.RemoveAt(0);
-            }
+            Comment output = new Comment(input);
+            output.Features.RemoveAll(f => f.Item1 == "TEXT");
             string text = input.Features[0].Item2.Trim();
 
             if (text.Contains("..."))
             {
-                output.Features.Add((FeatureMap[1], "ELLIPSIS_MARK"));
+                output.Features.Add((FeatureMap[1], "ELLIPSIS_TOKEN"));
             }
 
 
             if (text.Contains("!!"))
             {
-                output.Features.Add((FeatureMap[1], "MULTIPLE_EXCLAMATION_MARK"));
+                output.Features.Add((FeatureMap[1], "MULTIPLE_EXCLAMATION_TOKEN"));
             }
             else if (text.Contains("!"))
             {
-                output.Features.Add((FeatureMap[1], "EXCLAMATION_MARK"));
+                output.Features.Add((FeatureMap[1], "EXCLAMATION_TOKEN"));
             }
 
             if (text.Contains("??"))
             {
-                output.Features.Add((FeatureMap[1], "MULTIPLE_QUESTION_MARK"));
+                output.Features.Add((FeatureMap[1], "MULTIPLE_QUESTION_TOKEN"));
             }
             else if (text.Contains("?"))
             {
-                output.Features.Add((FeatureMap[1], "QUESTION_MARK"));
+                output.Features.Add((FeatureMap[1], "QUESTION_TOKEN"));
             }
 
+            string[] tokens = wordSplitter.Split(text);
+            //Emoticon sentiment
+
+            for (int i = 0; i < tokens.Length; i++)
+            {
+                if (EmoticonSentiment.Contains(tokens[i])) 
+                {
+                    output.Features.Add((FeatureMap[5], EmoticonSentiment[tokens[i]].First().ToString()));
+                }
+            }
             string[] words = wordSplitter.Split(text).Select(w => w.ToAlphaNumeric()).ToArray();
             for (int i = 0; i < words.Length; i++)
             {
-                string w = words[i].ToAlphaNumeric();
+                string w = words[i];
                 if (w.Empty() || w.StartsWith("http") || Int32.TryParse(w, out int integer) || Single.TryParse(w, out float fp))
                 {
                     continue;
@@ -111,7 +124,7 @@ namespace ClassifyBot.Example.TCCC
                 string wupper = w.ToUpper();
                 
                 //All caps
-                if(w.Length > 3 && w.IsAlphaNumeric() && w == wupper)
+                if(w.Length > 3 && w == wupper)
                 {
                     output.Features.Add((FeatureMap[1], "ALL_CAPS"));
                 }
@@ -124,7 +137,7 @@ namespace ClassifyBot.Example.TCCC
                 }
 
                 //Profanity
-                if (profanityWords.Contains(wlower))
+                if (Profanity.Contains(wlower))
                 {
                     output.Features.Add((FeatureMap[2], "PROFANITY"));
                 }
@@ -133,44 +146,36 @@ namespace ClassifyBot.Example.TCCC
                 if (NegativeEmotionWords.Any(g => g.Contains(wlower)))
                 {
                     output.Features.Add((FeatureMap[2], NegativeEmotionWords.First(g => g.Contains(wlower)).Key));
-                    break;
                 }
-
 
                 //Positive emotion
                 if (PositiveEmotionWords.Any(g => g.Contains(wlower)))
                 {
                     output.Features.Add((FeatureMap[2], PositiveEmotionWords.First(g => g.Contains(wlower)).Key));
-                    break;
                 }
 
                 //Ambiguous emotion
                 if (AmbiguousEmotionWords.Any(g => g.Contains(wlower)))
                 {
                     output.Features.Add((FeatureMap[2], AmbiguousEmotionWords.First(g => g.Contains(wlower)).Key));
-                    break;
                 }
 
                 //Sentiment
-
-
                 if (WordSentiment.Contains(wlower))
                 {
+                    
                     if (output.Features.Any(f => f.Item1 == FeatureMap[5]))
                     {
                         (string, string) orig = output.Features.First(f => f.Item1 == FeatureMap[5]);
                         Single orig_score = Single.Parse(orig.Item2);
-                        Single new_score = WordSentiment[wlower].First() + orig_score;
+                        Single new_score = orig_score + WordSentiment[wlower].First();
                         output.Features.Remove(orig);
                         output.Features.Add((FeatureMap[5], new_score.ToString()));
-                        break;
                     }
                     else
                     {
                         output.Features.Add((FeatureMap[5], WordSentiment[wlower].First().ToString()));
-                        break;
-                    }
-                        
+                    }   
                 }
                 
                 // Identity hate               
@@ -180,7 +185,7 @@ namespace ClassifyBot.Example.TCCC
                 }
 
                 // Personal               
-                if (w.ToLower().StartsWith("you") || w.ToLower() == "he")
+                if (w.ToLower().StartsWith("you") || w.ToLower() == "he" || w.ToLower() == "she" || w.ToLower() == "they" || w.ToLower() == "them" || w.ToLower() == "her" || w.ToLower() == "him")
                 {
                     output.Features.Add((FeatureMap[2], "PERSONAL"));
                 }
@@ -203,6 +208,7 @@ namespace ClassifyBot.Example.TCCC
                     break;
                 }
             }*/
+            output.Features.Add(("WORDS", string.Join(" ", words)));
             logger.Debug("Comment \'{0}\' has features {1}.", text, output.Features.Select(f => "{0}:{1}".F(f.Item1, f.Item2)));
             return output;
         };
@@ -218,11 +224,17 @@ namespace ClassifyBot.Example.TCCC
 
         public static Lookup<string, float> WordSentiment { get; protected set; }
 
+        public static Lookup<string, float> EmoticonSentiment { get; protected set; }
+
         public static Lookup<string, string> PositiveEmotionWords { get; protected set; }
 
         public static Lookup<string, string> NegativeEmotionWords { get; protected set; }
 
         public static Lookup<string, string> AmbiguousEmotionWords { get; protected set; }
+
+        public static HashSet<string> Profanity { get; protected set; }
+
+        public static HashSet<string> IdentityHateWords { get; protected set; }
 
         [Option("with-fulltext-feature", Required = false, Default = false, HelpText = "Include the full text of the comment as a feature. This is off by default.")]
         public bool WithFullTextFeature { get; set; }

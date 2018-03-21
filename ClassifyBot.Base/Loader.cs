@@ -156,7 +156,7 @@ namespace ClassifyBot
         [Option('i', "input-file", Required = true, HelpText = "Input data file name for stage operation.")]
         public virtual string InputFileName { get; set; }
 
-        [Option('p', "output-prefix", Required = true, HelpText = "Output data file name prefix. Training and test data files will be created with this prefix.")]
+        [Option('P', "output-prefix", Required = true, HelpText = "Output data file name prefix. Training and test data files will be created with this prefix.")]
         public string OutputFilePrefix { get; set; }
 
         [Option('s', "split", Required = false, HelpText = "Split the input dataset into training/test datasets with this ratio.", Default = 8)]

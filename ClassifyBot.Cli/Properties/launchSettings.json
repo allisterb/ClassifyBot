@@ -2,7 +2,7 @@
   "profiles": {
     "ClassifyBot.Cli": {
       "commandName": "Project",
-      "commandLineArgs": "tcc-features -i C:\\Projects\\ClassifyBot\\data\\TCC\\comments.json.gz -f C:\\Projects\\ClassifyBot\\data\\TCC\\\\CommentsWithFeatures.json -w"
+      "commandLineArgs": "tcc-load -i C:\\Projects\\ClassifyBot\\data\\TCC\\CommentsWithFeatures-8000.json -w -P C:\\Projects\\ClassifyBot\\data\\TCC\\TCC_Comments_Toxic"
     }
   }
 }

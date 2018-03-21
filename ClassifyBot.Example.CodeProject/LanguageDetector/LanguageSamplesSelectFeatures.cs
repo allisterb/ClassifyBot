@@ -62,7 +62,7 @@ namespace ClassifyBot.Example.CodeProject.LanguageDetector
 
         protected override StageResult Init()
         {
-            if (!StageResultSuccess(base.Init(), out StageResult r)) return r;
+            if (!Success(base.Init(), out StageResult r)) return r;
             FeatureMap.Add(0, "TEXT");
             FeatureMap.Add(1, "CURLY_BRACES_TOKEN");
             FeatureMap.Add(2, "SEMICOLON_TOKEN");

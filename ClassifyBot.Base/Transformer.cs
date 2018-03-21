@@ -136,7 +136,14 @@ namespace ClassifyBot
                     serializer.Serialize(sw, OutputRecords);
                 }
             }
-            Info("Wrote {0} output records to {1}.", OutputRecords.Count, OutputFileName);
+            if (!CompressOutputFile)
+            {
+                Info("Wrote {0} output records to {1}.", OutputRecords.Count, OutputFileName);
+            }
+            else
+            {
+                Info("Wrote {0} output records to gzip-compressed {1}.", OutputRecords.Count, OutputFileName);
+            }
             return StageResult.SUCCESS;
         }
         #endregion
@@ -175,7 +182,7 @@ namespace ClassifyBot
                         OutputRecords.Add(TransformInputToOutput(L, WriterOptions, InputRecords[i]));
                         if ((i + 1) % 1000 == 0)
                         {
-                            Info("Transformed {0} of {1} records...", i, InputRecords.Count);
+                            Info("Transformed range {0} to {1} of {2} records...", (i + 1) - 1000, i + 1, InputRecords.Count);
                         }
                         if ((RecordLimitSize > 0) && (i + 1 == RecordLimitSize))
                         {
@@ -200,7 +207,7 @@ namespace ClassifyBot
                         concurrentOutputDictionary.TryAdd(i, output);
                         if ((i + 1) % 1000 == 0)
                         {
-                            Info("Transformed {0} of {1} records...", i + 1, limit);
+                            Info("Transformed range {0} to {1} of {2} records...", (i + 1) - 1000, i + 1, InputRecords.Count);
                         }
                     });
                     OutputRecords = concurrentOutputDictionary.Values.ToList();

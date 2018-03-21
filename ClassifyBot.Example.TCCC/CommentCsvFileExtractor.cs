@@ -34,11 +34,11 @@ namespace ClassifyBot.Example.TCCC
                 };
                 csv.Read();
                 csv.ReadHeader();
-                int i = 0;
+                int i = 1;
                 while (csv.Read())
                 {
                     var r = csv.GetRecord(dataRow);
-                    comments.Add(new Comment(i++, r.id, r.comment_text, r.toxic, r.severe_toxic, r.obscene, r.threat, r.insult, r.identity_hate));
+                    comments.Add(new Comment(i, r.id, r.comment_text, r.toxic, r.severe_toxic, r.obscene, r.threat, r.insult, r.identity_hate));
                     if (i  % 20000 == 0)
                     {
                         logger.Information("Extracted {0} records from CSV file.", i);
@@ -48,6 +48,7 @@ namespace ClassifyBot.Example.TCCC
                         logger.Information("Stopping extraction at record limit {0}.", i);
                         break;
                     }
+                    i++;
                 }
                 return comments;
             }
@@ -55,11 +56,7 @@ namespace ClassifyBot.Example.TCCC
 
         protected override StageResult Init()
         {
-            StageResult r = base.Init();
-            if (r != StageResult.SUCCESS)
-            {
-                return r;
-            }
+            if (!Success(base.Init(), out StageResult r)) return r;
             WriterOptions.Add("HasHeaderRecord", true);
             return StageResult.SUCCESS;
         }
