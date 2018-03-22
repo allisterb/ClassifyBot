@@ -193,7 +193,7 @@ namespace ClassifyBot
             if (!CompressOutputFile)
             {
                 using (FileStream fs = new FileStream(file.FullName, FileMode.Create))
-                using (StreamWriter sw = new StreamWriter(fs, Encoding.UTF8))
+                using (StreamWriter sw = new StreamWriter(fs))
                 {
                     r = WriteFileStream(L, sw, records, WriterOptions);
                 }
@@ -202,7 +202,7 @@ namespace ClassifyBot
             {
                 using (FileStream fs = new FileStream(file.FullName, FileMode.Create))
                 using (GZipStream gzs = new GZipStream(fs, CompressionMode.Compress))
-                using (StreamWriter sw = new StreamWriter(gzs, Encoding.UTF8))
+                using (StreamWriter sw = new StreamWriter(gzs))
                 {
                     r = WriteFileStream(L, sw, records, WriterOptions);
                 }

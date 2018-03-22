@@ -1,10 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
+
 
 using CsvHelper;
 using Serilog;
+using SerilogTimings;
+using SerilogTimings.Extensions;
 
 using CommandLine;
 
@@ -20,44 +24,82 @@ namespace ClassifyBot.Example.TCCC
         #region Overriden members
         protected override Func<ILogger, StreamWriter, List<Comment>, Dictionary<string, object>, StageResult> WriteFileStream { get; } = (logger, sw, records, options) =>
         {
-            using (CsvWriter csv = new CsvWriter(sw))
+            using (Operation writeOp = logger.BeginOperation("Writing records to file"))
             {
-                SetPropFromDict(csv.Configuration.GetType(), csv.Configuration, options);
-                for (int i = 0; i < records.Count; i++)
+                using (CsvWriter csv = new CsvWriter(sw))
                 {
-                    Comment record = records[i];
-                    csv.WriteField(record.Labels[0].Item2);
-                    string features = string.Empty;
-                    float sentiment = 0;
-                    for (int f = 0; f < record.Features.Count; f++)
+                    SetPropFromDict(csv.Configuration.GetType(), csv.Configuration, options);
+                    string[] selectedFeatures = { "TOKEN", "LEXICAL", "WORDS" };
+                    for (int i = 0; i < records.Count; i++)
                     {
-                        if (record.Features[f].Item1 != "WORDS" && record.Features[f].Item1 != "SENTIMENT")
+                        Comment record = records[i];
+                        string c = "{0}{1}{2}{3}{4}{5}".F(record.Labels[0].Item2, record.Labels[1].Item2, record.Labels[2].Item2, record.Labels[3].Item2, 
+                        record.Labels[4].Item2, record.Labels[5].Item2);
+                        csv.WriteField(record.Labels[0].Item2);
+                        for (int j = 0; j < selectedFeatures.Length; j++)
                         {
-                            features += record.Features[f].Item2 + " ";
+                            IEnumerable<string> features = record.Features
+                             .Where(f => f.Item1 == selectedFeatures[j])
+                             .Select(f => f.Item2);
+                            if (features.Count() > 0)
+                            {
+                                csv.WriteField(string.Join(" ", features));
+                            }
+                            else
+                            {
+                                csv.WriteField(string.Empty);
+                            }
                         }
-                        else if (record.Features[f].Item1 == "SENTIMENT")
+
+                        string sentiment = record.Features
+                            .Where(f => f.Item1 == "SENTIMENT")
+                            .Select(f => f.Item2)
+                            .FirstOrDefault();
+                        if (sentiment != null)
                         {
-                            sentiment = Single.Parse(record.Features[f].Item2);
+                            if (Single.TryParse(sentiment, out float s))
+                            {
+                                csv.WriteField(s);
+                            }
+                            else
+                            {
+
+                                logger.Warning("Sentiment feature for {0} {1} is not numeric: {2}", record._Id, record.Id, sentiment);
+                                csv.WriteField(0);
+                            }
+                        }
+                        else
+                        {
+                            csv.WriteField(0);
+                        }
+
+                        if (!record.Id.Empty())
+                        {
+                            csv.WriteField(record.Id);
+                        }
+                        if (record._Id.HasValue)
+                        {
+                            csv.WriteField(record._Id);
+                        }
+                        csv.NextRecord();
+                        if ((i + 1) % 10000 == 0)
+                        {
+                            Log.Information("Wrote {0} records to file.", i + 1);
                         }
                     }
-                    csv.WriteField(features.TrimEnd());
-                    csv.WriteField(sentiment);
-                    if (!record.Id.Empty())
-                    {
-                        csv.WriteField(record.Id);
-                    }
-                    if (record._Id.HasValue)
-                    {
-                        csv.WriteField(record._Id);
-                    }
-                    csv.NextRecord();
                 }
+                writeOp.Complete();
                 return StageResult.SUCCESS;
             }
 
         };
 
         protected override StageResult Cleanup() => StageResult.SUCCESS;
+        #endregion
+
+        #region Properties
+        [Option('L', "label", Required = false, HelpText = "The index of the label to write to files.")]
+        public int Label { get; set; }
         #endregion
     }
 }

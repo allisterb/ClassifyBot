@@ -53,14 +53,6 @@ namespace ClassifyBot.Example.TCCC
             Profanity = new HashSet<string>(profanityWords.Select(w => w.ToAlphaNumeric()));
 
             IdentityHateWords = new HashSet<string>(identityHateWords);
-        }
-
-        #endregion
-
-        #region Overriden members
-        protected override StageResult Init()
-        {
-            if (!Success(base.Init(), out StageResult r)) return r;
 
             FeatureMap.Add(0, "TEXT");
             FeatureMap.Add(1, "TOKEN");
@@ -69,6 +61,14 @@ namespace ClassifyBot.Example.TCCC
             FeatureMap.Add(4, "SEMANTIC");
             FeatureMap.Add(5, "SENTIMENT");
             FeatureMap.Add(6, "PRAGMATIC");
+        }
+
+        #endregion
+
+        #region Overriden members
+        protected override StageResult Init()
+        {
+            if (!Success(base.Init(), out StageResult r)) return r;
             return StageResult.SUCCESS;
         }
 
@@ -80,26 +80,26 @@ namespace ClassifyBot.Example.TCCC
 
             if (text.Contains("..."))
             {
-                output.Features.Add((FeatureMap[1], "ELLIPSIS_TOKEN"));
+                output.Features.Add((FeatureMap[1], "ELLIPSIS"));
             }
 
 
             if (text.Contains("!!"))
             {
-                output.Features.Add((FeatureMap[1], "MULTIPLE_EXCLAMATION_TOKEN"));
+                output.Features.Add((FeatureMap[1], "MULTIPLE_EXCLAMATION"));
             }
             else if (text.Contains("!"))
             {
-                output.Features.Add((FeatureMap[1], "EXCLAMATION_TOKEN"));
+                output.Features.Add((FeatureMap[1], "EXCLAMATION"));
             }
 
             if (text.Contains("??"))
             {
-                output.Features.Add((FeatureMap[1], "MULTIPLE_QUESTION_TOKEN"));
+                output.Features.Add((FeatureMap[1], "MULTIPLE_QUESTION"));
             }
             else if (text.Contains("?"))
             {
-                output.Features.Add((FeatureMap[1], "QUESTION_TOKEN"));
+                output.Features.Add((FeatureMap[1], "QUESTION"));
             }
 
             string[] tokens = wordSplitter.Split(text);
@@ -123,6 +123,7 @@ namespace ClassifyBot.Example.TCCC
                 string wlower = w.ToLower();
                 string wupper = w.ToUpper();
                 
+
                 //All caps
                 if(w.Length > 3 && w == wupper)
                 {
@@ -145,19 +146,19 @@ namespace ClassifyBot.Example.TCCC
                 //Negative emotion
                 if (NegativeEmotionWords.Any(g => g.Contains(wlower)))
                 {
-                    output.Features.Add((FeatureMap[2], NegativeEmotionWords.First(g => g.Contains(wlower)).Key));
+                    output.Features.Add((FeatureMap[2], NegativeEmotionWords.First(g => g.Contains(wlower)).Key.ToUpper()));
                 }
 
                 //Positive emotion
                 if (PositiveEmotionWords.Any(g => g.Contains(wlower)))
                 {
-                    output.Features.Add((FeatureMap[2], PositiveEmotionWords.First(g => g.Contains(wlower)).Key));
+                    output.Features.Add((FeatureMap[2], PositiveEmotionWords.First(g => g.Contains(wlower)).Key.ToUpper()));
                 }
 
                 //Ambiguous emotion
                 if (AmbiguousEmotionWords.Any(g => g.Contains(wlower)))
                 {
-                    output.Features.Add((FeatureMap[2], AmbiguousEmotionWords.First(g => g.Contains(wlower)).Key));
+                    output.Features.Add((FeatureMap[2], AmbiguousEmotionWords.First(g => g.Contains(wlower)).Key.ToUpper()));
                 }
 
                 //Sentiment
@@ -181,7 +182,7 @@ namespace ClassifyBot.Example.TCCC
                 // Identity hate               
                 if (identityHateWords.Contains(w.ToLower()))
                 {
-                    output.Features.Add((FeatureMap[2], "HATE_WORD"));
+                    output.Features.Add((FeatureMap[2], "HATE"));
                 }
 
                 // Personal               

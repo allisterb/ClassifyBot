@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using CommandLine;
 using Newtonsoft.Json;
 using Serilog;
+using SerilogTimings;
 
 namespace ClassifyBot
 {
@@ -62,33 +63,36 @@ namespace ClassifyBot
 
         protected override StageResult Write()
         {
+            Contract.Requires(OutputFile != null && OutputFile.Exists);
             Contract.Requires(ExtractedRecords != null);
             if (ExtractedRecords.Count == 0)
             {
                 Warn("0 records extracted from file {0}. Not writing to output file.", InputFile.FullName);
                 return StageResult.SUCCESS;
             }
-            Contract.Requires(OutputFile != null && OutputFile.Exists);
-            JsonSerializer serializer = new JsonSerializer();
-            serializer.Formatting = Formatting.Indented;
-            if (!CompressOutputFile)
+            using (Operation writeOp = Begin("Writing {0} records to {file}", ExtractedRecords.Count, OutputFile.FullName))
             {
-                using (StreamWriter sw = new StreamWriter(OutputFile.FullName, false, Encoding.UTF8))
+                JsonSerializer serializer = new JsonSerializer();
+                serializer.Formatting = Formatting.Indented;
+                if (!CompressOutputFile)
                 {
-                    serializer.Serialize(sw, ExtractedRecords);
+                    using (StreamWriter sw = new StreamWriter(OutputFile.FullName, false, Encoding.UTF8))
+                    {
+                        serializer.Serialize(sw, ExtractedRecords);
+                    }
                 }
-            }
-            else
-            {
-                using (FileStream fs = new FileStream(OutputFile.FullName, FileMode.Create))
-                using (GZipStream gzs = new GZipStream(fs, CompressionMode.Compress))
-                using (StreamWriter sw = new StreamWriter(gzs, Encoding.UTF8))
+                else
                 {
-                    serializer.Serialize(sw, ExtractedRecords);
+                    using (FileStream fs = new FileStream(OutputFile.FullName, FileMode.Create))
+                    using (GZipStream gzs = new GZipStream(fs, CompressionMode.Compress))
+                    using (StreamWriter sw = new StreamWriter(gzs, Encoding.UTF8))
+                    {
+                        serializer.Serialize(sw, ExtractedRecords);
+                    }
                 }
+                writeOp.Complete();
+                return StageResult.SUCCESS;
             }
-            Info("Wrote {0} records to {file}", ExtractedRecords.Count, OutputFile.FullName);
-            return StageResult.SUCCESS;
         }
         #endregion
 

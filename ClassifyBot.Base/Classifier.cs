@@ -46,18 +46,18 @@ namespace ClassifyBot
 
         protected override StageResult Init()
         {
-            Contract.Requires(TrainingFile != null && TestFile == null);
-            if (!TrainingFile.CheckExistsAndReportError(L))
-            {
-                return StageResult.INPUT_ERROR;
-            }
-            if (!TestFile.CheckExistsAndReportError(L))
-            {
-                return StageResult.INPUT_ERROR;
-            }
             if (TrainOp)
             {
-                if (!ModelFile.Exists && !OverwriteOutputFile)
+                Contract.Requires(TrainingFile != null && TestFile == null);
+                if (!TrainingFile.CheckExistsAndReportError(L))
+                {
+                    return StageResult.INPUT_ERROR;
+                }
+                if (!TestFile.CheckExistsAndReportError(L))
+                {
+                    return StageResult.INPUT_ERROR;
+                }
+                if (!ModelFileName.Empty() && ModelFile.Exists && !OverwriteOutputFile)
                 {
                     Error("The model file {0} exists but the overwrite option was not specified.", ModelFile.FullName);
                     return StageResult.INPUT_ERROR;
@@ -65,6 +65,9 @@ namespace ClassifyBot
             }
             return StageResult.SUCCESS;
         }
+
+        [Option("compress", Hidden = true)]
+        public override bool CompressOutputFile { get; set; }
         #endregion
 
         #region Properties
@@ -78,13 +81,13 @@ namespace ClassifyBot
 
         public IEnumerable<IClassifierResult> Results => _Results;
 
-        [Option('t', "train-file", Required = true, HelpText = "Input file name with training data for classifier")]
+        [Option('t', "train-file", Required = false, HelpText = "Input file name with training data for classifier.")]
         public string TrainingFileName { get; set; }
 
-        [Option('e', "test-file", Required = true, HelpText = "Input file name with test data for classifier")]
+        [Option('e', "test-file", Required = false, HelpText = "Input file name with test data for classifier.")]
         public string TestFileName { get; set; }
 
-        [Option('m', "model-file", Required = true, HelpText = "Output file name for classifier model.")]
+        [Option('m', "model-file", Required = false, HelpText = "Output file name for classifier model.")]
         public string ModelFileName { get; set; }
 
         [Option("train", HelpText = "Train a classifier model using the training and test data files.", SetName = "op")]
@@ -94,7 +97,6 @@ namespace ClassifyBot
 
         protected List<ClassifierResult> _Results = new List<ClassifierResult>();
         #endregion
-
 
     }
 }
