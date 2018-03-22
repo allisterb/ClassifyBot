@@ -16,19 +16,6 @@ namespace ClassifyBot
         #region Overriden members
         public override StageResult Train(Dictionary<string, object> options = null)
         {
-            foreach (KeyValuePair<string, object> kv in AdditionalOptions)
-            {
-                if (ClassifierProperties.ContainsKey(kv.Key))
-                {
-                    ClassifierProperties[kv.Key] = kv.Value;
-                }
-                else
-                {
-                    ClassifierProperties.Add(kv.Key, kv.Value);
-                }
-                Info("Using additional classifier property {0}={1}.", kv.Key, kv.Value);
-            }
-
             ClassifierPropsFile = CreatePropsFile(ClassifierProperties);
             if (!ClassifierPropsFile.Exists)
             {
@@ -41,6 +28,7 @@ namespace ClassifyBot
 
             javaCommand = new JavaCommand(JavaHome, ClassPath, "edu.stanford.nlp.classify.ColumnDataClassifier", "-mx16000m", 
                 "-trainFile", TrainingFile.FullName, "-testFile", TestFile.FullName, "-prop", ClassifierPropsFile.FullName);
+            PrintCommand(javaCommand);
             Task c = javaCommand.Run();
             if (!CheckCommandStartedAndReport(javaCommand))
             {
@@ -278,6 +266,25 @@ namespace ClassifyBot
                     return StageResult.FAILED;
                 }
             }
+           
+            foreach (KeyValuePair<string, object> kv in AdditionalOptions)
+            {
+                if (ClassifierProperties.ContainsKey(kv.Key))
+                {
+                    ClassifierProperties[kv.Key] = kv.Value;
+                }
+                else
+                {
+                    ClassifierProperties.Add(kv.Key, kv.Value);
+                }
+                Info("Using additional classifier property {0}={1}.", kv.Key, kv.Value);
+            }
+
+            if (ClassifierProperties.ContainsKey("useNB"))
+            {
+                ClassifierProperties.Remove("useBinary");
+            }
+
             return StageResult.SUCCESS;
 
         }
@@ -345,6 +352,9 @@ namespace ClassifyBot
 
         [Option('b', "binary", Required = false, Default = false, HelpText = "Use a binary logistic classifier.")]
         public bool BinaryLogisticClassifier { get; set; }
+
+        [Option('n', "bayes", Required = false, Default = false, HelpText = "Use a Naive Bayes generative classifier.")]
+        public bool NaiveBayesClassifier { get; set; }
         #endregion
 
         #region Methods

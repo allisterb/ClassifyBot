@@ -27,7 +27,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ClassifyBot.Base\ClassifyBot.Base.csproj" />
-    <ProjectReference Include="..\Expect.NET\Expect.NETStandard\Expect.NETStandard.csproj" />
   </ItemGroup>
 
 </Project>

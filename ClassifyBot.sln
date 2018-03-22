@@ -21,9 +21,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		clb.cmd = clb.cmd
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Expect.NETStandard", "Expect.NET\Expect.NETStandard\Expect.NETStandard.csproj", "{0FEAC820-AE40-4079-885A-3495D720264B}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClassifyBot.Example.TCCC", "ClassifyBot.Example.TCCC\ClassifyBot.Example.TCCC.csproj", "{0BB7748C-886B-4F48-AD53-12F72CB62B6A}"
+EndProject
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "TCCC", "TCCC\TCCC.pyproj", "{8524EDE0-3E17-4103-BBA4-F1CA5378A113}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -68,18 +68,15 @@ Global
 		{ACAA556E-1477-450F-B610-89BB8AB04FC3}.Nuget|Any CPU.Build.0 = Release|Any CPU
 		{ACAA556E-1477-450F-B610-89BB8AB04FC3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ACAA556E-1477-450F-B610-89BB8AB04FC3}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0FEAC820-AE40-4079-885A-3495D720264B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0FEAC820-AE40-4079-885A-3495D720264B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0FEAC820-AE40-4079-885A-3495D720264B}.Nuget|Any CPU.ActiveCfg = Debug|Any CPU
-		{0FEAC820-AE40-4079-885A-3495D720264B}.Nuget|Any CPU.Build.0 = Debug|Any CPU
-		{0FEAC820-AE40-4079-885A-3495D720264B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0FEAC820-AE40-4079-885A-3495D720264B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{0BB7748C-886B-4F48-AD53-12F72CB62B6A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0BB7748C-886B-4F48-AD53-12F72CB62B6A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0BB7748C-886B-4F48-AD53-12F72CB62B6A}.Nuget|Any CPU.ActiveCfg = Debug|Any CPU
 		{0BB7748C-886B-4F48-AD53-12F72CB62B6A}.Nuget|Any CPU.Build.0 = Debug|Any CPU
 		{0BB7748C-886B-4F48-AD53-12F72CB62B6A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0BB7748C-886B-4F48-AD53-12F72CB62B6A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8524EDE0-3E17-4103-BBA4-F1CA5378A113}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8524EDE0-3E17-4103-BBA4-F1CA5378A113}.Nuget|Any CPU.ActiveCfg = Release|Any CPU
+		{8524EDE0-3E17-4103-BBA4-F1CA5378A113}.Release|Any CPU.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

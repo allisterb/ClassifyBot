@@ -81,10 +81,10 @@ namespace ClassifyBot
 
         public IEnumerable<IClassifierResult> Results => _Results;
 
-        [Option('t', "train-file", Required = false, HelpText = "Input file name with training data for classifier.")]
+        [Option('t', "train-file", Required = true, HelpText = "Input file name with training data for classifier.")]
         public string TrainingFileName { get; set; }
 
-        [Option('e', "test-file", Required = false, HelpText = "Input file name with test data for classifier.")]
+        [Option('e', "test-file", Required = true, HelpText = "Input file name with test data for classifier.")]
         public string TestFileName { get; set; }
 
         [Option('m', "model-file", Required = false, HelpText = "Output file name for classifier model.")]
@@ -97,6 +97,5 @@ namespace ClassifyBot
 
         protected List<ClassifierResult> _Results = new List<ClassifierResult>();
         #endregion
-
     }
 }

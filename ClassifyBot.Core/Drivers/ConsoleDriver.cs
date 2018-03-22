@@ -37,7 +37,7 @@ namespace ClassifyBot
             {
                 WithDebugOutput = true;
             }
-            if (args.Contains("--with-logfile"))
+            if (args.Contains("--with-log-file"))
             {
                 WithLogFile = true;
             }

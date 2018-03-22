@@ -52,7 +52,7 @@ namespace ClassifyBot
         [Option("with-debug", HelpText = "Enable debug output.", Required = false)]
         public bool WithDebugOutput { get; set; }
 
-        [Option("with-logfile", HelpText = "Log output to a text file.", Required = false)]
+        [Option("with-log-file", HelpText = "Log output to a text file.", Required = false)]
         public bool WithLogFile { get; set; }
 
         [Option("without-console", HelpText = "Don't log output to console.", Required = false)]
@@ -181,6 +181,15 @@ namespace ClassifyBot
                 return true;
             }
         }
+
+        protected void PrintCommand(Command c)
+        {
+            if (AdditionalOptions.ContainsKey("PrintCommand") && (bool)AdditionalOptions["PrintCommand"] == true)
+            {
+                Info("Executing command {0} {1} in working directory {2}.", c.Text, string.Join(" ", c.CommandOptions), c.WorkingDirectory);
+            }
+        }
+
         #endregion
 
         #region Fields

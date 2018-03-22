@@ -12,6 +12,8 @@ namespace ClassifyBot.Example.TCCC
         #region Overriden members
         public override Dictionary<string, object> ClassifierProperties { get; } = new Dictionary<string, object>()
         {
+            {"useBinary", true },
+            {"3.binnedLengths", "30,60,120,240"},
             { "1.useSplitWords", true },
             {"1.splitWordsRegexp", "\\\\s+" },
             {"1.useAllSplitWordPairs", true },

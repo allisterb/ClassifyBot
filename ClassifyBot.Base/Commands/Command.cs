@@ -6,7 +6,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using ExpectNet;
 using MeSh = Medallion.Shell;
 using Serilog;
 
@@ -100,7 +99,6 @@ namespace ClassifyBot
         #region Methods
         public virtual Task Run()
         {
-            L.Information("Executing command {0} {1} in working directory {2}.", Text, string.Join(" ", CommandOptions), WorkingDirectory);
             try
             {
                 shell = new MeSh.Shell(o => o.WorkingDirectory(WorkingDirectory));
