@@ -10,6 +10,7 @@
     <Company />
     <Product>ClassifyBot</Product>
     <PackageId>ClassifyBot</PackageId>
+    <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
 
   <ItemGroup>
@@ -27,6 +28,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ClassifyBot.Base\ClassifyBot.Base.csproj" />
+    <ProjectReference Include="..\pythonnet\src\runtime\Python.Runtime.15.csproj" />
   </ItemGroup>
 
 </Project>

@@ -4,6 +4,8 @@
     <TargetFramework>netcoreapp2.0</TargetFramework>
 
     <IsPackable>false</IsPackable>
+
+    <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,6 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ClassifyBot.Core\ClassifyBot.Core.csproj" />
     <ProjectReference Include="..\ClassifyBot.Example.CodeProject\ClassifyBot.Example.CodeProject.csproj" />
   </ItemGroup>
 
