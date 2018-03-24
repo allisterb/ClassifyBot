@@ -81,6 +81,9 @@ namespace ClassifyBot
 
         [Option('p', "parallel", Required = false, HelpText = "Use parallel execution where possible.", Default = false)]
         public virtual bool ParallelExecution { get; set; }
+
+        [Option("wait-for-attach", Required = false, HelpText = "Pauses the console driver program until the user presses a key and a debugger is attached to the console process.", Default = false)]
+        public virtual bool WaitForAttach { get; set; }
         #endregion
 
         #region Methods

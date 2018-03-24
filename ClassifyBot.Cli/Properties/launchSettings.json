@@ -2,7 +2,7 @@
   "profiles": {
     "ClassifyBot.Cli": {
       "commandName": "Project",
-      "commandLineArgs": "tcc-features -i C:\\Projects\\ClassifyBot\\data\\TCC\\Comments-1100.json -f C:\\Projects\\ClassifyBot\\foo -w -P C:\\Python\\venv\\TCC\\Scripts"
+      "commandLineArgs": "tcc-features -i C:\\Projects\\ClassifyBot\\data\\TCC\\Comments-1100.json -f C:\\Projects\\ClassifyBot\\foo -w -P C:\\Python\\venv\\TCC\\Scripts --wait-for-attach"
     }
   }
 }

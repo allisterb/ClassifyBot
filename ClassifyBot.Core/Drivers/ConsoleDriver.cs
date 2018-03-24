@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reflection;
@@ -33,6 +34,20 @@ namespace ClassifyBot
         #region Methods
         public static void RunAndExit(string[] args)
         {
+            if (args.Contains("--wait-for-attach"))
+            {
+                Console.WriteLine("Attach debugger and press any key to continue execution...");
+                Console.ReadKey(true);
+                if (!Debugger.IsAttached)
+                {
+                    Console.WriteLine("No debugger detected! Exiting.");
+                    return;
+                }
+                else
+                {
+                    Debugger.Break();
+                }
+            }
             if (args.Contains("--with-debug"))
             {
                 WithDebugOutput = true;
