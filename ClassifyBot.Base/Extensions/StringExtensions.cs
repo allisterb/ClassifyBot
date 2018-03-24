@@ -103,7 +103,7 @@ namespace ClassifyBot
             return new String(chars);
         }
 
-        public static string WithSharedLibraryExtension(this string s)
+        public static string WithDllExt(this string s)
         {
             if (Environment.OSVersion.Platform == PlatformID.Win32NT)
             {
@@ -111,7 +111,7 @@ namespace ClassifyBot
             }
             else
             {
-                return s + ".so";
+                return s;
             }
         }
     }

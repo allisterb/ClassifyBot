@@ -44,12 +44,12 @@ namespace ClassifyBot
                     
                     if (BinDir.IsEmpty())
                     {
-                        Error(dnfe, $"Could not find the system-wide {"python36".WithSharedLibraryExtension()} library. Check your PATH environment variable or use the -P option to set the path to the interpreter directory.");
+                        Error(dnfe, $"Could not find the system-wide {"python36".WithDllExt()} library. Check your PATH environment variable or use the -P option to set the path to the interpreter directory.");
                     }
                     else
                     {
                             
-                        Error(dnfe, $"Could not find {"python36".WithSharedLibraryExtension()} in {BinDir}.");
+                        Error(dnfe, $"Could not find {"python36".WithDllExt()} in {BinDir}.");
                     }
                 }
                 catch (Exception e)
@@ -67,7 +67,7 @@ namespace ClassifyBot
                 if (PythonEngine.IsInitialized)
                 {
                     PythonEngine.ProgramName = "ClassifyBot";
-                    Info("Python version {0} from {1}.", PythonEngine.Version, BinDir.IsEmpty() ? Runtime.PythonDLL.WithSharedLibraryExtension() : Path.Combine(BinDir, Runtime.PythonDLL.WithSharedLibraryExtension()));
+                    Info("Python version {0} from {1}.", PythonEngine.Version, BinDir.IsEmpty() ? Runtime.PythonDLL.WithDllExt() : Path.Combine(BinDir, Runtime.PythonDLL.WithDllExt()));
                     init.Complete();
                 }
                 else init.Cancel();
