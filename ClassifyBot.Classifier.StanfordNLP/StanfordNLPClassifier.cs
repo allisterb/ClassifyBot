@@ -53,7 +53,7 @@ namespace ClassifyBot
                         Info("Built classifier {0} with {1} features, {2} classes and {3} parameters.", ClassifierType, NumberofFeatures, NumberofClasses, NumberofParameters);
                     }
                 }
-                else if (ClassifierType.Empty() && s.StartsWith("QNMinimizer called on double function"))
+                else if (ClassifierType.IsEmpty() && s.StartsWith("QNMinimizer called on double function"))
                 {
                     ClassifierType = "BinaryLogisticClassifier";
                     Match m = binaryClassiferQNN.Match(s);
@@ -205,13 +205,13 @@ namespace ClassifyBot
                 Contract.Requires(ModelFile != null);
             }
 
-            if (JavaHome.Empty())
+            if (JavaHome.IsEmpty())
             {
                 if (AdditionalOptions.ContainsKey("JAVA_HOME"))
                 {
                     JavaHome = (string)AdditionalOptions["JAVA_HOME"];
                 }
-                else if ((JavaHome = Environment.GetEnvironmentVariable("JAVA_HOME")).Empty())
+                else if ((JavaHome = Environment.GetEnvironmentVariable("JAVA_HOME")).IsEmpty())
                 {
                     Error("The java-home option was not specified and the JAVA_HOME environment variable does not exist.");
                     return StageResult.INVALID_OPTIONS;
@@ -223,13 +223,13 @@ namespace ClassifyBot
                 return StageResult.INVALID_OPTIONS;
             }
 
-            if (ClassPath.Empty())
+            if (ClassPath.IsEmpty())
             {
                 if (AdditionalOptions.ContainsKey("STANFORD_CLASSIFIER_JAR"))
                 {
                     ClassPath = (string)AdditionalOptions["STANFORD_CLASSIFIER_JAR"];
                 }
-                else if ((ClassPath = Environment.GetEnvironmentVariable("STANFORD_CLASSIFIER_JAR")).Empty())
+                else if ((ClassPath = Environment.GetEnvironmentVariable("STANFORD_CLASSIFIER_JAR")).IsEmpty())
                 {
                     Error("The class-path option was not specified and the STANFORD_CLASSIFIER_JAR environment variable does not exist.");
                     return StageResult.INVALID_OPTIONS;

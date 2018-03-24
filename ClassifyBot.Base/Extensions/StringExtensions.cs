@@ -14,7 +14,7 @@ namespace ClassifyBot
             return string.Format(formatString, o);
         }
 
-        public static bool Empty(this string s)
+        public static bool IsEmpty(this string s)
         {
             return string.IsNullOrEmpty(s);
         }
@@ -101,6 +101,18 @@ namespace ClassifyBot
         {
             char[] chars = s.Where(c => Char.IsLetterOrDigit(c)).ToArray();
             return new String(chars);
+        }
+
+        public static string WithSharedLibraryExtension(this string s)
+        {
+            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+            {
+                return s + ".dll";
+            }
+            else
+            {
+                return s + ".so";
+            }
         }
     }
 }

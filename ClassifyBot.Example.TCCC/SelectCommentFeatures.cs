@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -10,13 +11,14 @@ using Serilog;
 namespace ClassifyBot.Example.TCCC
 {
     [Verb("tcc-features", HelpText = "Select features from TCC comment data.")]
-    public class SelectCommentFeatures : Transformer<Comment, string>
+    public class SelectCommentFeatures : Transformer<Comment, string>, IExtern<PythonScript>
     {
         #region Constructor
         public SelectCommentFeatures() : base() {}
 
         static SelectCommentFeatures()
         {
+            
             Slang = (Lookup<string, string>) slangWords
                 .Select(s => s.Split("\t".ToCharArray(), StringSplitOptions.RemoveEmptyEntries))
                 .Select(s => new KeyValuePair<string, string>(s[0].Trim().ToAlphaNumeric(), s[1].Trim().ToAlphaNumeric()))
@@ -49,7 +51,7 @@ namespace ClassifyBot.Example.TCCC
                 .Select((s, i) => new KeyValuePair<string, string>(ambiguousEmotionWordLabels[i].ToAlphaNumeric(), s.ToAlphaNumeric())))
                 .SelectMany(x => x)
                 .ToLookup((x => x.Key), (x => x.Value));
-
+                
             Profanity = new HashSet<string>(profanityWords.Select(w => w.ToAlphaNumeric()));
 
             IdentityHateWords = new HashSet<string>(identityHateWords);
@@ -66,9 +68,16 @@ namespace ClassifyBot.Example.TCCC
         #endregion
 
         #region Overriden members
+        public Extern<PythonScript> E => FeatureExtractScript;
+
         protected override StageResult Init()
         {
             if (!Success(base.Init(), out StageResult r)) return r;
+            FeatureExtractScript = new PythonScript(BinDir, ModuleName);
+            if (!FeatureExtractScript.Init())
+            {
+                return StageResult.FAILED;
+            }
             return StageResult.SUCCESS;
         }
 
@@ -116,7 +125,7 @@ namespace ClassifyBot.Example.TCCC
             for (int i = 0; i < words.Length; i++)
             {
                 string w = words[i];
-                if (w.Empty() || w.StartsWith("http") || Int32.TryParse(w, out int integer) || Single.TryParse(w, out float fp))
+                if (w.IsEmpty() || w.StartsWith("http") || Int32.TryParse(w, out int integer) || Single.TryParse(w, out float fp))
                 {
                     continue;
                 }
@@ -220,7 +229,6 @@ namespace ClassifyBot.Example.TCCC
         #endregion
 
         #region Properties
-
         public static Lookup<string, string> Slang { get; protected set; }
 
         public static Lookup<string, float> WordSentiment { get; protected set; }
@@ -239,6 +247,11 @@ namespace ClassifyBot.Example.TCCC
 
         [Option("with-fulltext-feature", Required = false, Default = false, HelpText = "Include the full text of the comment as a feature. This is off by default.")]
         public bool WithFullTextFeature { get; set; }
+
+        [Option('P',"python", Required = false, HelpText = "Path to the directory containing the Python 3.6 interpreter libraries. If this is omitted then the system-wide interpreter will be used.")]
+        public string BinDir { get; set; }
+
+        public string ModuleName { get; } = Path.Combine("TCCC", "hello_from_python.py");
         #endregion
 
         #region Methods
@@ -249,8 +262,9 @@ namespace ClassifyBot.Example.TCCC
         #endregion
 
         #region Fields
-
+        protected PythonScript FeatureExtractScript;
         protected static Regex wordSplitter = new Regex("\\s+", RegexOptions.Compiled);
+        
 
         #region Word lists
         protected static string[] slangWords = @"121	one to one

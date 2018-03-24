@@ -16,7 +16,7 @@ namespace ClassifyBot
         #region Constuctors
         public Command(string workingDirectory, string cmdText, params object[] cmdOptions)
         {
-            if (cmdText.Empty())
+            if (cmdText.IsEmpty())
             {
                 throw new ArgumentException("The cmdText parameter must not be null and empty.");
             }
@@ -33,7 +33,7 @@ namespace ClassifyBot
         public string WorkingDirectory { get; protected set; }
         public List<object> CommandOptions { get; protected set; }
         public Task Task { get; protected set; }
-        public bool WorkingDirectoryExists => !WorkingDirectory.Empty() ? Directory.Exists(WorkingDirectory) : false;
+        public bool WorkingDirectoryExists => !WorkingDirectory.IsEmpty() ? Directory.Exists(WorkingDirectory) : false;
 
         public bool Started => meshCommand != null;
 

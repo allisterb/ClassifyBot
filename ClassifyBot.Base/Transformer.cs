@@ -24,8 +24,8 @@ namespace ClassifyBot
         #region Constructors
         public Transformer() : base()
         {
-            Contract.Requires(!InputFileName.Empty());
-            Contract.Requires(!OutputFileName.Empty());
+            Contract.Requires(!InputFileName.IsEmpty());
+            Contract.Requires(!OutputFileName.IsEmpty());
         }
         #endregion
 
@@ -153,9 +153,9 @@ namespace ClassifyBot
         #endregion
 
         #region Properties
-        public FileInfo InputFile => InputFileName.Empty() ? null : new FileInfo(InputFileName);
+        public FileInfo InputFile => InputFileName.IsEmpty() ? null : new FileInfo(InputFileName);
 
-        public FileInfo OutputFile => OutputFileName.Empty() ? null : new FileInfo(OutputFileName);
+        public FileInfo OutputFile => OutputFileName.IsEmpty() ? null : new FileInfo(OutputFileName);
 
         public virtual List<TRecord> InputRecords { get; protected set; } = new List<TRecord>();
 

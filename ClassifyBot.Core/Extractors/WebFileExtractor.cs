@@ -18,7 +18,7 @@ namespace ClassifyBot
         #region Constructors
         public WebFileExtractor() : base("{0}-clbot-web-extract-dl.tmp".F(DateTime.Now.Ticks))
         {
-            Contract.Requires(!InputFileUrl.Empty());
+            Contract.Requires(!InputFileUrl.IsEmpty());
             
         }
 

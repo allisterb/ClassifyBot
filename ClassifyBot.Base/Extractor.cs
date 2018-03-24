@@ -22,7 +22,7 @@ namespace ClassifyBot
         #region Constructors
         public Extractor()
         {
-            Contract.Requires(!OutputFileName.Empty());
+            Contract.Requires(!OutputFileName.IsEmpty());
             
         }
         #endregion
@@ -103,9 +103,9 @@ namespace ClassifyBot
         #region Properties
         public List<TRecord> ExtractedRecords { get; protected set; } = new List<TRecord>();
 
-        public FileInfo InputFile => InputFileName.Empty() ? null : new FileInfo(InputFileName);
+        public FileInfo InputFile => InputFileName.IsEmpty() ? null : new FileInfo(InputFileName);
 
-        public FileInfo OutputFile => OutputFileName.Empty() ? null : new FileInfo(OutputFileName);
+        public FileInfo OutputFile => OutputFileName.IsEmpty() ? null : new FileInfo(OutputFileName);
 
         [Option('i', "input-file", Required = true, HelpText = "Input data file name for stage operation.")]
         public virtual string InputFileName { get; set; }

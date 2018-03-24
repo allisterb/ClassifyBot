@@ -73,7 +73,7 @@ namespace ClassifyBot.Example.TCCC
                             csv.WriteField(0);
                         }
 
-                        if (!record.Id.Empty())
+                        if (!record.Id.IsEmpty())
                         {
                             csv.WriteField(record.Id);
                         }

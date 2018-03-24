@@ -16,9 +16,9 @@ namespace ClassifyBot
         #region Constructors
         public Loader()
         {
-            Contract.Requires(!OutputFilePrefix.Empty());
-            Contract.Requires(!TrainingFileName.Empty());
-            Contract.Requires(!TestFileName.Empty());
+            Contract.Requires(!OutputFilePrefix.IsEmpty());
+            Contract.Requires(!TrainingFileName.IsEmpty());
+            Contract.Requires(!TestFileName.IsEmpty());
         }
         #endregion
 
@@ -137,11 +137,11 @@ namespace ClassifyBot
         #endregion
 
         #region Properties
-        public FileInfo TrainingFile => TrainingFileName.Empty() ? null : new FileInfo(TrainingFileName);
+        public FileInfo TrainingFile => TrainingFileName.IsEmpty() ? null : new FileInfo(TrainingFileName);
 
-        public FileInfo TestFile => TestFileName.Empty() ? null : new FileInfo(TestFileName);
+        public FileInfo TestFile => TestFileName.IsEmpty() ? null : new FileInfo(TestFileName);
 
-        public FileInfo InputFile => InputFileName.Empty() ? null : new FileInfo(InputFileName);
+        public FileInfo InputFile => InputFileName.IsEmpty() ? null : new FileInfo(InputFileName);
 
         public List<TRecord> TrainingRecords { get; protected set; } = new List<TRecord>();
 

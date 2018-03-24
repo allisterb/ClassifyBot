@@ -22,7 +22,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ClassifyBot.Core\ClassifyBot.Core.csproj" />
-    <ProjectReference Include="..\ClassifyBot.Example.CodeProject\ClassifyBot.Example.CodeProject.csproj" />
     <ProjectReference Include="..\ClassifyBot.Example.TCCC\ClassifyBot.Example.TCCC.csproj" />
   </ItemGroup>
 

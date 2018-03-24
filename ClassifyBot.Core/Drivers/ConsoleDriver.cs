@@ -70,11 +70,11 @@ namespace ClassifyBot
             }
 
             StageResult result= Driver.MarshalOptionsForStage(args, out Stage stage, out string optionsHelp);
-            if (result == StageResult.INVALID_OPTIONS && stage == null && !optionsHelp.Empty())
+            if (result == StageResult.INVALID_OPTIONS && stage == null && !optionsHelp.IsEmpty())
             {
                 L.Information(optionsHelp);
             }
-            else if (result == StageResult.CREATED && stage != null && optionsHelp.Empty())
+            else if (result == StageResult.CREATED && stage != null && optionsHelp.IsEmpty())
             {
                 Exit(stage.Run());
             }

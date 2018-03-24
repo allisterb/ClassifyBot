@@ -31,7 +31,7 @@ namespace ClassifyBot.Example.CodeProject.LanguageDetector
                     {
                         csv.WriteField(record.Features[f].Item2);
                     }
-                    if (!record.Id.Empty())
+                    if (!record.Id.IsEmpty())
                     {
                         csv.WriteField(record.Id);
                     }

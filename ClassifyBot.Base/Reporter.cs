@@ -16,8 +16,8 @@ namespace ClassifyBot
         #region Constructors
         public Reporter() : base()
         {
-            Contract.Requires(!ClassifierResultsFileName.Empty());
-            Contract.Requires(!OutputFileName.Empty());
+            Contract.Requires(!ClassifierResultsFileName.IsEmpty());
+            Contract.Requires(!OutputFileName.IsEmpty());
         }
         #endregion
 
@@ -109,11 +109,11 @@ namespace ClassifyBot
         #endregion
 
         #region Properties
-        public FileInfo ClassStatisticsFile => ClassStatisticsFileName.Empty() ? null : new FileInfo(ClassStatisticsFileName);
+        public FileInfo ClassStatisticsFile => ClassStatisticsFileName.IsEmpty() ? null : new FileInfo(ClassStatisticsFileName);
 
-        public FileInfo ClassifierResultsFile => ClassifierResultsFileName.Empty() ? null : new FileInfo(ClassifierResultsFileName);
+        public FileInfo ClassifierResultsFile => ClassifierResultsFileName.IsEmpty() ? null : new FileInfo(ClassifierResultsFileName);
 
-        public FileInfo OutputFile => OutputFileName.Empty() ? null : new FileInfo(OutputFileName);
+        public FileInfo OutputFile => OutputFileName.IsEmpty() ? null : new FileInfo(OutputFileName);
 
         public virtual List<ClassStatistic> ClassStatistics { get; protected set; } = new List<ClassStatistic>();
 

@@ -35,7 +35,7 @@ namespace ClassifyBot
         #endregion
 
         #region Properties
-        public virtual ILogger L { get; } = Log.ForContext<Stage>();
+        public static ILogger L { get; } = Log.ForContext<Stage>();
 
         public static Dictionary<string, object> StageOptions { get; } = new Dictionary<string, object>();
 
@@ -91,6 +91,7 @@ namespace ClassifyBot
         [DebuggerStepThrough] protected virtual void Verbose(string messageTemplate, params object[] propertyValues) => L.Verbose(messageTemplate, propertyValues);
         [DebuggerStepThrough] protected virtual void Warn(string messageTemplate, params object[] propertyValues) => L.Warning(messageTemplate, propertyValues);
         [DebuggerStepThrough]
+
         public virtual Operation Begin(string messageTemplate, params object[] args) 
         {
             Info(messageTemplate + "...", args);
@@ -111,7 +112,7 @@ namespace ClassifyBot
         protected static Dictionary<string, object> ParseAdditionalOptions(string o)
         {
             Dictionary<string, object> options = new Dictionary<string, object>();
-            if (o.Empty())
+            if (o.IsEmpty())
             {
                 return options;
             }

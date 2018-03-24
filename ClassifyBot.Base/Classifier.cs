@@ -14,9 +14,9 @@ namespace ClassifyBot
         #region Constructors
         public Classifier() : base()
         {
-            Contract.Requires(!TrainingFileName.Empty());
-            Contract.Requires(!TestFileName.Empty());
-            Contract.Requires(!ModelFileName.Empty());
+            Contract.Requires(!TrainingFileName.IsEmpty());
+            Contract.Requires(!TestFileName.IsEmpty());
+            Contract.Requires(!ModelFileName.IsEmpty());
         }
         #endregion
 
@@ -57,7 +57,7 @@ namespace ClassifyBot
                 {
                     return StageResult.INPUT_ERROR;
                 }
-                if (!ModelFileName.Empty() && ModelFile.Exists && !OverwriteOutputFile)
+                if (!ModelFileName.IsEmpty() && ModelFile.Exists && !OverwriteOutputFile)
                 {
                     Error("The model file {0} exists but the overwrite option was not specified.", ModelFile.FullName);
                     return StageResult.INPUT_ERROR;
@@ -71,11 +71,11 @@ namespace ClassifyBot
         #endregion
 
         #region Properties
-        public FileInfo TrainingFile => TrainingFileName.Empty() ? null : new FileInfo(TrainingFileName);
+        public FileInfo TrainingFile => TrainingFileName.IsEmpty() ? null : new FileInfo(TrainingFileName);
 
-        public FileInfo TestFile => TestFileName.Empty() ? null : new FileInfo(TestFileName);
+        public FileInfo TestFile => TestFileName.IsEmpty() ? null : new FileInfo(TestFileName);
 
-        public FileInfo ModelFile => ModelFileName.Empty() ? null : new FileInfo(ModelFileName);
+        public FileInfo ModelFile => ModelFileName.IsEmpty() ? null : new FileInfo(ModelFileName);
 
         public IEnumerable<IClassStatistic> ClassStatistics => _ClassStatistics;
 

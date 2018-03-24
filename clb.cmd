@@ -1,3 +1,3 @@
 @echo off
-dotnet .\ClassifyBot.Cli\bin\Debug\netcoreapp2.0\ClassifyBot.Cli.dll %*
+dotnet .\ClassifyBot.Cli\bin\x64\Debug\netcoreapp2.0\ClassifyBot.Cli.dll %*
 :end
