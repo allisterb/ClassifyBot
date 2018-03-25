@@ -27,6 +27,7 @@ namespace ClassifyBot
         public string BinDir { get; protected set; }
         public string ModulePath { get; protected set; }
         public List<string> Args { get; protected set; }
+        public bool Initialized { get; protected set; }
         #endregion
 
         #region Methods
@@ -39,7 +40,7 @@ namespace ClassifyBot
         #endregion
 
         #region Abstract members
-        public abstract bool IsInitialized { get; } 
+        
         public abstract bool Init();
         public abstract bool Run();
         public abstract bool Destroy();
