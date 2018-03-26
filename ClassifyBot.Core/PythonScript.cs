@@ -205,7 +205,7 @@ namespace ClassifyBot
                     DirectoryInfo python36 = lib.GetDirectories().First(d => d.Name.ToLower() == "python3.6");
                     if (python36.GetDirectories().Any(d => d.Name.ToLower() == "site-packages"))
                     {
-                        string site_packages = lib.GetDirectories().First(d => d.Name.ToLower() == "site-packages").FullName;
+                        string site_packages = python36.GetDirectories().First(d => d.Name.ToLower() == "site-packages").FullName;
                         Info("Incuding virtual environment user modules directory {0}.", site_packages);
                         PythonEngine.PythonPath += ";{0}".F(site_packages);
                     }
