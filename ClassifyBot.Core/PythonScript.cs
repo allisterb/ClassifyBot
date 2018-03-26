@@ -52,16 +52,14 @@ namespace ClassifyBot
                     
                     Directory.SetCurrentDirectory(binDir);
                 }
-                
-                SetPythonPaths();
+                SetPythonPath();
                 PythonEngine.Initialize(Args);
             }
             catch (DllNotFoundException dnfe)
             {
-                    
                 if (HomeDir.IsEmpty())
                 {
-                    Error(dnfe, $"Could not find the system-wide python36 shared library. Check your PATH environment variable or use the -P option to set the path to a interpreter directory.");
+                    Error(dnfe, $"Could not find the system-wide python36 shared library. Add Python 3.6 to your PATH environment variable or use the -P option to set the path to a Python 3.6 interpreter directory.");
                 }
                 else
                 {
@@ -90,7 +88,7 @@ namespace ClassifyBot
                 HasPipModule = Modules.Contains("pip");
                 if (!HasPipModule)
                 {
-                    Warn("pip modules is not installed. Package operations will fail.");
+                    Warn("pip module is not installed.");
                 }
                 else
                 {
@@ -186,7 +184,7 @@ namespace ClassifyBot
             }
         }
 
-        protected void SetPythonPaths()
+        protected void SetPythonPath()
         {
             string ppath = Environment.GetEnvironmentVariable("PYTHONPATH");
             if (Environment.OSVersion.Platform == PlatformID.Win32NT && VirtualEnvDir != null && ppath.IsEmpty() && VirtualEnvDir.GetDirectories().Any(d => d.Name.ToLower() == "lib"))
@@ -195,11 +193,11 @@ namespace ClassifyBot
                 if (lib.GetDirectories().Any(d => d.Name.ToLower() == "site-packages"))
                 {
                     string site_packages = lib.GetDirectories().First(d => d.Name.ToLower() == "site-packages").FullName;
-                    Info("Incuding Virtual environment user modules directory {0}.", site_packages);
+                    Info("Incuding virtual environment user modules directory {0}.", site_packages);
                     PythonEngine.PythonPath += ";{0}".F(site_packages);
-
                 }
             }
+            Info("User module paths are: {0}.", PythonEngine.PythonPath);
         }
         #endregion
 
