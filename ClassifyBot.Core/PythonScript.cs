@@ -197,7 +197,7 @@ namespace ClassifyBot
                     PythonEngine.PythonPath += ";{0}".F(site_packages);
                 }
             }
-            else if (Environment.OSVersion.Platform == PlatformID.Unix && VirtualEnvDir != null && ppath.IsEmpty() && VirtualEnvDir.GetDirectories().Any(d => d.Name.ToLower() == "lib"))
+            else if (Environment.OSVersion.Platform == PlatformID.Unix && !VirtualEnvActivated && VirtualEnvDir != null && ppath.IsEmpty() && VirtualEnvDir.GetDirectories().Any(d => d.Name.ToLower() == "lib"))
             {
                 DirectoryInfo lib = VirtualEnvDir.GetDirectories().First(d => d.Name.ToLower() == "lib");
                 if (lib.GetDirectories().Any(d => d.Name.ToLower() == "python3.6"))
