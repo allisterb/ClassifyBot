@@ -171,7 +171,7 @@ namespace ClassifyBot
                 VirtualEnvDir = new DirectoryInfo(venv);
                 Info("Virtual environment activation detected.");
             }
-            else if (homeDirInfo.GetFiles("pyvenv.cfg").Count() > 0)
+            else if (homeDirInfo != null && homeDirInfo.GetFiles("pyvenv.cfg").Count() > 0)
             {
                 VirtualEnvDir = homeDirInfo;
                 Info("Virtual environment directory detected.");

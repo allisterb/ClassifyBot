@@ -17,8 +17,11 @@ namespace ClassifyBot
         {
             Contract.Requires(homeDir.IsEmpty() || Directory.Exists(homeDir));
             Contract.Requires(modulePath.IsEmpty() || File.Exists(modulePath));
-            HomeDir = homeDir;
-            homeDirInfo = new DirectoryInfo(HomeDir);
+            if (homeDir.IsNotEmpty())
+            {
+                HomeDir = homeDir;
+                homeDirInfo = new DirectoryInfo(HomeDir);
+            }
             ModulePath = modulePath;
             Args = argv?.ToList();
         }
