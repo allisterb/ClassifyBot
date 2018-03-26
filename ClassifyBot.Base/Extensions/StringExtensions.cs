@@ -19,6 +19,11 @@ namespace ClassifyBot
             return string.IsNullOrEmpty(s);
         }
 
+        public static bool IsNotEmpty(this string s)
+        {
+            return !string.IsNullOrEmpty(s);
+        }
+
         public static string ToOneCharString(this char c)
         {
             return new string(c, 1);

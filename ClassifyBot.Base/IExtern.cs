@@ -7,7 +7,7 @@ namespace ClassifyBot
     public interface IExtern<T>
     {
         Extern<T> E { get; }
-        string BinDir { get; }
+        string HomeDir { get; }
         string ModuleName { get; }
     }
 }

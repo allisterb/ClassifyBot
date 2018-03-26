@@ -13,18 +13,19 @@ namespace ClassifyBot
     public abstract class Extern<T>
     {
         #region Constructors
-        public Extern(string binDir = "", string modulePath = "", params string[] argv)
+        public Extern(string homeDir = "", string modulePath = "", params string[] argv)
         {
-            Contract.Requires(binDir.IsEmpty() || Directory.Exists(binDir));
+            Contract.Requires(homeDir.IsEmpty() || Directory.Exists(homeDir));
             Contract.Requires(modulePath.IsEmpty() || File.Exists(modulePath));
-            BinDir = binDir;
+            HomeDir = homeDir;
+            homeDirInfo = new DirectoryInfo(HomeDir);
             ModulePath = modulePath;
             Args = argv?.ToList();
         }
         #endregion
 
         #region Properties
-        public string BinDir { get; protected set; }
+        public string HomeDir { get; protected set; }
         public string ModulePath { get; protected set; }
         public List<string> Args { get; protected set; }
         public bool Initialized { get; protected set; }
@@ -48,6 +49,7 @@ namespace ClassifyBot
 
         #region Fields
         protected static ILogger L = Log.ForContext<T>();
+        protected static DirectoryInfo homeDirInfo;
         #endregion
     }
 }

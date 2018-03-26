@@ -73,7 +73,7 @@ namespace ClassifyBot.Example.TCCC
         protected override StageResult Init()
         {
             if (!Success(base.Init(), out StageResult r)) return r;
-            FeatureExtractScript = new PythonScript(BinDir, ModuleName);
+            FeatureExtractScript = new PythonScript(HomeDir, ModuleName);
             if (!FeatureExtractScript.Init())
             {
                 return StageResult.FAILED;
@@ -248,8 +248,8 @@ namespace ClassifyBot.Example.TCCC
         [Option("with-fulltext-feature", Required = false, Default = false, HelpText = "Include the full text of the comment as a feature. This is off by default.")]
         public bool WithFullTextFeature { get; set; }
 
-        [Option('P',"python", Required = false, HelpText = "Path to the directory containing the Python 3.6 interpreter libraries. If this is omitted then the system-wide interpreter will be used.")]
-        public string BinDir { get; set; }
+        [Option('P',"python", Required = false, HelpText = "Path to the directory containing the Python 3.6 interpreter binaries and modules. If this is omitted then the value of the PYTHONHOME environment variable or the system-wide interpreter environment will be used.")]
+        public string HomeDir { get; set; }
 
         public string ModuleName { get; } = Path.Combine("TCCC", "hello_from_python.py");
         #endregion
