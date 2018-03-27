@@ -14,7 +14,7 @@ using SerilogTimings.Extensions;
 
 namespace ClassifyBot
 {
-    public class PythonScript : Extern<PythonScript>
+    public abstract class PythonScript : Extern<PythonScript>
     {
         #region Constructors
         public PythonScript(string homeDir = "", string scriptPath = "", bool isModule = false, params string[] argv) : base(homeDir, scriptPath, argv)
@@ -113,14 +113,6 @@ namespace ClassifyBot
             return true;
         }
     
-
-
-        public override bool Run(string code, params object[] p)
-        {
-            
-            throw new NotImplementedException();
-        }
-
         public override bool Destroy()
         {
             PythonEngine.Shutdown();
@@ -227,6 +219,7 @@ namespace ClassifyBot
 
         #region Fields
         protected string binDir;
+        protected PyDict globals;
         #endregion
     }
 }

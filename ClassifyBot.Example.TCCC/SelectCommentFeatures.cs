@@ -83,9 +83,10 @@ namespace ClassifyBot.Example.TCCC
 
         protected override StageResult Transform(int? recordBatchSize = null, int? recordLimit = null, Dictionary<string, string> options = null)
         {
-            if (!script.TokenizeComments(InputRecords))
+            script.Comments = InputRecords;
+            if (!script.Run())
             {
-                Error("Word tokenization in Python did not complete successfully.");
+                Error("Feature extraction in Python did not complete successfully.");
                 return StageResult.FAILED;
             }
             return base.Transform(recordBatchSize, recordLimit, options);
@@ -274,8 +275,6 @@ namespace ClassifyBot.Example.TCCC
         #region Fields
         internal FeatureExtractScript script;
         protected static Regex wordSplitter = new Regex("\\s+", RegexOptions.Compiled);
-        
-
         #region Word lists
         protected static string[] slangWords = @"121	one to one
             a/s/l	age, sex, location

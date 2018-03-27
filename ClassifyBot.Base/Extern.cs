@@ -51,9 +51,8 @@ namespace ClassifyBot
         #endregion
 
         #region Abstract members
-
         public abstract bool Init();
-        public abstract bool Run(string code, params object[] p);
+        public abstract bool Run();
         public abstract bool Destroy();
         #endregion
 

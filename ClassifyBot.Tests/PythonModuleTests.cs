@@ -14,6 +14,7 @@ namespace ClassifyBot.Tests
 
         }
 
+        /*
         [Fact(DisplayName = "Can initialize a Python script instance.")]
         public void CanInitPythonScript()
         {
@@ -33,5 +34,6 @@ namespace ClassifyBot.Tests
             //m.GetModules();
 
         }
+        */
     }
 }

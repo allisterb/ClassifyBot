@@ -71,12 +71,12 @@ namespace ClassifyBot
             }
             if (!WithoutConsole)
             {
-                LoggerConfiguration = LoggerConfiguration.WriteTo.Console(outputTemplate: "{Timestamp:HH:mm:ss}<{ThreadId:d2}> [{Level:u3}] {Message}{NewLine}{Exception}");
+                LoggerConfiguration = LoggerConfiguration.WriteTo.Console(outputTemplate: "{Timestamp:HH:mm:ss} [{ThreadId:d2}][{Level:u3}] {Message}{NewLine}{Exception}");
             }
             if (WithLogFile)
             {
                 LogFileName = Path.Combine("logs", "ClassifyBot") + "-{Date}.log";
-                LoggerConfiguration = LoggerConfiguration.WriteTo.RollingFile(LogFileName, outputTemplate: "{Timestamp:HH:mm:ss}<{ThreadId:d2}> [{Level:u3}] {Message}{NewLine}{Exception}");
+                LoggerConfiguration = LoggerConfiguration.WriteTo.RollingFile(LogFileName, outputTemplate: "{Timestamp:HH:mm:ss}[{ThreadId:d2}] [{Level:u3}] {Message}{NewLine}{Exception}");
             }
 
             Log.Logger = LoggerConfiguration.CreateLogger();
