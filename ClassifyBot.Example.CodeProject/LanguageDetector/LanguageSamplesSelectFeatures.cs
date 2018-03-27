@@ -15,8 +15,9 @@ namespace ClassifyBot.Example.CodeProject.LanguageDetector
         #endregion
 
         #region Overriden members
-        protected override Func<ILogger, Dictionary<string, object>, LanguageItem, LanguageItem> TransformInputToOutput { get; } = (logger, options, input) =>
+        protected override Func<Stage, Dictionary<string, object>, LanguageItem, LanguageItem> TransformInputToOutput { get; } = (s, options, input) =>
         {
+            LanguageSamplesSelectFeatures t = (LanguageSamplesSelectFeatures)s;
             string text = input.Features[0].Item2.Trim();
             StringBuilder textBuilder = new StringBuilder(input.Features[0].Item2.Trim());
             Regex doubleQuote = new Regex("\\\".*?\\\"", RegexOptions.Compiled | RegexOptions.Multiline);

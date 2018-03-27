@@ -7,6 +7,8 @@ using System.Linq;
 using System.Text;
 
 using Serilog;
+using SerilogTimings;
+using SerilogTimings.Extensions;
 
 namespace ClassifyBot
 {
@@ -41,12 +43,17 @@ namespace ClassifyBot
         [DebuggerStepThrough] protected virtual void Error(Exception e, string messageTemplate, params object[] propertyValues) => L.Error(e, messageTemplate, propertyValues);
         [DebuggerStepThrough] protected virtual void Verbose(string messageTemplate, params object[] propertyValues) => L.Verbose(messageTemplate, propertyValues);
         [DebuggerStepThrough] protected virtual void Warn(string messageTemplate, params object[] propertyValues) => L.Warning(messageTemplate, propertyValues);
+        [DebuggerStepThrough] protected virtual Operation Begin(string messageTemplate, params object[] propertyValues)
+        {
+            L.Information(messageTemplate + "...", propertyValues);
+            return L.BeginOperation(messageTemplate, propertyValues);
+        }
         #endregion
 
         #region Abstract members
-        
+
         public abstract bool Init();
-        public abstract bool Run();
+        public abstract bool Run(string code, params object[] p);
         public abstract bool Destroy();
         #endregion
 

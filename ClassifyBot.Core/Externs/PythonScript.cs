@@ -10,6 +10,7 @@ using System.Text;
 using Python.Runtime;
 using Serilog;
 using SerilogTimings;
+using SerilogTimings.Extensions;
 
 namespace ClassifyBot
 {
@@ -32,15 +33,14 @@ namespace ClassifyBot
         #region Overriden members
         public override bool Init()
         {
-            Operation init = Operation.Begin("Initializing embedded Python interpreter");
+            Operation init = Begin("Initializing embedded Python interpreter");
             if (PythonEngine.IsInitialized && (HomeDir != string.Empty || ModulePath != string.Empty || Args.Count > 0))
             {
                 Error("Python engine is already initialized and cannot be initilaized with another script or aditional arguments.");
                 init.Cancel();
                 return false;
             }
-            
-            
+
             string originalDirectory = Directory.GetCurrentDirectory();
 
             try
@@ -49,7 +49,7 @@ namespace ClassifyBot
                 SetBinDir();
                 if (binDir.IsNotEmpty())
                 {
-                    
+
                     Directory.SetCurrentDirectory(binDir);
                 }
                 SetPythonPath();
@@ -63,7 +63,6 @@ namespace ClassifyBot
                 }
                 else
                 {
-                            
                     Error(dnfe, $"Could not find python36 shared library in {HomeDir}.");
                 }
             }
@@ -79,35 +78,44 @@ namespace ClassifyBot
                 }
             }
 
-            if (PythonEngine.IsInitialized)
-            {
-                
-                Info("Python version {0} from {1}.", PythonEngine.Version.Trim(), binDir.IsEmpty() ? Runtime.PythonDLL : Path.Combine(binDir, Runtime.PythonDLL.WithDllExt()));
-                Modules = GetModules();
-                Info("{0} modules installed.", Modules.Count(m => !m.StartsWith("__")));
-                HasPipModule = Modules.Contains("pip");
-                if (!HasPipModule)
-                {
-                    Warn("pip module is not installed.");
-                }
-                else
-                {
-                    PipModules = GetPipModules();
-                    Info("{0} pip modules installed.", PipModules.Count);
-                }
-                init.Complete();
-                return this.Initialized = true;
-            }
-            else
+            if (!PythonEngine.IsInitialized)
             {
                 Error("Could not initalize Python engine.");
                 init.Cancel();
                 return false;
             }
+
+            Info("Python version {0} from {1}.", PythonEngine.Version.Trim(), binDir.IsEmpty() ? Runtime.PythonDLL : Path.Combine(binDir, Runtime.PythonDLL.WithDllExt()));
+            Modules = GetModules();
+            Info("{0} Python modules installed.", Modules.Count(m => !m.StartsWith("__")));
+            HasPipModule = Modules.Contains("pip");
+            if (!HasPipModule)
+            {
+                Warn("Python pip module is not installed.");
+            }
+            else
+            {
+                PipModules = GetPipModules();
+                Info("{0} pip modules installed.", PipModules.Count);
+            }
+
+            foreach (string m in RequiredModules)
+            {
+                if (!Modules.Contains(m))
+                {
+                    Error("Python {0} module is not installed.", m);
+                    init.Cancel();
+                    return false;
+                }
+            }
+
+            init.Complete();
+            return true;
         }
+    
 
 
-        public override bool Run()
+        public override bool Run(string code, params object[] p)
         {
             
             throw new NotImplementedException();
@@ -126,6 +134,8 @@ namespace ClassifyBot
         public List<string> Modules { get; protected set; }
         public bool HasPipModule { get; protected set; }
         public Dictionary<string, string> PipModules { get; protected set; }
+
+        public List<string> RequiredModules { get; protected set; } = new List<string>();
         #endregion
 
         #region Methods
@@ -167,12 +177,12 @@ namespace ClassifyBot
             {
                 VirtualEnvActivated = true;
                 VirtualEnvDir = new DirectoryInfo(venv);
-                Info("Virtual environment activation detected.");
+                Info("Python virtual environment activation detected.");
             }
             else if (homeDirInfo != null && homeDirInfo.GetFiles("pyvenv.cfg").Count() > 0)
             {
                 VirtualEnvDir = homeDirInfo;
-                Info("Virtual environment directory detected.");
+                Info("Python virtual environment directory detected.");
             }
         }
 
@@ -211,7 +221,7 @@ namespace ClassifyBot
                     }
                 }   
             }
-            Info("User module paths are: {0}.", PythonEngine.PythonPath);
+            Info("Python user module paths are: {0}.", PythonEngine.PythonPath);
         }
         #endregion
 

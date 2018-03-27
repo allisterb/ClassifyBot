@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 
 namespace ClassifyBot.Example.TCCC
 {
@@ -35,7 +36,11 @@ namespace ClassifyBot.Example.TCCC
             this.threat = c.threat;
             this.insult = c.insult;
             this.identity_hate = c.identity_hate;
-
+            if (Features.Any(f => f.Item1 == "WORDS"))
+            {
+                words = Features.First(f => f.Item1 == "WORDS").Item2.Split(new string[] { "<->" }, StringSplitOptions.RemoveEmptyEntries);
+            }
+            
         }
 
         public Comment() {}
@@ -48,6 +53,7 @@ namespace ClassifyBot.Example.TCCC
         internal int threat;
         internal int insult;
         internal int identity_hate;
+        internal string[] words;
         #endregion
     }
 }

@@ -68,25 +68,35 @@ namespace ClassifyBot.Example.TCCC
         #endregion
 
         #region Overriden members
-        public Extern<PythonScript> E => FeatureExtractScript;
+        public Extern<PythonScript> E => script;
 
         protected override StageResult Init()
         {
             if (!Success(base.Init(), out StageResult r)) return r;
-            FeatureExtractScript = new PythonScript(HomeDir, ModuleName);
-            if (!FeatureExtractScript.Init())
+            script = new FeatureExtractScript(HomeDir);
+            if (!script.Init())
             {
                 return StageResult.FAILED;
             }
             return StageResult.SUCCESS;
         }
 
-        protected override Func<ILogger, Dictionary<string, object>, Comment, Comment> TransformInputToOutput { get; } = (logger, options, input) =>
+        protected override StageResult Transform(int? recordBatchSize = null, int? recordLimit = null, Dictionary<string, string> options = null)
+        {
+            if (!script.TokenizeComments(InputRecords))
+            {
+                Error("Word tokenization in Python did not complete successfully.");
+                return StageResult.FAILED;
+            }
+            return base.Transform(recordBatchSize, recordLimit, options);
+        }
+
+        protected override Func<Stage, Dictionary<string, object>, Comment, Comment> TransformInputToOutput { get; } = (s, options, input) =>
         {
             Comment output = new Comment(input);
             output.Features.RemoveAll(f => f.Item1 == "TEXT");
             string text = input.Features[0].Item2.Trim();
-
+            
             if (text.Contains("..."))
             {
                 output.Features.Add((FeatureMap[1], "ELLIPSIS"));
@@ -219,7 +229,7 @@ namespace ClassifyBot.Example.TCCC
                 }
             }*/
             output.Features.Add(("WORDS", string.Join(" ", words)));
-            logger.Debug("Comment \'{0}\' has features {1}.", text, output.Features.Select(f => "{0}:{1}".F(f.Item1, f.Item2)));
+            L.Debug("Comment \'{0}\' has features {1}.", text, output.Features.Select(f => "{0}:{1}".F(f.Item1, f.Item2)));
             return output;
         };
 
@@ -262,7 +272,7 @@ namespace ClassifyBot.Example.TCCC
         #endregion
 
         #region Fields
-        protected PythonScript FeatureExtractScript;
+        internal FeatureExtractScript script;
         protected static Regex wordSplitter = new Regex("\\s+", RegexOptions.Compiled);
         
 
