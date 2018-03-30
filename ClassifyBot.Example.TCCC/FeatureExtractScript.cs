@@ -29,8 +29,6 @@ namespace ClassifyBot.Example.TCCC
             if (!base.Init()) return false;
             globals = new PyDict();
             commentsDict = new PyDict();
-            
-            
             globals.SetItem("nltk", Py.Import("nltk"));
             globals.SetItem("vader", Py.Import("vaderSentiment.vaderSentiment"));
             globals.SetItem("comments", commentsDict);
@@ -70,7 +68,7 @@ namespace ClassifyBot.Example.TCCC
         #endregion
 
         #region Methods
-        public bool TokenizeComments()
+        protected bool TokenizeComments()
         {
             Operation tokenize = Begin("Tokenizing {0} comments using NLTK word tokenizer", commentsDict.Length());
             using (Py.GIL())
@@ -82,20 +80,17 @@ namespace ClassifyBot.Example.TCCC
             return true;
         }
 
-        public bool CalculateSentiment()
+        protected bool CalculateSentiment()
         {
-            
             Operation sentiment = Begin("Calculating sentiment scores for {0} comments using VADER sentiment analyzer.", commentsDict.Length());
 
             using (Py.GIL())
             {
-
                 PyObject analyzer = PythonEngine.Eval("vader.SentimentIntensityAnalyzer()", globals.Handle);
                 globals["analyzer"] = analyzer;
                 PyObject r = PythonEngine.Eval("{k: analyzer.polarity_scores(v) for k, v in comments.items()}", globals.Handle);
                 commentsSentiment = new PyDict(r.Handle);
                 sentiment.Complete();
-
             }
             return true;
         }
@@ -106,7 +101,6 @@ namespace ClassifyBot.Example.TCCC
         protected PyDict commentsDict;
         protected PyDict commentsWords;
         protected PyDict commentsSentiment;
-        
         #endregion
     }
 }

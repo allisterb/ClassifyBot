@@ -64,9 +64,6 @@ namespace ClassifyBot
             get; set;
         }
 
-        //[Option("explicit", HelpText = "Enable explicit loading of assemblies.", Required = false)]
-        public string ExplicitAssemblies { get; set; }
-
         [Option('w', "overwrite", Required = false, Default = false, HelpText = "Ovewrite existing output data file if it exists.")]
         public virtual bool OverwriteOutputFile { get; set; }
 

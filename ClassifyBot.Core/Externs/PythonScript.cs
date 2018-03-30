@@ -213,6 +213,13 @@ namespace ClassifyBot
                     }
                 }   
             }
+            /*
+            IntPtr path = PySys_GetObject("path");
+            IntPtr item = PyString_FromString(rtdir);
+            PyList_Append(path, item);
+            XDecref(item);
+            */
+
             Info("Python user module paths are: {0}.", PythonEngine.PythonPath);
         }
         #endregion

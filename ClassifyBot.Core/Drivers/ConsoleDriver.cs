@@ -12,7 +12,7 @@ using Serilog.Sinks;
 
 namespace ClassifyBot
 {
-    public static class ConsoleDriver
+    public class ConsoleDriver : Driver
     {
         static ConsoleDriver()
         {
@@ -22,13 +22,12 @@ namespace ClassifyBot
         #region Properties
         static Dictionary<string, string> AppConfig { get; set; }
         static LoggerConfiguration LoggerConfiguration { get; set; }
-        static ILogger L;
         static bool ExitToEnvironment { get; set; }
         public static bool WithLogFile { get; set; } = false;
         public static string LogFileName { get; set; }
         public static bool WithoutConsole { get; set; } = false;
-
         public static bool WithDebugOutput { get; set; } = false;
+        
         #endregion
 
         #region Methods
@@ -60,8 +59,7 @@ namespace ClassifyBot
             {
                 WithoutConsole = true;
             }
-
-            ExitToEnvironment = true;
+            
             LoggerConfiguration = new LoggerConfiguration()
                 .Enrich.FromLogContext()
                 .Enrich.WithThreadId();
@@ -80,13 +78,35 @@ namespace ClassifyBot
             }
 
             Log.Logger = LoggerConfiguration.CreateLogger();
-            L = Log.ForContext<Stage>();
+            L = Log.ForContext<Driver>();
+
+            ExitToEnvironment = true;
+
             if (WithLogFile)
             {
                 L.Information("Log file is at {0}.", LogFileName);
             }
 
-            StageResult result= Driver.MarshalOptionsForStage(args, out Stage stage, out string optionsHelp);
+            for (int i = 0; i < args.Length; i++)
+            {
+                if (args[i] == "-e" || args[i] == "--explicit")
+                {
+                    if ((i + 1) <= args.Length - 1)
+                    {
+                        ExplicitAssemblyName = args[i + 1].StartsWith("ClassifyBot.") ? args[i + 1] : "ClassifyBot." + args[i + 1];
+                        args = args.Except(new string[] { "-e", "--explicit", args[i + 1] }).ToArray();
+                    }
+                    else
+                    {
+                        L.Error("You must enter an assembly name to explicitly load. Valid assembly names are : {0}."
+                            .F(string.Join(", ", AllLoadedAssemblies.Select(a => a.GetName().Name).ToArray())));
+                        Exit(StageResult.INVALID_OPTIONS);
+                    }
+                    break;
+                }
+            }
+
+            StageResult result = MarshalOptionsForStage(args, ExplicitAssemblyName, out Stage stage, out string optionsHelp);
             if (result == StageResult.INVALID_OPTIONS && stage == null && !optionsHelp.IsEmpty())
             {
                 L.Information(optionsHelp);

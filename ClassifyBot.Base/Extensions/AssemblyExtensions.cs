@@ -13,6 +13,7 @@ namespace ClassifyBot
     public static class AssemblyExtensions
     {
         private static ILogger L = Log.ForContext<Assembly>();
+
         public static List<Assembly> LoadAllFrom(this Assembly assembly, string[] includedFileNames, params string[] excludedFileNames)
         {
             if (includedFileNames == null)
@@ -52,7 +53,7 @@ namespace ClassifyBot
             }
             else
             {
-                L.Information("Loaded {0} ClassifyBot assemblies: {1}.", assemblies.Count, assemblies);
+                
                 return assemblies;
 
             }
