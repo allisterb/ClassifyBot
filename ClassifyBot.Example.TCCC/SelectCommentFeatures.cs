@@ -92,7 +92,7 @@ namespace ClassifyBot.Example.TCCC
             return base.Transform(recordBatchSize, recordLimit, options);
         }
 
-        protected override Func<Stage, Dictionary<string, object>, Comment, Comment> TransformInputToOutput { get; } = (s, options, input) =>
+        protected override Func<Transformer<Comment, string>, Dictionary<string, object>, Comment, Comment> TransformInputToOutput { get; } = (t, options, input) =>
         {
             Comment output = new Comment(input);
             output.Features.RemoveAll(f => f.Item1 == "TEXT");

@@ -149,7 +149,7 @@ namespace ClassifyBot
         #endregion
 
         #region Abstract members
-        protected abstract Func<Stage, Dictionary<string, object>, TRecord, TRecord> TransformInputToOutput { get; }
+        protected abstract Func<Transformer<TRecord, TFeature>, Dictionary<string, object>, TRecord, TRecord> TransformInputToOutput { get; }
         #endregion
 
         #region Properties
@@ -179,7 +179,7 @@ namespace ClassifyBot
                 {
                     for (int i = 0; i < InputRecords.Count; i++)
                     {
-                        OutputRecords.Add(TransformInputToOutput((Stage) this, WriterOptions, InputRecords[i]));
+                        OutputRecords.Add(TransformInputToOutput(this, WriterOptions, InputRecords[i]));
                         if ((i + 1) % 1000 == 0)
                         {
                             Info("Transformed range {0} to {1} of {2} records...", (i + 1) - 1000, i + 1, InputRecords.Count);

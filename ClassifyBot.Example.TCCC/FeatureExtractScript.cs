@@ -70,7 +70,7 @@ namespace ClassifyBot.Example.TCCC
         #region Methods
         protected bool TokenizeComments()
         {
-            Operation tokenize = Begin("Tokenizing {0} comments using NLTK word tokenizer", commentsDict.Length());
+            Operation tokenize = Begin("Tokenizing {0} comments using {1}", commentsDict.Length(), "NLTK word tokenizer");
             using (Py.GIL())
             {
                 PyObject r = PythonEngine.Eval("{k: '<->'.join(nltk.word_tokenize(v)) for k, v in comments.items()}", globals.Handle);
@@ -82,7 +82,7 @@ namespace ClassifyBot.Example.TCCC
 
         protected bool CalculateSentiment()
         {
-            Operation sentiment = Begin("Calculating sentiment scores for {0} comments using VADER sentiment analyzer.", commentsDict.Length());
+            Operation sentiment = Begin("Calculating sentiment scores for {0} comments using {1}.", commentsDict.Length(), "VADER sentiment analyzer");
 
             using (Py.GIL())
             {

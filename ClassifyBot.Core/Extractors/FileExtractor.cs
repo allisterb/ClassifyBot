@@ -29,7 +29,7 @@ namespace ClassifyBot
         #endregion
 
         #region Abstract members
-        protected abstract Func<ILogger, StreamReader, Dictionary<string, object>, List<TRecord>> ReadRecordsFromFileStream { get; }
+        protected abstract Func<FileExtractor<TRecord, TFeature>, StreamReader, Dictionary<string, object>, List<TRecord>> ReadRecordsFromFileStream { get; }
         #endregion
 
         #region Overridden members
@@ -61,7 +61,7 @@ namespace ClassifyBot
                     using (Stream rs = reader.OpenEntryStream())
                     using (StreamReader r = new StreamReader(rs))
                     {
-                        ExtractedRecords.AddRange(ReadRecordsFromFileStream(L, r, WriterOptions));
+                        ExtractedRecords.AddRange(ReadRecordsFromFileStream(this, r, WriterOptions));
                     }
                 }
             }
@@ -71,7 +71,7 @@ namespace ClassifyBot
                 using (FileStream f = InputFile.OpenRead())
                 using (StreamReader r = new StreamReader(f))
                 {
-                    ExtractedRecords.AddRange(ReadRecordsFromFileStream(L, r, WriterOptions));
+                    ExtractedRecords.AddRange(ReadRecordsFromFileStream(this, r, WriterOptions));
                 }
 
             }

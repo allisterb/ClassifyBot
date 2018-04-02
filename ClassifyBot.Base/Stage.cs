@@ -90,8 +90,8 @@ namespace ClassifyBot
         [DebuggerStepThrough] protected virtual void Error(Exception e, string messageTemplate, params object[] propertyValues) => L.Error(e, messageTemplate, propertyValues);
         [DebuggerStepThrough] protected virtual void Verbose(string messageTemplate, params object[] propertyValues) => L.Verbose(messageTemplate, propertyValues);
         [DebuggerStepThrough] protected virtual void Warn(string messageTemplate, params object[] propertyValues) => L.Warning(messageTemplate, propertyValues);
-        [DebuggerStepThrough]
 
+        [DebuggerStepThrough]
         public virtual Operation Begin(string messageTemplate, params object[] args) 
         {
             Info(messageTemplate + "...", args);

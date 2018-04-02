@@ -13,7 +13,7 @@ namespace ClassifyBot.Example.TCCC
     [Verb("tcc-extract", HelpText = "Extract comment data from a local TCC data file into a common JSON format.")]
     public class CommentCsvFileExtractor : FileExtractor<Comment, string>
     {
-        protected override Func<ILogger, StreamReader, Dictionary<string, object>, List<Comment>> ReadRecordsFromFileStream { get; } = (logger, sr, options) =>
+        protected override Func<FileExtractor<Comment, string>, StreamReader, Dictionary<string, object>, List<Comment>> ReadRecordsFromFileStream { get; } = (e, sr, options) =>
         {
             using (CsvReader csv = new CsvReader(sr))
             {
@@ -41,11 +41,11 @@ namespace ClassifyBot.Example.TCCC
                     comments.Add(new Comment(i, r.id, r.comment_text, r.toxic, r.severe_toxic, r.obscene, r.threat, r.insult, r.identity_hate));
                     if (i  % 20000 == 0)
                     {
-                        logger.Information("Extracted {0} records from CSV file.", i);
+                        L.Information("Extracted {0} records from CSV file.", i);
                     }
                     if ((recordLimitSize > 0) && (i == recordLimitSize))
                     {
-                        logger.Information("Stopping extraction at record limit {0}.", i);
+                        L.Information("Stopping extraction at record limit {0}.", i);
                         break;
                     }
                     i++;
