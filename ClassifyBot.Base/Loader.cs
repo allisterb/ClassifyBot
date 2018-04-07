@@ -133,7 +133,7 @@ namespace ClassifyBot
         #endregion
 
         #region Abstract members
-        protected abstract Func<ILogger, StreamWriter, List<TRecord>, Dictionary<string, object>, StageResult> WriteFileStream { get; }
+        protected abstract Func<Loader<TRecord, TFeature>, StreamWriter, List<TRecord>, Dictionary<string, object>, StageResult> WriteFileStream { get; }
         #endregion
 
         #region Properties
@@ -195,7 +195,7 @@ namespace ClassifyBot
                 using (FileStream fs = new FileStream(file.FullName, FileMode.Create))
                 using (StreamWriter sw = new StreamWriter(fs))
                 {
-                    r = WriteFileStream(L, sw, records, WriterOptions);
+                    r = WriteFileStream(this, sw, records, WriterOptions);
                 }
             }
             else
@@ -204,7 +204,7 @@ namespace ClassifyBot
                 using (GZipStream gzs = new GZipStream(fs, CompressionMode.Compress))
                 using (StreamWriter sw = new StreamWriter(gzs))
                 {
-                    r = WriteFileStream(L, sw, records, WriterOptions);
+                    r = WriteFileStream(this, sw, records, WriterOptions);
                 }
 
             }

@@ -22,9 +22,9 @@ namespace ClassifyBot.Example.TCCC
         #endregion
 
         #region Overriden members
-        protected override Func<ILogger, StreamWriter, List<Comment>, Dictionary<string, object>, StageResult> WriteFileStream { get; } = (logger, sw, records, options) =>
+        protected override Func<Loader<Comment, string>, StreamWriter, List<Comment>, Dictionary<string, object>, StageResult> WriteFileStream { get; } = (loader, sw, records, options) =>
         {
-            using (Operation writeOp = logger.BeginOperation("Writing records to file"))
+            using (Operation writeOp = L.BeginOperation("Writing records to file"))
             {
                 using (CsvWriter csv = new CsvWriter(sw))
                 {
@@ -64,7 +64,7 @@ namespace ClassifyBot.Example.TCCC
                             else
                             {
 
-                                logger.Warning("Sentiment feature for {0} {1} is not numeric: {2}", record._Id, record.Id, sentiment);
+                                L.Warning("Sentiment feature for {0} {1} is not numeric: {2}", record._Id, record.Id, sentiment);
                                 csv.WriteField(0);
                             }
                         }

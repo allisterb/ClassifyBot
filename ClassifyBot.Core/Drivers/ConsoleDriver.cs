@@ -89,7 +89,7 @@ namespace ClassifyBot
 
             for (int i = 0; i < args.Length; i++)
             {
-                if (args[i] == "-e" || args[i] == "--explicit")
+                if (args[i] == "-x" || args[i] == "--explicit")
                 {
                     if ((i + 1) <= args.Length - 1)
                     {

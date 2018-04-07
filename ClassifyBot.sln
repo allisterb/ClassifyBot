@@ -17,6 +17,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClassifyBot.Tests", "Classi
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{BB197DB6-C648-44F6-8C4C-A529BE7EF91B}"
 	ProjectSection(SolutionItems) = preProject
+		build.cmd = build.cmd
 		build.sh = build.sh
 		clb = clb
 		clb.cmd = clb.cmd
@@ -24,7 +25,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClassifyBot.Example.TCCC", "ClassifyBot.Example.TCCC\ClassifyBot.Example.TCCC.csproj", "{0BB7748C-886B-4F48-AD53-12F72CB62B6A}"
 EndProject
-Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "TCCC", "TCCC\TCCC.pyproj", "{BFA14484-928E-410F-BFCA-CF451459FB4B}"
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "TCCC", "TCCC\TCCC.pyproj", "{36725C1A-1F4E-4008-9438-BD6BD8B0EC9C}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Python.Runtime.15", "pythonnet\src\runtime\Python.Runtime.15.csproj", "{BB1532D3-75E7-4004-8536-B1999C5DE187}"
 EndProject
@@ -212,18 +213,18 @@ Global
 		{0BB7748C-886B-4F48-AD53-12F72CB62B6A}.ReleaseWin|x64.Build.0 = Release|x64
 		{0BB7748C-886B-4F48-AD53-12F72CB62B6A}.ReleaseWinPY3|x64.ActiveCfg = Release|x64
 		{0BB7748C-886B-4F48-AD53-12F72CB62B6A}.ReleaseWinPY3|x64.Build.0 = Release|x64
-		{BFA14484-928E-410F-BFCA-CF451459FB4B}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{BFA14484-928E-410F-BFCA-CF451459FB4B}.DebugLinux|x64.ActiveCfg = Debug|Any CPU
-		{BFA14484-928E-410F-BFCA-CF451459FB4B}.DebugMono|x64.ActiveCfg = Debug|Any CPU
-		{BFA14484-928E-410F-BFCA-CF451459FB4B}.DebugMonoPY3|x64.ActiveCfg = Debug|Any CPU
-		{BFA14484-928E-410F-BFCA-CF451459FB4B}.DebugWin|x64.ActiveCfg = Debug|Any CPU
-		{BFA14484-928E-410F-BFCA-CF451459FB4B}.DebugWinPY3|x64.ActiveCfg = Debug|Any CPU
-		{BFA14484-928E-410F-BFCA-CF451459FB4B}.Nuget|x64.ActiveCfg = Release|Any CPU
-		{BFA14484-928E-410F-BFCA-CF451459FB4B}.Release|x64.ActiveCfg = Release|Any CPU
-		{BFA14484-928E-410F-BFCA-CF451459FB4B}.ReleaseMono|x64.ActiveCfg = Release|Any CPU
-		{BFA14484-928E-410F-BFCA-CF451459FB4B}.ReleaseMonoPY3|x64.ActiveCfg = Release|Any CPU
-		{BFA14484-928E-410F-BFCA-CF451459FB4B}.ReleaseWin|x64.ActiveCfg = Release|Any CPU
-		{BFA14484-928E-410F-BFCA-CF451459FB4B}.ReleaseWinPY3|x64.ActiveCfg = Release|Any CPU
+		{36725C1A-1F4E-4008-9438-BD6BD8B0EC9C}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{36725C1A-1F4E-4008-9438-BD6BD8B0EC9C}.DebugLinux|x64.ActiveCfg = Debug|Any CPU
+		{36725C1A-1F4E-4008-9438-BD6BD8B0EC9C}.DebugMono|x64.ActiveCfg = Debug|Any CPU
+		{36725C1A-1F4E-4008-9438-BD6BD8B0EC9C}.DebugMonoPY3|x64.ActiveCfg = Debug|Any CPU
+		{36725C1A-1F4E-4008-9438-BD6BD8B0EC9C}.DebugWin|x64.ActiveCfg = Debug|Any CPU
+		{36725C1A-1F4E-4008-9438-BD6BD8B0EC9C}.DebugWinPY3|x64.ActiveCfg = Debug|Any CPU
+		{36725C1A-1F4E-4008-9438-BD6BD8B0EC9C}.Nuget|x64.ActiveCfg = Release|Any CPU
+		{36725C1A-1F4E-4008-9438-BD6BD8B0EC9C}.Release|x64.ActiveCfg = Release|Any CPU
+		{36725C1A-1F4E-4008-9438-BD6BD8B0EC9C}.ReleaseMono|x64.ActiveCfg = Release|Any CPU
+		{36725C1A-1F4E-4008-9438-BD6BD8B0EC9C}.ReleaseMonoPY3|x64.ActiveCfg = Release|Any CPU
+		{36725C1A-1F4E-4008-9438-BD6BD8B0EC9C}.ReleaseWin|x64.ActiveCfg = Release|Any CPU
+		{36725C1A-1F4E-4008-9438-BD6BD8B0EC9C}.ReleaseWinPY3|x64.ActiveCfg = Release|Any CPU
 		{BB1532D3-75E7-4004-8536-B1999C5DE187}.Debug|x64.ActiveCfg = ReleaseWinPY3|Any CPU
 		{BB1532D3-75E7-4004-8536-B1999C5DE187}.Debug|x64.Build.0 = ReleaseWinPY3|Any CPU
 		{BB1532D3-75E7-4004-8536-B1999C5DE187}.DebugLinux|x64.ActiveCfg = ReleaseMonoPY3|Any CPU

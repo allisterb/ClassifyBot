@@ -101,7 +101,36 @@ namespace ClassifyBot
                     }
                 }
 
-                else if (!MicroAveragedF1.HasValue && s.StartsWith("Accuracy/micro-averaged F1"))
+                else if (!KFoldCrossValidation && s.StartsWith("### Fold"))
+                {
+                    KFoldCrossValidation = true;
+                    Match m = kFold.Match(s);
+                    if (m.Success)
+                    {
+                        if (!KFoldIndex.HasValue)
+                        {
+                            MicroAveragedF1Folds = new float[10];
+                            MacroAveragedF1Folds = new float[10];
+                        }
+                        KFoldIndex = Int32.Parse(m.Groups[1].Value);
+                    }
+                }
+
+                else if (KFoldCrossValidation && s.StartsWith("### Fold"))
+                {
+                    Match m = kFold.Match(s);
+                    if (m.Success)
+                    {
+                        KFoldIndex = Int32.Parse(m.Groups[1].Value);
+                    }
+                    else
+                    {
+                        Error("Could not parse k-fold output line: {0}.", s);
+                        return StageResult.FAILED;
+                    }
+                }
+
+                else if (!KFoldCrossValidation && !MicroAveragedF1.HasValue && s.StartsWith("Accuracy/micro-averaged F1"))
                 {
                     Match m = f1MicroRegex.Match(s);
                     if (m.Success)
@@ -115,7 +144,35 @@ namespace ClassifyBot
                     }
                 }
 
-                else if (!MacroAveragedF1.HasValue && s.StartsWith("Macro-averaged F1"))
+                else if (KFoldCrossValidation && ReadTestDataset && !MicroAveragedF1.HasValue && s.StartsWith("Accuracy/micro-averaged F1"))
+                {
+                    Match m = f1MicroRegex.Match(s);
+                    if (m.Success)
+                    {
+                        MicroAveragedF1 = Single.Parse(m.Groups[1].Value);
+                        Info("Micro-averaged F1 = {0}.", MicroAveragedF1);
+                    }
+                    else
+                    {
+                        Error("Could not parse micro-averaged F1 statistic {0}.", s);
+                    }
+                }
+
+                else if (KFoldCrossValidation && s.StartsWith("Accuracy/micro-averaged F1"))
+                {
+                    Match m = f1MicroRegex.Match(s);
+                    if (m.Success)
+                    {
+                        MicroAveragedF1Folds[KFoldIndex.Value] = Single.Parse(m.Groups[1].Value);
+                        Info("Fold {0} Micro-averaged F1 = {1}.", KFoldIndex.Value, MicroAveragedF1Folds[KFoldIndex.Value]);
+                    }
+                    else
+                    {
+                        Error("Could not parse micro-averaged F1 statistic {0}.", s);
+                    }
+                }
+
+                else if (!KFoldCrossValidation && !MacroAveragedF1.HasValue && s.StartsWith("Macro-averaged F1"))
                 {
                     Match m = f1MacroRegex.Match(s);
                     if (m.Success)
@@ -128,6 +185,35 @@ namespace ClassifyBot
                         Error("Could not parse macro-averaged F1 statistic {0}.", s);
                     }
                 }
+
+                else if (KFoldCrossValidation && ReadTestDataset && !MacroAveragedF1.HasValue && s.StartsWith("Macro-averaged F1"))
+                {
+                    Match m = f1MacroRegex.Match(s);
+                    if (m.Success)
+                    {
+                        MacroAveragedF1Folds[KFoldIndex.Value] = Single.Parse(m.Groups[1].Value);
+                        Info("Macro-averaged F1 = {0}.\n", MacroAveragedF1Folds[KFoldIndex.Value]);
+                    }
+                    else
+                    {
+                        Error("Could not parse macro-averaged F1 statistic {0}.", s);
+                    }
+                }
+
+                else if (KFoldCrossValidation && s.StartsWith("Macro-averaged F1"))
+                {
+                    Match m = f1MacroRegex.Match(s);
+                    if (m.Success)
+                    {
+                        MacroAveragedF1Folds[KFoldIndex.Value] = Single.Parse(m.Groups[1].Value);
+                        Info("Fold {0} Macro-averaged F1 = {1}.\n", KFoldIndex.Value, MacroAveragedF1Folds[KFoldIndex.Value]);
+                    }
+                    else
+                    {
+                        Error("Could not parse macro-averaged F1 statistic {0}.", s);
+                    }
+                }
+
                 else if (Features == null && s.StartsWith("Built this classifier: 1"))
                 {
                     Features = new Dictionary<string, float>();
@@ -187,23 +273,18 @@ namespace ClassifyBot
             {
                 return StageResult.FAILED;
             }
-            Info("Got {0} class statistics.", _ClassStatistics.Count);
-            Info("Got {0} results.", _Results.Count);
+            
+            if (!KFoldCrossValidation)
+            {
+                Info("Got {0} class statistics.", _ClassStatistics.Count);
+                Info("Got {0} results.", _Results.Count);
+            }
             return StageResult.SUCCESS;
         }
         
         protected override StageResult Init()
         {
-            StageResult r = base.Init();
-            if (r != StageResult.SUCCESS)
-            {
-                return r;
-            }
-
-            if (TrainOp)
-            {
-                Contract.Requires(ModelFile != null);
-            }
+            if (!Success(base.Init(), out StageResult r)) return r;
 
             if (JavaHome.IsEmpty())
             {
@@ -244,6 +325,12 @@ namespace ClassifyBot
             if (BinaryLogisticClassifier && !AdditionalOptions.ContainsKey("useBinary"))
             {
                 AdditionalOptions.Add("useBinary", true);
+            }
+
+            if (WithKFoldCrossValidation)
+            {
+                ClassifierProperties.Add("crossValidationFolds", 10);
+                Info("Using 10-fold cross validation");
             }
 
             Command version = new Command(Path.Combine(JavaHome, "bin"), "java", "-version");
@@ -327,6 +414,10 @@ namespace ClassifyBot
 
         public bool ReadTestDataset { get; protected set; }
 
+        public bool KFoldCrossValidation { get; protected set; }
+
+        public int? KFoldIndex { get; protected set; }
+
         public string ClassifierType { get; protected set; }
 
         public int? NumberofFeatures { get; protected set; }
@@ -340,6 +431,10 @@ namespace ClassifyBot
         public float? MicroAveragedF1 { get; protected set; }
 
         public float? MacroAveragedF1 { get; protected set; }
+
+        public float[] MicroAveragedF1Folds { get; protected set; }
+
+        public float[] MacroAveragedF1Folds { get; protected set; }
 
         [Option('j', "java-home", Required = false, HelpText = "The path to an existing Java installation. If this is not specified then the JAVA_HOME environment variable will be used")]
         public virtual string JavaHome { get; set; }
@@ -355,6 +450,9 @@ namespace ClassifyBot
 
         [Option('n', "bayes", Required = false, Default = false, HelpText = "Use a Naive Bayes generative classifier.")]
         public bool NaiveBayesClassifier { get; set; }
+
+        [Option("with-kcross", HelpText = "Use k-fold cross-validation.", Required = false)]
+        public bool WithKFoldCrossValidation { get; set; }
         #endregion
 
         #region Methods
@@ -381,6 +479,7 @@ namespace ClassifyBot
         protected static Regex f1MicroRegex = new Regex("Accuracy/micro-averaged F1: ([0|1]\\.\\d+)");
         protected static Regex f1MacroRegex = new Regex("Macro-averaged F1: ([0|1]\\.\\d+)");
         protected static Regex binaryClassiferQNN = new Regex("QNMinimizer called on double function of (\\d+) variables");
+        protected static Regex kFold = new Regex("### Fold (\\d+)");
         #endregion
     }
 }

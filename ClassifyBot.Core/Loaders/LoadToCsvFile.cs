@@ -23,6 +23,41 @@ namespace ClassifyBot
         #endregion
 
         #region Overriden members
+        protected override Func<Loader<TRecord, TFeature>, StreamWriter, List<TRecord>, Dictionary<string, object>, StageResult> WriteFileStream { get; } = (l, sw, records, options) =>
+        {
+            using (CsvWriter csv = new CsvWriter(sw))
+            {
+                SetPropFromDict(csv.Configuration.GetType(), csv.Configuration, options);
+                for (int i = 0; i < records.Count; i++)
+                {
+                    TRecord record = records[i];
+                    for (int j = 0; j < record.Labels.Count; j++)
+                    {
+                        csv.WriteField(record.Labels[j].Item1.ToUpper());
+                    }
+
+                    for (int f = 0; f < record.Features.Count; f++)
+                    {
+                        csv.WriteField(record.Features[f].Item2.ToString()
+                            .Replace("\r", string.Empty)
+                            .Replace("\n", string.Empty)
+                            .Replace("\r\n", string.Empty)
+                            .Replace("\t", string.Empty));
+                    }
+                    if (!record.Id.IsEmpty())
+                    {
+                        csv.WriteField(record.Id);
+                    }
+                    else if (record._Id.HasValue)
+                    {
+                        csv.WriteField(record._Id);
+                    }
+                    csv.NextRecord();
+                }
+                return StageResult.SUCCESS;
+            }
+        };
+
         protected override StageResult Init()
         {
             StageResult r;
@@ -30,7 +65,7 @@ namespace ClassifyBot
             {
                 return r;
             }
-       
+
             if (AdditionalOptions.Count > 0)
             {
                 foreach (KeyValuePair<string, object> kv in AdditionalOptions)
@@ -43,8 +78,10 @@ namespace ClassifyBot
                 }
             }
             return StageResult.SUCCESS;
-            
+
         }
+
+        protected override StageResult Cleanup() => StageResult.SUCCESS;
         #endregion
     }
 }
