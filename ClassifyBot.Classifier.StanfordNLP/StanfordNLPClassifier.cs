@@ -294,7 +294,7 @@ namespace ClassifyBot
                 }
                 else if ((JavaHome = Environment.GetEnvironmentVariable("JAVA_HOME")).IsEmpty())
                 {
-                    Error("The java-home option was not specified and the JAVA_HOME environment variable does not exist.");
+                    Error("The java-home or JAVA_HOME option was not specified and the JAVA_HOME environment variable does not exist.");
                     return StageResult.INVALID_OPTIONS;
                 }
             }
@@ -439,7 +439,7 @@ namespace ClassifyBot
         [Option('j', "java-home", Required = false, HelpText = "The path to an existing Java installation. If this is not specified then the JAVA_HOME environment variable will be used")]
         public virtual string JavaHome { get; set; }
 
-        [Option('c', "class-path", Required = false, HelpText = "The path to the Stanford NLP Classifier jar file. If this is not specified then the JAVA_HOME environment variable will be used")]
+        [Option("class-path", Required = false, HelpText = "The path to the Stanford NLP Classifier jar file. If this is not specified then the JAVA_HOME environment variable will be used")]
         public virtual string ClassPath { get; set; }
 
         [Option('k', "keep-props-file", Required = false, Default = false, HelpText = "Don't delete the classifier properties file after classification task completes.")]
