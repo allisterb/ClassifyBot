@@ -17,9 +17,9 @@ namespace ClassifyBot
     public abstract class FileExtractor<TRecord, TFeature> : Extractor<TRecord, TFeature> where TFeature : ICloneable, IComparable, IComparable<TFeature>, IConvertible, IEquatable<TFeature> where TRecord : Record<TFeature>
     {
         #region Constructors
-        public FileExtractor() : base()
+        public FileExtractor()
         {
-            Contract.Requires(InputFile != null);
+
         }
 
         public FileExtractor(string inputFileName) : base()

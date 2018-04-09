@@ -11,15 +11,6 @@ namespace ClassifyBot
 {
     public abstract class Classifier<TRecord, TFeature> : Stage, IClassifier<TRecord, TFeature> where TFeature : ICloneable, IComparable, IComparable<TFeature>, IConvertible, IEquatable<TFeature> where TRecord : Record<TFeature>
     {
-        #region Constructors
-        public Classifier() : base()
-        {
-            Contract.Requires(!TrainingFileName.IsEmpty());
-            Contract.Requires(!TestFileName.IsEmpty());
-            Contract.Requires(!ModelFileName.IsEmpty());
-        }
-        #endregion
-
         #region Abstract members
         public abstract StageResult Train(Dictionary<string, object> options = null);
         #endregion

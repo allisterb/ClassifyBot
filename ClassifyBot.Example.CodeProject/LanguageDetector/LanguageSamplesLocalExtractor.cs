@@ -13,10 +13,6 @@ namespace ClassifyBot.Example.CodeProject.LanguageDetector
     [Verb("langdata-extract-local", HelpText = "Extract language samples data from local zip file.", Hidden = true)]
     public class LanguageSamplesLocalExtractor : FileExtractor<LanguageItem, string>
     {
-        #region Constructors
-        public LanguageSamplesLocalExtractor() : base() {}
-        #endregion
-
         #region Overriden members
         protected override Func<FileExtractor<LanguageItem, string>, StreamReader, Dictionary<string, object>, List<LanguageItem>> ReadRecordsFromFileStream { get; } = (e, r, options) =>
         {

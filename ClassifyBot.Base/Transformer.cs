@@ -21,14 +21,6 @@ namespace ClassifyBot
     public abstract class Transformer<TRecord, TFeature> : Stage, ITransformer<TRecord, TFeature>
         where TFeature : ICloneable, IComparable, IComparable<TFeature>, IConvertible, IEquatable<TFeature> where TRecord : Record<TFeature>
     {
-        #region Constructors
-        public Transformer() : base()
-        {
-            Contract.Requires(!InputFileName.IsEmpty());
-            Contract.Requires(!OutputFileName.IsEmpty());
-        }
-        #endregion
-
         #region Overriden members
         public override StageResult Run(Dictionary<string, object> options = null)
         {

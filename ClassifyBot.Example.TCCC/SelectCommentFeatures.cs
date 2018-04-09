@@ -14,8 +14,6 @@ namespace ClassifyBot.Example.TCCC
     public class SelectCommentFeatures : Transformer<Comment, string>, IExtern<PythonScript>
     {
         #region Constructor
-        public SelectCommentFeatures() : base() {}
-
         static SelectCommentFeatures()
         {
             

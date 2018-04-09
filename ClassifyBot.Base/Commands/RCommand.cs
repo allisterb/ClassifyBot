@@ -7,10 +7,11 @@ using Serilog;
 
 namespace ClassifyBot
 {
+    //WIP
     public class RCommand : Command
     {
         #region Constructors
-        public RCommand(string javaHome, string classPath, string className, string javaOptions, params object[] options) : base(javaHome, "java", options)
+        public RCommand(string rHome, string classPath, string className, string javaOptions, params object[] options) : base(rHome, "java", options)
         {
             this.RHome = WorkingDirectory;
             this.ClassPath = classPath;
