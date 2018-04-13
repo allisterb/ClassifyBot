@@ -1,3 +1,6 @@
 [submodule "pythonnet"]
 	path = pythonnet
 	url = https://github.com/allisterb/pythonnet.git
+[submodule "WolfCurses"]
+	path = WolfCurses
+	url = https://github.com/allisterb/WolfCurses.git
