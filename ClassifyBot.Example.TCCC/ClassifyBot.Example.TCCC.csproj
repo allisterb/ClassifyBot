@@ -6,6 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ClassifyBot.Annotator.Wunderkind\ClassifyBot.Annotator.Wunderkind.csproj" />
     <ProjectReference Include="..\ClassifyBot.Classifier.StanfordNLP\ClassifyBot.Classifier.StanfordNLP.csproj" />
     <ProjectReference Include="..\ClassifyBot.Core\ClassifyBot.Core.csproj" />
   </ItemGroup>

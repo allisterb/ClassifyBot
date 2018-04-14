@@ -33,7 +33,7 @@ namespace ClassifyBot
             {
                 return r;
             }
-            if ((r = Transform()) != StageResult.SUCCESS)
+            if ((r = Process()) != StageResult.SUCCESS)
             {
                 return r;
             }

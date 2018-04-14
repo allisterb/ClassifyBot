@@ -11,25 +11,24 @@ namespace ClassifyBot
         where TRecord : Record<TFeature> 
     {
         #region Overriden members
-        protected override StageResult Init()
+        protected override StageResult Read()
         {
-            if(!Success(base.Init(), out StageResult r)) return r;
+            if (!Success(base.Read(), out StageResult r)) return r;
             RecordsToAnnotate = InputRecords.Where(record => record.Labels == null || record.Labels.Count == 0 || record.Labels.Any(l => l.Item2 == 0f)).ToList();
             Labels = InputRecords.Where(record => record.Labels != null && record.Labels.Count > 0 && record.Labels.Any(l => l.Item2 > 0))?
                 .SelectMany(record => record.Labels)
                 .ToList();
             if (Labels == null || Labels.Count == 0)
             {
-                Error("Did not find any labels from {0} records", InputRecords.Count);
+                Error("Did not read any labels from {0} records", InputRecords.Count);
                 return StageResult.FAILED;
             }
             else
             {
-                Info("Got {0} labels from {1} records", Labels.Count, InputRecords.Count);
+                Info("Read {0} labels from {1} records", Labels.Count, InputRecords.Count);
                 return StageResult.SUCCESS;
+                
             }
-            
-                                
         }
         #endregion
 

@@ -2,9 +2,12 @@
 using System.Collections.Generic;
 using System.Text;
 
+using CommandLine;
+
 namespace ClassifyBot.Example.CodeProject.LanguageDetector
 {
-    public class LanguageItemAnnotator : Wunderkind<LanguageItem, string>
+    [Verb("langdata-label", HelpText = "Label the ")]
+    public class LanguageItemAnnotator : WunderkindLabelAnnotator<LanguageItem, string>
     {
     }
 }

@@ -14,10 +14,12 @@ namespace ClassifyBot
 {
     public class ConsoleDriver : Driver
     {
+        #region Constructors
         static ConsoleDriver()
         {
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
         }
+        #endregion
 
         #region Properties
         static Dictionary<string, string> AppConfig { get; set; }
@@ -94,7 +96,7 @@ namespace ClassifyBot
                     if ((i + 1) <= args.Length - 1)
                     {
                         ExplicitAssemblyName = args[i + 1].StartsWith("ClassifyBot.") ? args[i + 1] : "ClassifyBot." + args[i + 1];
-                        args = args.Except(new string[] { "-e", "--explicit", args[i + 1] }).ToArray();
+                        args = args.Except(new string[] { "-x", "--explicit", args[i + 1] }).ToArray();
                     }
                     else
                     {
