@@ -23,15 +23,8 @@ namespace ClassifyBot.Annotator.Wunderkind
 
             var headerText = new StringBuilder();
             headerText.Append(
-                $"{Environment.NewLine}Example Console Application{Environment.NewLine}{Environment.NewLine}");
-            headerText.Append("You may:");
+                $"{Environment.NewLine}Wunderkind Console Annotator{Environment.NewLine}{Environment.NewLine}");
             MenuHeader = headerText.ToString();
-            /*
-            AddCommand(TextPrompt, ExampleCommands.TextPrompt);
-            AddCommand(YesNoPrompt, ExampleCommands.YesNoPrompt);
-            AddCommand(CustomPrompt, ExampleCommands.CustomPrompt);
-            AddCommand(CloseSimulation, ExampleCommands.CloseSimulation);
-            */
         }
         #endregion
     }

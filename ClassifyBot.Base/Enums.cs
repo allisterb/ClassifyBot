@@ -11,6 +11,7 @@ namespace ClassifyBot
         INPUT_ERROR = 2,
         OUTPUT_ERROR = 3,
         FAILED = 4,
+        ABORTED = 5,
         CREATED = -100,
         INITIALIZED = -101
     }

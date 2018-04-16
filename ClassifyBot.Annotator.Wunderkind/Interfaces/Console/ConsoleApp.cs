@@ -18,12 +18,11 @@ namespace ClassifyBot.Annotator.Wunderkind
         public ConsoleApp(Annotator<TRecord, TFeature> annotator) : base()
         {
             Annotator = annotator;
+            this.SceneGraph2 = new SceneGraph2(this);
         }
         #endregion      
 
         #region Overriden methods
-      
-
         /// <summary>
         ///     Fired when the ticker receives the first system tick event.
         /// </summary>
@@ -45,9 +44,6 @@ namespace ClassifyBot.Annotator.Wunderkind
                     m.Destroy();
                 }
             }
-
-            // Destroys simulation instance.
-            Instance = null;
         }
 
         /// <summary>
@@ -78,7 +74,35 @@ namespace ClassifyBot.Annotator.Wunderkind
         /// </param>
         public override void OnTick(bool systemTick, bool skipDay = false)
         {
-            base.OnTick(systemTick, skipDay);
+            
+            // No ticks allowed if simulation is shutting down.
+            if (IsClosing)
+                return;
+
+            // Sends commands if queue has any.
+            InputManager?.OnTick(systemTick, skipDay);
+
+            // Back buffer for only sending text when changed.
+            SceneGraph2?.OnTick(systemTick, skipDay);
+
+            // Changes game Windows and state when needed.
+            WindowManager?.OnTick(systemTick, skipDay);
+
+            // Rolls virtual dice.
+            Random?.OnTick(systemTick, skipDay);
+
+            // System tick is from execution platform, otherwise they are linear simulation ticks.
+            if (systemTick)
+            {
+                // Recursive call on ourselves to process non-system ticks.
+                OnTick(false, skipDay);
+            }
+            else
+            {
+                //Any actions
+            }
+            
+            //base.OnTick(systemTick, skipDay);
 
             // Tick each module
             foreach (ConsoleModule m in Modules)
@@ -87,10 +111,22 @@ namespace ClassifyBot.Annotator.Wunderkind
             }
             
         }
+
+        public override void Restart()
+        {
+            base.Restart();
+            SceneGraph2.Clear();
+        }
+
+        public override void Destroy()
+        {
+            base.Destroy();
+            SceneGraph2.Clear();
+        }
         #endregion
 
         #region Properties
-        public static ConsoleApp<TRecord, TFeature> Instance { get; private set; }
+        public SceneGraph2 SceneGraph2 { get; protected set; }
 
         public List<ConsoleModule> Modules { get; protected set; } = new List<ConsoleModule>();
 
@@ -102,35 +138,6 @@ namespace ClassifyBot.Annotator.Wunderkind
         #endregion
 
         #region Methods
-        public virtual StageResult Run()
-        {
-            Console.Title = Title;
-            Console.CursorVisible = false;
-            Console.CancelKeyPress += Console_CancelKeyPress;
-
-            bool close = false;
-            // Prevent console session from closing.
-            Console.Clear();
-
-            while (!this.IsClosing)
-            {
-                // Simulation takes any numbers of pulses to determine seconds elapsed.
-                this.OnTick(true);
-                ReadAndDispatchConsoleKeys();
-
-            }
-            return StageResult.SUCCESS;
-        }
-
-        public virtual StageResult Init()
-        {
-            SetPropFromDict(typeof(ConsoleApp<TRecord, TFeature>), this, Annotator.InterfaceOptions);
-            this.Modules.Add(new StatusModule());
-            this.SceneGraph.ScreenBufferDirtyEvent += SceneGraph_ScreenBufferDirtyEvent;
-            L.Information("Initialized console application for annotator.");
-            return StageResult.SUCCESS;
-        }
-
         internal static void SetPropFromDict(Type t, object o, Dictionary<string, object> p)
         {
             foreach (PropertyInfo prop in t.GetProperties())
@@ -141,6 +148,53 @@ namespace ClassifyBot.Annotator.Wunderkind
                 }
             }
         }
+
+        public virtual StageResult Init()
+        {
+            SetPropFromDict(typeof(ConsoleApp<TRecord, TFeature>), this, Annotator.InterfaceOptions);
+            this.Modules.Add(new StatusModule());
+            this.SceneGraph2.ScreenBufferDirtyEvent += SceneGraph_ScreenBufferDirtyEvent;
+            L.Information("Initialized console application for annotator.");
+            return StageResult.SUCCESS;
+        }
+
+        public virtual StageResult Run()
+        {
+            string oldTitle = Console.Title;
+            Console.Title = Title;
+            Console.CursorVisible = false;
+            Console.Clear();
+            Console.CancelKeyPress += Console_CancelKeyPress;
+            Tick();
+            Console.CursorVisible = true;
+            Console.Title = oldTitle;
+            if (CtrlCRequested)
+            {
+                return StageResult.ABORTED;
+            }
+            return StageResult.SUCCESS;
+        }
+
+        protected virtual void Tick()
+        {
+            lastSystemTickTime = DateTime.UtcNow;
+            while (!this.IsClosing)
+            {
+                currentSystemTickTime = DateTime.UtcNow;
+                // Check if more than an entire second has gone by.
+                if ((TimeSpan.FromTicks(currentSystemTickTime.Ticks - lastSystemTickTime.Ticks).TotalMilliseconds < (1000 / fps)))
+                {
+                    Thread.Sleep(5);
+                }
+                else
+                {
+                    lastSystemTickTime = currentSystemTickTime;
+                    this.OnTick(true);
+                }
+                ReadAndDispatchConsoleKeys();
+            }
+        }
+   
         
         protected void ReadAndDispatchConsoleKeys()
         {
@@ -154,6 +208,10 @@ namespace ClassifyBot.Annotator.Wunderkind
                         break;
                     case ConsoleKey.Backspace:
                         this.InputManager.RemoveLastCharOfInputBuffer();
+                        break;
+                    case ConsoleKey.Escape:
+                        L.Information("Stopping");
+                        this.Destroy();
                         break;
                     default:
                         this.InputManager.AddCharToInputBuffer(key.KeyChar);
@@ -186,32 +244,23 @@ namespace ClassifyBot.Annotator.Wunderkind
 
         private void Console_CancelKeyPress(object sender, ConsoleCancelEventArgs e)
         {
-            throw new NotImplementedException();
+            L.Error("Ctrl-C abort requested. Terminating console application");
+            e.Cancel = true;
+            CtrlCRequested = true;
+            this.Destroy();
         }
         #endregion
 
         #region Fields
-        /// <summary>
-        ///     Time and date of latest system tick, used to measure total elapsed time and tick simulation after each second.
-        /// </summary>
         protected DateTime currentSystemTickTime;
 
-        /// <summary>
-        ///     Last known time the simulation was ticked with logic and all sub-systems. This is not the same as a system tick
-        ///     which can happen hundreds of thousands of times a second or just a few, we only measure the difference in time on
-        ///     them.
-        /// </summary>
         protected DateTime lastSystemTickTime;
 
-        protected long currentFrameElapsedTicks;
-
-        protected TimeSpan currentFrameElapsedInterval;
+        protected ulong elapsedSeconds;
 
         protected int fps = 60;
 
-        protected float frameInterval = 1000 / 60;
-
-
+        protected bool CtrlCRequested;
         #endregion
     }
 }

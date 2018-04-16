@@ -39,8 +39,5 @@ namespace ClassifyBot
             set => InterfaceType = (AnnotatorInterfaceType)value;
         }
         #endregion
-
-
-        
     }
 }
