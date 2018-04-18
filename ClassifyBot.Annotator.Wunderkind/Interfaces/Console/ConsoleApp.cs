@@ -22,109 +22,6 @@ namespace ClassifyBot.Annotator.Wunderkind
         }
         #endregion      
 
-        #region Overriden methods
-        /// <summary>
-        ///     Fired when the ticker receives the first system tick event.
-        /// </summary>
-        protected override void OnFirstTick()
-        {
-            Restart();
-        }
-
-        /// <summary>
-        ///     Called when simulation is about to destroy itself, but right before it actually does it.
-        /// </summary>
-        protected override void OnPreDestroy()
-        {
-            // Allows module to save any data before core simulation closes.
-            foreach(ConsoleModule m in Modules)
-            {
-                if (m != null)
-                {
-                    m.Destroy();
-                }
-            }
-        }
-
-        /// <summary>
-        ///     Called by the text user interface scene graph renderer before it asks the active window to render itself out for
-        ///     display.
-        /// </summary>
-        public override string OnPreRender()
-        {
-            // Total number of turns that have passed in the simulation.
-            var tui = new StringBuilder();
-            
-            return tui.ToString();
-        }
-
-        /// <summary>
-        ///     Called when the simulation is ticked by underlying operating system, game engine, or potato. Each of these system
-        ///     ticks is called at unpredictable rates, however if not a system tick that means the simulation has processed enough
-        ///     of them to fire off event for fixed interval that is set in the core simulation by constant in milliseconds.
-        /// </summary>
-        /// <remarks>Default is one second or 1000ms.</remarks>
-        /// <param name="systemTick">
-        ///     TRUE if ticked unpredictably by underlying operating system, game engine, or potato. FALSE if
-        ///     pulsed by game simulation at fixed interval.
-        /// </param>
-        /// <param name="skipDay">
-        ///     Determines if the simulation has force ticked without advancing time or down the trail. Used by
-        ///     special events that want to simulate passage of time without actually any actual time moving by.
-        /// </param>
-        public override void OnTick(bool systemTick, bool skipDay = false)
-        {
-            
-            // No ticks allowed if simulation is shutting down.
-            if (IsClosing)
-                return;
-
-            // Sends commands if queue has any.
-            InputManager?.OnTick(systemTick, skipDay);
-
-            // Back buffer for only sending text when changed.
-            SceneGraph2?.OnTick(systemTick, skipDay);
-
-            // Changes game Windows and state when needed.
-            WindowManager?.OnTick(systemTick, skipDay);
-
-            // Rolls virtual dice.
-            Random?.OnTick(systemTick, skipDay);
-
-            // System tick is from execution platform, otherwise they are linear simulation ticks.
-            if (systemTick)
-            {
-                // Recursive call on ourselves to process non-system ticks.
-                OnTick(false, skipDay);
-            }
-            else
-            {
-                //Any actions
-            }
-            
-            //base.OnTick(systemTick, skipDay);
-
-            // Tick each module
-            foreach (ConsoleModule m in Modules)
-            {
-                m.OnTick(systemTick, skipDay);
-            }
-            
-        }
-
-        public override void Restart()
-        {
-            base.Restart();
-            SceneGraph2.Clear();
-        }
-
-        public override void Destroy()
-        {
-            base.Destroy();
-            SceneGraph2.Clear();
-        }
-        #endregion
-
         #region Properties
         public SceneGraph2 SceneGraph2 { get; protected set; }
 
@@ -135,6 +32,22 @@ namespace ClassifyBot.Annotator.Wunderkind
         protected Annotator<TRecord, TFeature> Annotator { get; set; }
 
         protected static ILogger L = Log.Logger.ForContext<ConsoleApp<TRecord, TFeature>>();
+        
+        protected ulong TotalFramesElapsed
+        {
+            get
+            {
+                if (_TotalFramesElapsed == UInt64.MaxValue)
+                {
+                    _TotalFramesElapsed = 0;
+                }
+                return _TotalFramesElapsed;
+            }
+            set
+            {
+                _TotalFramesElapsed = value;
+            }
+        }
         #endregion
 
         #region Methods
@@ -181,7 +94,7 @@ namespace ClassifyBot.Annotator.Wunderkind
             while (!this.IsClosing)
             {
                 currentSystemTickTime = DateTime.UtcNow;
-                // Check if more than an entire second has gone by.
+                // Check if more than an entire frame time by.
                 if ((TimeSpan.FromTicks(currentSystemTickTime.Ticks - lastSystemTickTime.Ticks).TotalMilliseconds < (1000 / fps)))
                 {
                     Thread.Sleep(5);
@@ -190,8 +103,9 @@ namespace ClassifyBot.Annotator.Wunderkind
                 {
                     lastSystemTickTime = currentSystemTickTime;
                     this.OnTick(true);
+                    ReadAndDispatchConsoleKeys();
                 }
-                ReadAndDispatchConsoleKeys();
+                
             }
         }
    
@@ -216,6 +130,84 @@ namespace ClassifyBot.Annotator.Wunderkind
                     default:
                         this.InputManager.AddCharToInputBuffer(key.KeyChar);
                         break;
+                }
+            }
+        }
+        #endregion
+
+        #region Overriden methods
+        public override string OnPreRender() // Gather data from modules
+        {
+            return string.Empty;
+        }
+
+        public override void OnTick(bool systemTick, bool skipDay = false)
+        {
+            if (IsClosing)
+            {
+                return;
+            }
+            InputManager?.OnTick(systemTick, skipDay);
+
+            SceneGraph2?.OnTick(systemTick, skipDay);
+
+            WindowManager?.OnTick(systemTick, skipDay);
+
+            Random?.OnTick(systemTick, skipDay);
+
+            if (systemTick)
+            {
+                OnTick(false, skipDay);
+            }
+            else
+            {
+                TotalFramesElapsed++;
+                if (TotalFramesElapsed == 1)
+                {
+                    OnFirstTick();
+                }
+            }
+            // Tick each module
+            foreach (ConsoleModule m in Modules)
+            {
+                m.OnTick(systemTick, skipDay);
+            }
+        }
+
+        protected override void OnFirstTick()
+        {
+            Restart();
+        }
+
+        public override void Restart()
+        {
+            // Resets the window manager in the base simulation.
+            base.Restart();
+        
+            SceneGraph2.Clear();
+
+            // Resets the module to default start.
+            foreach (ConsoleModule m in Modules)
+            {
+                m.Restart();
+            }
+        }
+
+        public override void Destroy()
+        {
+            base.Destroy();
+            SceneGraph2 = null;
+        }
+
+        
+
+        protected override void OnPreDestroy()
+        {
+            foreach (ConsoleModule m in Modules)
+            {
+                if (m != null)
+                {
+                    m.Destroy();
                 }
             }
         }
@@ -255,6 +247,8 @@ namespace ClassifyBot.Annotator.Wunderkind
         protected DateTime currentSystemTickTime;
 
         protected DateTime lastSystemTickTime;
+
+        protected ulong _TotalFramesElapsed;
 
         protected ulong elapsedSeconds;
 

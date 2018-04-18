@@ -14,6 +14,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Colorful.Console" Version="1.2.6" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\ClassifyBot.Base\ClassifyBot.Base.csproj" />
     <ProjectReference Include="..\WolfCurses\WolfCurses.csproj" />
   </ItemGroup>

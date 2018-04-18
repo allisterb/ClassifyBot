@@ -110,9 +110,9 @@ namespace ClassifyBot.Annotator.Wunderkind
             //tui.Append($"[ {SimUnit.TickPhase} ] - ");
 
             // Keeps track of active Windows name and active Windows current state name for debugging purposes.
-            tui.Append(SimUnit.WindowManager.FocusedWindow?.CurrentForm != null
-                ? $"Window({SimUnit.WindowManager.Count}): {SimUnit.WindowManager.FocusedWindow}({SimUnit.WindowManager.FocusedWindow.CurrentForm}) - "
-                : "[0]");
+            tui.Append(_simUnit.WindowManager.FocusedWindow?.CurrentForm != null
+                ? $"Window({_simUnit.WindowManager.Count}): {_simUnit.WindowManager.FocusedWindow}({_simUnit.WindowManager.FocusedWindow.CurrentForm}) - "
+                : $"Window({_simUnit.WindowManager.Count}): {_simUnit.WindowManager.FocusedWindow}() - ");
 
             // Allows the implementing simulation to control text before window is rendered out.
             tui.Append(SimUnit.OnPreRender());
