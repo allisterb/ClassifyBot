@@ -21,10 +21,7 @@ namespace ClassifyBot.Annotator.Wunderkind
         {
             base.OnWindowPostCreate();
 
-            var headerText = new StringBuilder();
-            headerText.Append(
-                $"{Environment.NewLine}Wunderkind Console Annotator{Environment.NewLine}{Environment.NewLine}");
-            MenuHeader = headerText.ToString();
+            SetForm(typeof(LabelAnnotatorTitleForm));
         }
         #endregion
     }

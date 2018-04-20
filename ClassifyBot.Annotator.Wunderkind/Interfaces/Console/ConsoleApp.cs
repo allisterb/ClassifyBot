@@ -1,12 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Drawing;
+using System.IO;
+using System.Linq;
 using System.Reflection;
-using System.Text;
+using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 using System.Threading;
 
 using Serilog;
 using SerilogTimings;
 
+using Console = Colorful.Console;
+using Colorful;
 using WolfCurses;
 using WolfCurses.Module;
 
@@ -19,6 +26,9 @@ namespace ClassifyBot.Annotator.Wunderkind
         {
             Annotator = annotator;
             this.SceneGraph2 = new SceneGraph2(this);
+            fonts.Add("chunky", FigletFont.Load(Path.Combine(EntryAssemblyDirectory.FullName, "Interfaces", "Console", "Fonts", "chunky.flf")));
+            figlet.Add("chunky", new Figlet(fonts["chunky"]));
+            preprocessRegex = new Regex("<@(.+?)@>", RegexOptions.Compiled | RegexOptions.Multiline);
         }
         #endregion      
 
@@ -27,7 +37,13 @@ namespace ClassifyBot.Annotator.Wunderkind
 
         public List<ConsoleModule> Modules { get; protected set; } = new List<ConsoleModule>();
 
+        public static DirectoryInfo EntryAssemblyDirectory { get; } = Directory.GetParent(Assembly.GetExecutingAssembly().Location);
+
         public string Title { get; protected set; }
+
+        public int ConsoleWidth { get; protected set; } = 150;
+
+        public int ConsoleHeight { get; protected set; } = 40;
 
         protected Annotator<TRecord, TFeature> Annotator { get; set; }
 
@@ -75,12 +91,18 @@ namespace ClassifyBot.Annotator.Wunderkind
         {
             string oldTitle = Console.Title;
             Console.Title = Title;
+            int oldWidth = Console.WindowWidth;
+            int oldHeight = Console.WindowWidth;
+            Console.WindowWidth = ConsoleWidth;
+            Console.WindowHeight = ConsoleHeight;
             Console.CursorVisible = false;
             Console.Clear();
             Console.CancelKeyPress += Console_CancelKeyPress;
             Tick();
             Console.CursorVisible = true;
             Console.Title = oldTitle;
+            Console.WindowWidth = oldWidth;
+            Console.WindowHeight = oldHeight;
             if (CtrlCRequested)
             {
                 return StageResult.ABORTED;
@@ -91,13 +113,15 @@ namespace ClassifyBot.Annotator.Wunderkind
         protected virtual void Tick()
         {
             lastSystemTickTime = DateTime.UtcNow;
+            double stepInterval;
             while (!this.IsClosing)
             {
                 currentSystemTickTime = DateTime.UtcNow;
                 // Check if more than an entire frame time by.
-                if ((TimeSpan.FromTicks(currentSystemTickTime.Ticks - lastSystemTickTime.Ticks).TotalMilliseconds < (1000 / fps)))
+                stepInterval = TimeSpan.FromTicks(currentSystemTickTime.Ticks - lastSystemTickTime.Ticks).TotalMilliseconds;
+                if ((stepInterval < (1000 / fps)))
                 {
-                    Thread.Sleep(5);
+                    Thread.Sleep((int) (stepInterval / 2));
                 }
                 else
                 {
@@ -105,10 +129,8 @@ namespace ClassifyBot.Annotator.Wunderkind
                     this.OnTick(true);
                     ReadAndDispatchConsoleKeys();
                 }
-                
             }
         }
-   
         
         protected void ReadAndDispatchConsoleKeys()
         {
@@ -133,6 +155,8 @@ namespace ClassifyBot.Annotator.Wunderkind
                 }
             }
         }
+
+        //protected void Parse
         #endregion
 
         #region Overriden methods
@@ -147,6 +171,7 @@ namespace ClassifyBot.Annotator.Wunderkind
             {
                 return;
             }
+
             InputManager?.OnTick(systemTick, skipDay);
 
             SceneGraph2?.OnTick(systemTick, skipDay);
@@ -161,8 +186,7 @@ namespace ClassifyBot.Annotator.Wunderkind
             }
             else
             {
-                TotalFramesElapsed++;
-                if (TotalFramesElapsed == 1)
+                if (TotalFramesElapsed == 0)
                 {
                     OnFirstTick();
                 }
@@ -172,6 +196,9 @@ namespace ClassifyBot.Annotator.Wunderkind
             {
                 m.OnTick(systemTick, skipDay);
             }
+
+            lastFrameRenderTime = DateTime.UtcNow;
+            TotalFramesElapsed++;
         }
 
         protected override void OnFirstTick()
@@ -191,6 +218,9 @@ namespace ClassifyBot.Annotator.Wunderkind
             {
                 m.Restart();
             }
+
+            TotalFramesElapsed = 0;
+            startTime = DateTime.UtcNow;
         }
 
         public override void Destroy()
@@ -198,8 +228,6 @@ namespace ClassifyBot.Annotator.Wunderkind
             base.Destroy();
             SceneGraph2 = null;
         }
-
-        
 
         protected override void OnPreDestroy()
         {
@@ -214,24 +242,64 @@ namespace ClassifyBot.Annotator.Wunderkind
         #endregion
 
         #region Event handlers
-        private void SceneGraph_ScreenBufferDirtyEvent(string tuiContent)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void SceneGraph_ScreenBufferDirtyEvent(string buffer)
         {
-            string[] tuiContentSplit = tuiContent.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
-
-            for (int index = 0; index < Console.WindowHeight - 1; index++)
+            string[] lines = buffer.Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
+       
+            for (int i = 0; i < lines.Length; i++)
             {
-                Console.CursorLeft = 0;
-                Console.SetCursorPosition(0, index);
-
-                string emptyStringData = new string(' ', Console.WindowWidth);
-
-                if (tuiContentSplit.Length > index)
+                string line = lines[i];
+                Match m = preprocessRegex.Match(line);
+                if (!m.Success)
                 {
-                    emptyStringData = tuiContentSplit[index].PadRight(Console.WindowWidth);
+                    Console.WriteLine(line);
                 }
-
-                Console.Write(emptyStringData);
+                else
+                {
+                    string[] command = m.Groups[1].Value.Split('|');
+                    string font = command[0];
+                    string text = command[1];
+                    string fg = command[2];
+                    string bg = command[3];
+                    StyledString s;
+                    if (command[0].IsNotEmpty())
+                    {
+                        //Console.WriteLine(figlet[font].ToAscii(text));
+                        Console.WriteAscii(text);
+                    }
+                    else
+                    {
+                        Console.WriteAscii(text);
+                    }
+                }
             }
+        }
+
+        private StyledString[] PreProcessBuffer(string buffer)
+        {
+            string output = string.Empty;
+            List<StyledString> lines = new List<StyledString>();
+            Match m = preprocessRegex.Match(buffer);
+            if (!m.Success)
+            {
+                return buffer.Split(new string[] { Environment.NewLine }, StringSplitOptions.None).Select(s => new StyledString(s)).ToArray();
+            }
+
+            for(int i = 1; i < m.Groups.Count; i++)
+            {
+                string[] command = m.Groups[i].Value.Split('|');
+                string font = command[0];
+                string text = command[1];
+                string fg = command[2];
+                string bg = command[2];
+                if (command[0].IsNotEmpty())
+                {
+                    var s = figlet[font].ToAscii(text);
+                }
+                    
+            }
+            return null;
         }
 
         private void Console_CancelKeyPress(object sender, ConsoleCancelEventArgs e)
@@ -244,9 +312,13 @@ namespace ClassifyBot.Annotator.Wunderkind
         #endregion
 
         #region Fields
+        protected DateTime startTime;
+
         protected DateTime currentSystemTickTime;
 
         protected DateTime lastSystemTickTime;
+
+        protected DateTime lastFrameRenderTime;
 
         protected ulong _TotalFramesElapsed;
 
@@ -255,6 +327,12 @@ namespace ClassifyBot.Annotator.Wunderkind
         protected int fps = 60;
 
         protected bool CtrlCRequested;
+
+        protected Dictionary<string, FigletFont> fonts = new Dictionary<string, FigletFont>();
+
+        protected Dictionary<string, Figlet> figlet = new Dictionary<string, Figlet>();
+
+        protected Regex preprocessRegex;
         #endregion
     }
 }

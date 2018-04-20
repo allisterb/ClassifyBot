@@ -35,7 +35,7 @@ namespace ClassifyBot.Annotator.Wunderkind
         /// <summary>
         ///     Default string that is used in menu generations when the user is given a choice. Can be changed per window or form.
         /// </summary>
-        public const string PROMPT_TEXT_DEFAULT = "What is your choice?";
+        public const string PROMPT_TEXT_DEFAULT = "[NO FORM ACTIVE]";
 
         /// <summary>
         ///     Reference to simulation that is controlling the text user interface and actually filling the screen buffer with
@@ -111,8 +111,8 @@ namespace ClassifyBot.Annotator.Wunderkind
 
             // Keeps track of active Windows name and active Windows current state name for debugging purposes.
             tui.Append(_simUnit.WindowManager.FocusedWindow?.CurrentForm != null
-                ? $"Window({_simUnit.WindowManager.Count}): {_simUnit.WindowManager.FocusedWindow}({_simUnit.WindowManager.FocusedWindow.CurrentForm}) - "
-                : $"Window({_simUnit.WindowManager.Count}): {_simUnit.WindowManager.FocusedWindow}() - ");
+                ? $"Window[{_simUnit.WindowManager.Count}]: {_simUnit.WindowManager.FocusedWindow}[{_simUnit.WindowManager.FocusedWindow.CurrentForm}] : "
+                : $"Window[{_simUnit.WindowManager.Count}]: {_simUnit.WindowManager.FocusedWindow}() : ");
 
             // Allows the implementing simulation to control text before window is rendered out.
             tui.Append(SimUnit.OnPreRender());
