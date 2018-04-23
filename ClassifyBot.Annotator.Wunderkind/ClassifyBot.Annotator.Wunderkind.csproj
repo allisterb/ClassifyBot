@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <Platforms>AnyCPU;x64</Platforms>
+    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -23,18 +24,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Interfaces\Console\Fonts\">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Folder>
+    <Fonts Include="$(ProjectDir)Interfaces\Console\Fonts\**\*.*" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Update="Interfaces\Console\Fonts\chunky.flf">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Interfaces\Console\Fonts\starwars.flf">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Copy SourceFiles="@(Fonts)" DestinationFolder="$(OutputPath)%(RecursiveDir)" />
+  </Target>
 
 </Project>

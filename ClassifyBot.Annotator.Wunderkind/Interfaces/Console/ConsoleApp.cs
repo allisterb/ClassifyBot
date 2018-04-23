@@ -26,8 +26,10 @@ namespace ClassifyBot.Annotator.Wunderkind
         {
             Annotator = annotator;
             this.SceneGraph2 = new SceneGraph2(this);
-            fonts.Add("chunky", FigletFont.Load(Path.Combine(EntryAssemblyDirectory.FullName, "Interfaces", "Console", "Fonts", "chunky.flf")));
+            fonts.Add("chunky", FigletFont.Load(Path.Combine(EntryAssemblyDirectory.FullName, "chunky.flf")));
+            fonts.Add("ANSI Shadow", FigletFont.Load(Path.Combine(EntryAssemblyDirectory.FullName, "ANSI Shadow.flf")));
             figlet.Add("chunky", new Figlet(fonts["chunky"]));
+            figlet.Add("ANSI Shadow", new Figlet(fonts["ANSI Shadow"]));
             preprocessRegex = new Regex("<@(.+?)@>", RegexOptions.Compiled | RegexOptions.Multiline);
         }
         #endregion      
@@ -92,7 +94,7 @@ namespace ClassifyBot.Annotator.Wunderkind
             string oldTitle = Console.Title;
             Console.Title = Title;
             int oldWidth = Console.WindowWidth;
-            int oldHeight = Console.WindowWidth;
+            int oldHeight = Console.WindowHeight;
             Console.WindowWidth = ConsoleWidth;
             Console.WindowHeight = ConsoleHeight;
             Console.CursorVisible = false;
@@ -245,35 +247,68 @@ namespace ClassifyBot.Annotator.Wunderkind
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void SceneGraph_ScreenBufferDirtyEvent(string buffer)
         {
-            string[] lines = buffer.Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
-       
-            for (int i = 0; i < lines.Length; i++)
+            string[] lines = buffer.Split(new string[] { Environment.NewLine }, StringSplitOptions.None).ToArray();
+            bufferLines = new StyledString[lines.Length];
+            StyleSheet styleDefault = new StyleSheet(Color.White);
+            for (int i = 0; i < bufferLines.Length; i++)
             {
                 string line = lines[i];
                 Match m = preprocessRegex.Match(line);
+
                 if (!m.Success)
                 {
-                    Console.WriteLine(line);
+                    bufferLines[i] = new StyledString(line)
+                    {
+                        ColorGeometry = new Color[,] { { Color.White, Color.Black } }
+                    };
                 }
                 else
                 {
-                    string[] command = m.Groups[1].Value.Split('|');
-                    string font = command[0];
-                    string text = command[1];
-                    string fg = command[2];
-                    string bg = command[3];
-                    StyledString s;
-                    if (command[0].IsNotEmpty())
+                    string[] parts = preprocessRegex.Split(line);
+                    for (int j = 1; j < m.Groups.Count; j++)
                     {
-                        //Console.WriteLine(figlet[font].ToAscii(text));
-                        Console.WriteAscii(text);
+                        string[] command = m.Groups[j].Value.Split('|');
+                        string font = command[0];
+                        string text = command[1];
+                        string fg = command[2];
+                        string bg = command[3];
+                        StyledString s;
+                        if (command[0].IsNotEmpty())
+                        {
+                            bufferLines[i] = figlet["ANSI Shadow"].ToAscii(text);
+                        }
+                        else
+                        {
+                            bufferLines[i] = new StyledString(line)
+                            {
+                                ColorGeometry = new Color[,] { { Color.White, Color.Black } }
+                            };
+                        }
+                    }
+                }             
+                
+            }
+            Console.SetCursorPosition(0, 0);
+            for (int i = 0; i < bufferLines.Length; i++)
+            {
+                if (oldBufferLines.Length > i && oldBufferLines[i] == bufferLines[i])
+                {
+                    continue;
+                }
+                else
+                {
+                    if (bufferLines[i].CharacterGeometry == null)
+                    {
+                        Console.Write(bufferLines[i].AbstractValue + Environment.NewLine);
                     }
                     else
                     {
-                        Console.WriteAscii(text);
+                        Console.WriteLineStyled(bufferLines[i], styleDefault);
                     }
                 }
             }
+
+            oldBufferLines = bufferLines;
         }
 
         private StyledString[] PreProcessBuffer(string buffer)
@@ -331,6 +366,12 @@ namespace ClassifyBot.Annotator.Wunderkind
         protected Dictionary<string, FigletFont> fonts = new Dictionary<string, FigletFont>();
 
         protected Dictionary<string, Figlet> figlet = new Dictionary<string, Figlet>();
+
+        protected string buffer;
+
+        protected StyledString[] bufferLines;
+
+        protected StyledString[] oldBufferLines = new StyledString[0];
 
         protected Regex preprocessRegex;
         #endregion

@@ -1,3 +1,3 @@
 # Wunderkind: Universal multi-modal accessible annotator 
-![Screenshot](https://ph6zka.dm.files.1drv.com/y4mb73eBOwMoFLZz5VO3mkWAeHPdLMux4zN9O-50HmWWw05IidY0LlokmFWOUIZEjZB5M6ymM3tOTnXOQ31bOLs6rZZs6lEZAbqX_kE353Dw4NoSTACUYGHdtmb56WI6A24jRsyCT7PPtoGEvMJ6Y5rVEJF9r0kGPa_iP6x3Y0BnflitdlIckOaPfSRtBeD8HTiWcK-ESvTJGKIVueIlxURVA?width=1215&height=809&cropmode=none)
+![Screenshot](https://ph4yta.dm.files.1drv.com/y4mOHlwniYGGMxbyWlkFpek004hiT38cc7QJQ9kwbp6g0RmXo8jZNcpPvytNu9BLdMAeQhJ0kEHM8lnh7qdUo3BY6unFwSUGpWpEd0MF20zujAdv9SyW7wlNl9pDxycPrFZZm4W4bNCY0LLQkpNUUE62HHaC9poyKCkNG6mAvecBEhpOZxx0k9UpVvSh4Ru9Nd29kdM7MvQFoU9WCMjek_VAw?width=1205&height=776&cropmode=none)
 

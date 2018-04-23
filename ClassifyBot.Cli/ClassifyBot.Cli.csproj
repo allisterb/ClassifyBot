@@ -28,4 +28,12 @@
     <ProjectReference Include="..\ClassifyBot.Example.TCCC\ClassifyBot.Example.TCCC.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Fonts Include="$(SolutionDir)ClassifyBot.Annotator.Wunderkind\Interfaces\Console\Fonts\**\*.*" />
+  </ItemGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Copy SourceFiles="@(Fonts)" DestinationFolder="$(OutputPath)%(RecursiveDir)" />
+  </Target>
+
 </Project>

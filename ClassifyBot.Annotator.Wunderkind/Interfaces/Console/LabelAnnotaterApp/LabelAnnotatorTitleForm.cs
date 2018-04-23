@@ -20,7 +20,7 @@ namespace ClassifyBot.Annotator.Wunderkind
         #region Overriden members
         public override string OnRenderForm()
         {
-            return "<@chunky|Wunderkind|#8AFFEF||@>";
+            return Environment.NewLine + "<@chunky|Wunderkind|#8AFFEF||@>";
 
         }
 
