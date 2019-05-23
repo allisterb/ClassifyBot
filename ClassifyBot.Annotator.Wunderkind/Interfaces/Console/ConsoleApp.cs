@@ -41,7 +41,7 @@ namespace ClassifyBot.Annotator.Wunderkind
 
         public static DirectoryInfo EntryAssemblyDirectory { get; } = Directory.GetParent(Assembly.GetExecutingAssembly().Location);
 
-        public string Title { get; protected set; }
+        public string Title { get; protected set; } = "goo";
 
         public int ConsoleWidth { get; protected set; } = 150;
 
